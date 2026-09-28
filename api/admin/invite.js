@@ -4,7 +4,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SITE_URL = process.env.SITE_URL || "https://bistro-burger-site.vercel.app";
+const SITE_URL = process.env.SITE_URL || "https://bistroburgergardanne.com";
 
 async function requireUser(req) {
   const auth = req.headers.authorization || "";

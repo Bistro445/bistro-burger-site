@@ -8,7 +8,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GOOGLE_CSE_API_KEY = process.env.GOOGLE_CSE_API_KEY;
 const GOOGLE_CSE_ID = process.env.GOOGLE_CSE_ID;
-const SITE_HOST = "bistro-burger-site.vercel.app";
+const SITE_HOST = new URL(process.env.SITE_URL || "https://bistroburgergardanne.com").host;
 
 const MAX_SENTENCES = 6;
 const MIN_WORDS = 9;

@@ -1,7 +1,7 @@
 // Utilitaire partagé : notifie par e-mail tous les comptes admin (Supabase Auth)
 // qu'une nouvelle commande ou réservation vient d'arriver. Best-effort, ne bloque
 // jamais l'enregistrement principal en base (chaque échec est avalé silencieusement).
-const SITE_URL = process.env.SITE_URL || "https://bistro-burger-site.vercel.app";
+const SITE_URL = process.env.SITE_URL || "https://bistroburgergardanne.com";
 
 async function getAdminEmails(supabase) {
   try {

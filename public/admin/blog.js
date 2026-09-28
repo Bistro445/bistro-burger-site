@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   const API_URL = "/api/admin/content";
-  const SITE_ORIGIN = "https://bistro-burger-site.vercel.app";
+  const SITE_ORIGIN = "https://bistroburgergardanne.com";
   const container = document.getElementById("blog-view");
 
   let state = null;
@@ -447,7 +447,7 @@
     dc.textContent = desc.length + " / 160 caractères";
     dc.className = "seo-count " + countClass(desc.length, 70, 160);
 
-    document.getElementById("bl-prev-url").textContent = "bistro-burger-site.vercel.app › blog › " + slug + ".html";
+    document.getElementById("bl-prev-url").textContent = "bistroburgergardanne.com › blog › " + slug + ".html";
     document.getElementById("bl-prev-title").textContent = truncate(title || "Titre de l'article", 60) + " — Blog Bistro Burger";
     document.getElementById("bl-prev-desc").textContent = truncate(desc || "La description de l'article apparaîtra ici.", 160);
 

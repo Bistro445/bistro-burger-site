@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bistro-burger-site.vercel.app/sitemap.xml
+Sitemap: https://bistroburgergardanne.com/sitemap.xml

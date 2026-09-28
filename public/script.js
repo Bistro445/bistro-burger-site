@@ -1129,7 +1129,7 @@
         `<p class="article-body" style="margin-top:20px;">Il a peut-être été déplacé ou retiré. Retrouvez tous nos articles sur la page du blog.</p>`;
       return;
     }
-    const origin = "https://bistro-burger-site.vercel.app";
+    const origin = "https://bistroburgergardanne.com";
     const url = origin + "/blog/" + post.slug + ".html";
     const imgAbs = post.img ? (/^https?:\/\//.test(post.img) ? post.img : origin + "/" + post.img) : origin + "/assets/hero-burger.webp";
     const desc = post.seoDesc || post.excerpt || post.title;
