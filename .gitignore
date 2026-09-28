@@ -2,5 +2,6 @@ node_modules/
 public/data.generated.js
 public/admin/config.generated.js
 public/app/config.generated.js
+public/sitemap.xml
 .vercel
 Acces-Admin-Bistro-Burger.pdf

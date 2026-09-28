@@ -97,7 +97,14 @@ app.get("/sitemap.xml", serveGenerated((f) => f.sitemapXml, { type: "application
 app.get("/healthz", (req, res) => res.json({ ok: true }));
 
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
-app.use(express.static(PUBLIC_DIR, { dotfiles: "ignore" }));
+app.use(
+  express.static(PUBLIC_DIR, {
+    dotfiles: "ignore",
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".webmanifest")) res.type("application/manifest+json");
+    },
+  })
+);
 
 // Articles de blog : /blog/mon-article -> modèle unique (équivalent de la réécriture Vercel).
 app.get("/blog/:slug", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "blog", "article.html")));
