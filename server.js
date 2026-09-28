@@ -94,7 +94,15 @@ app.get("/sitemap.xml", serveGenerated((f) => f.sitemapXml, { type: "application
 
 /* ------------------------------ Pages statiques ------------------------------ */
 
-app.get("/healthz", (req, res) => res.json({ ok: true }));
+const PROCESS_STARTED_AT = new Date().toISOString();
+app.get("/healthz", (req, res) =>
+  res.json({
+    ok: true,
+    processStartedAt: PROCESS_STARTED_AT,
+    lastDataRefresh: siteData.getLastBuildAt(),
+    lastDataError: siteData.getLastError() ? siteData.getLastError().message : null,
+  })
+);
 
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(
