@@ -1313,14 +1313,50 @@
 
     // Toujours repartir de la date du jour : le champ ne doit jamais garder
     // une date obsolète, et le client ne peut pas sélectionner une date passée.
+    function formatLocalDate(d) {
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
     const dateInput = form.querySelector('input[name="date"]');
+    const todayStr = formatLocalDate(new Date());
     if (dateInput) {
-      const today = new Date();
-      const todayStr =
-        today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
       dateInput.min = todayStr;
       if (!dateInput.value || dateInput.value < todayStr) dateInput.value = todayStr;
     }
+
+    // Si la date sélectionnée est aujourd'hui, retire les créneaux déjà passés
+    // pour ne pas laisser réserver une heure révolue. S'il n'en reste aucun
+    // (établissement fermé pour le reste de la journée), on passe au lendemain.
+    const heureSelect = document.getElementById("reservation-heure-select");
+    function updateAvailableHeures() {
+      if (!heureSelect || !dateInput) return;
+      const isToday = dateInput.value === todayStr;
+      const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+      let anyEnabled = false;
+      let firstEnabledValue = null;
+      Array.from(heureSelect.options).forEach((opt) => {
+        const m = (opt.textContent || "").trim().match(/^(\d{1,2})h(\d{2})$/);
+        const mins = m ? Number(m[1]) * 60 + Number(m[2]) : null;
+        const past = isToday && mins !== null && mins <= nowMinutes;
+        opt.disabled = past;
+        opt.hidden = past;
+        if (!past) {
+          anyEnabled = true;
+          if (firstEnabledValue === null) firstEnabledValue = opt.value || opt.textContent;
+        }
+      });
+      if (!anyEnabled) {
+        const next = new Date(dateInput.value + "T00:00:00");
+        next.setDate(next.getDate() + 1);
+        dateInput.value = formatLocalDate(next);
+        updateAvailableHeures();
+        return;
+      }
+      const selected = heureSelect.options[heureSelect.selectedIndex];
+      if (!selected || selected.disabled) heureSelect.value = firstEnabledValue;
+    }
+    updateAvailableHeures();
+    if (dateInput) dateInput.addEventListener("change", updateAvailableHeures);
+
     const sentBox = document.getElementById("reservation-sent");
     const errorBox = document.getElementById("reservation-error");
     const sendFailedMessage = errorBox.textContent;
