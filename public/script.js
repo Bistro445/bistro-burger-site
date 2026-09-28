@@ -1310,6 +1310,17 @@
     const form = document.getElementById("reservation-form");
     if (!form) return;
     form.setAttribute("novalidate", "novalidate");
+
+    // Toujours repartir de la date du jour : le champ ne doit jamais garder
+    // une date obsolète, et le client ne peut pas sélectionner une date passée.
+    const dateInput = form.querySelector('input[name="date"]');
+    if (dateInput) {
+      const today = new Date();
+      const todayStr =
+        today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+      dateInput.min = todayStr;
+      if (!dateInput.value || dateInput.value < todayStr) dateInput.value = todayStr;
+    }
     const sentBox = document.getElementById("reservation-sent");
     const errorBox = document.getElementById("reservation-error");
     const sendFailedMessage = errorBox.textContent;
