@@ -1323,23 +1323,27 @@
       if (!dateInput.value || dateInput.value < todayStr) dateInput.value = todayStr;
     }
 
-    // Si la date sélectionnée est aujourd'hui, retire les créneaux déjà passés
-    // pour ne pas laisser réserver une heure révolue. S'il n'en reste aucun
-    // (établissement fermé pour le reste de la journée), on passe au lendemain.
+    // Si la date sélectionnée est aujourd'hui, retire les créneaux trop proches :
+    // il faut au moins 45 minutes d'avance (le temps de préparer la commande),
+    // donc quelqu'un qui se connecte à midi ne peut pas réserver pour midi.
+    // S'il n'en reste aucun (établissement fermé pour le reste de la journée),
+    // on passe au lendemain.
+    const MIN_LEAD_MINUTES = 45;
     const heureSelect = document.getElementById("reservation-heure-select");
     function updateAvailableHeures() {
       if (!heureSelect || !dateInput) return;
       const isToday = dateInput.value === todayStr;
       const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+      const minMinutes = nowMinutes + MIN_LEAD_MINUTES;
       let anyEnabled = false;
       let firstEnabledValue = null;
       Array.from(heureSelect.options).forEach((opt) => {
         const m = (opt.textContent || "").trim().match(/^(\d{1,2})h(\d{2})$/);
         const mins = m ? Number(m[1]) * 60 + Number(m[2]) : null;
-        const past = isToday && mins !== null && mins <= nowMinutes;
-        opt.disabled = past;
-        opt.hidden = past;
-        if (!past) {
+        const tooSoon = isToday && mins !== null && mins < minMinutes;
+        opt.disabled = tooSoon;
+        opt.hidden = tooSoon;
+        if (!tooSoon) {
           anyEnabled = true;
           if (firstEnabledValue === null) firstEnabledValue = opt.value || opt.textContent;
         }
