@@ -123,6 +123,8 @@ window.AdminDrafts = (() => {
   });
   sidebarBackdrop.addEventListener("click", closeSidebar);
 
+  let lastSectionKey = "dashboard";
+
   function showSection(key) {
     SECTIONS.forEach((s) => {
       if (s.viewEl) s.viewEl.hidden = s.key !== key;
@@ -132,6 +134,7 @@ window.AdminDrafts = (() => {
     pageTitle.textContent = (active && active.title) || "";
     closeSidebar();
     window.scrollTo(0, 0);
+    lastSectionKey = key;
   }
   window.adminShowDashboard = () => showSection("dashboard");
 
@@ -143,6 +146,17 @@ window.AdminDrafts = (() => {
     if (s.navEl) s.navEl.addEventListener("click", open);
     if (s.cardEl) s.cardEl.addEventListener("click", open);
   });
+
+  // Après une reconnexion (ex : session expirée en plein milieu d'une
+  // modification), on revient à la section où on était plutôt que de forcer
+  // le tableau de bord — la bannière "brouillon non enregistré" de chaque
+  // éditeur reprend alors la main pour proposer de restaurer le travail en cours.
+  function reopenLastSection() {
+    const s = SECTIONS.find((s) => s.key === lastSectionKey);
+    if (!s || s.key === "dashboard") { showSection("dashboard"); return; }
+    showSection(s.key);
+    if (s.editor) s.editor().open();
+  }
 
   function renderAvatarInto(el, user) {
     el.innerHTML = "";
@@ -337,9 +351,21 @@ window.AdminDrafts = (() => {
     ppNameEl.textContent = firstname;
     ppEmailEl.textContent = email;
     renderAvatarInto(ppAvatarEl, session.user);
+    const wasLoggedOut = appShell.hidden;
     loginScreen.hidden = true;
     appShell.hidden = false;
-    showSection("dashboard");
+    if (wasLoggedOut) {
+      // Vraie (re)connexion : on restaure la section où on était avant la
+      // coupure plutôt que de toujours revenir au tableau de bord, pour que
+      // la bannière "brouillon non enregistré" reprenne la main si une
+      // modification était en cours au moment de la coupure.
+      reopenLastSection();
+    }
+    // Un simple rafraîchissement de jeton en arrière-plan (session déjà
+    // active, ex. toutes les heures) ne doit jamais faire bouger l'écran :
+    // onAuthStateChange rappelle showLoggedIn() à chaque TOKEN_REFRESHED,
+    // et avant ce correctif ça ramenait systématiquement au tableau de bord
+    // en pleine rédaction d'un article.
     refreshAdminAlerts();
     if (!alertsInterval) alertsInterval = setInterval(refreshAdminAlerts, 60000);
     startPresence(session);

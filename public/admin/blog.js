@@ -414,8 +414,22 @@
       window.AdminDrafts.save(draftKey(), readEditFields());
       const statusEl = document.getElementById("bl-draft-status");
       if (statusEl) statusEl.textContent = "Brouillon enregistré automatiquement — à l'instant";
-    }, 800);
+    }, 300);
   }
+
+  // Filet de sécurité : si l'onglet devient invisible (changement d'onglet,
+  // mise en veille, ou l'admin qui repasse en écran de connexion suite à une
+  // coupure de session) pendant qu'un article est en cours de modification,
+  // on sauvegarde immédiatement le brouillon sans attendre le débounce.
+  function flushDraftSave() {
+    if (state.screen !== "edit") return;
+    if (draftSaveTimer) { clearTimeout(draftSaveTimer); draftSaveTimer = null; }
+    window.AdminDrafts.save(draftKey(), readEditFields());
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) flushDraftSave();
+  });
+  window.addEventListener("pagehide", flushDraftSave);
 
   function scheduleSeo() {
     if (seoTimer) clearTimeout(seoTimer);
