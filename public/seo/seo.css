@@ -49,9 +49,9 @@ body { margin: 0; background: var(--page-bg); }
 .password-toggle {
   position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
   width: 34px; height: 34px; display: grid; place-items: center; padding: 0;
-  border: none; background: transparent; color: var(--muted); cursor: pointer; border-radius: 8px;
+  border: 1px solid var(--border); background: #FFFFFF; color: var(--green-700); cursor: pointer; border-radius: 8px;
 }
-.password-toggle:hover { color: var(--green-700); background: rgba(27,109,95,.08); }
+.password-toggle:hover { color: #FFFFFF; background: var(--green-700); border-color: var(--green-700); }
 
 .seo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .seo-btn {
