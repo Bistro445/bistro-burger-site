@@ -1,4 +1,4 @@
-// API protégée : liste des comptes administrateurs (e-mail, dates, statut).
+// API protégée : liste (GET) et suppression (DELETE) des comptes administrateurs.
 // Ne renvoie jamais de mot de passe : Supabase ne conserve que des empreintes chiffrées.
 const { createClient } = require("@supabase/supabase-js");
 
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: "Configuration serveur manquante." });
     return;
   }
-  if (req.method !== "GET") {
+  if (req.method !== "GET" && req.method !== "DELETE") {
     res.status(405).json({ error: "Méthode non autorisée." });
     return;
   }
@@ -37,6 +37,40 @@ module.exports = async (req, res) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
+
+  if (req.method === "DELETE") {
+    const id = String((req.query && req.query.id) || "");
+    if (!id) {
+      res.status(400).json({ error: "Compte manquant." });
+      return;
+    }
+    if (id === user.id) {
+      res.status(400).json({ error: "Vous ne pouvez pas supprimer votre propre compte." });
+      return;
+    }
+    const list = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
+    if (list.error) {
+      res.status(500).json({ error: list.error.message });
+      return;
+    }
+    const all = list.data.users || [];
+    if (!all.some((u) => u.id === id)) {
+      res.status(404).json({ error: "Compte introuvable." });
+      return;
+    }
+    if (all.length <= 1) {
+      res.status(400).json({ error: "Impossible de supprimer le dernier compte." });
+      return;
+    }
+    const del = await supabase.auth.admin.deleteUser(id);
+    if (del.error) {
+      res.status(500).json({ error: del.error.message });
+      return;
+    }
+    res.status(200).json({ ok: true });
+    return;
+  }
+
   const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
   if (error) {
     res.status(500).json({ error: error.message });

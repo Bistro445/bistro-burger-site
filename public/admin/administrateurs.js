@@ -3,7 +3,7 @@
   const container = document.getElementById("administrateurs-view");
   if (!container) return;
 
-  const state = { users: null, error: "", loading: false, messages: {} };
+  const state = { users: null, error: "", loading: false, messages: {}, meId: null };
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
@@ -60,6 +60,7 @@
                 '<div style="font-size:14px; margin-top:2px;">' + statusLine(u, online.has(u.id)) + "</div>" +
                 '<div style="font-size:13px; opacity:.7; margin-top:2px;">Compte créé le ' + esc(formatDate(u.created_at)) + "</div>" +
                 '<button type="button" class="btn-primary" data-reset="' + esc(u.id) + '" style="margin-top:10px; width:auto; padding:9px 14px; font-size:14px;">Envoyer un lien de réinitialisation du mot de passe</button>' +
+                (u.id !== state.meId ? '<button type="button" data-delete="' + esc(u.id) + '" style="margin:10px 0 0 8px; padding:9px 14px; font-size:14px; border:1px solid #B5362B; color:#B5362B; background:#fff; border-radius:10px; cursor:pointer;">Supprimer ce compte</button>' : '<span style="display:inline-block; margin:10px 0 0 8px; font-size:13px; opacity:.7;">(votre compte)</span>') +
                 (msg ? '<div style="font-size:13px; margin-top:8px;">' + esc(msg) + "</div>" : "") +
               "</div>" +
             "</div>"
@@ -83,6 +84,10 @@
     state.error = "";
     render();
     try {
+      const sess = await window.adminAuth.supabase.auth.getSession();
+      state.meId = (sess.data.session && sess.data.session.user.id) || null;
+    } catch {}
+    try {
       const headers = await window.adminAuth.authHeader();
       const res = await fetch("/api/admin/users", { headers });
       const json = await res.json().catch(() => ({}));
@@ -97,6 +102,26 @@
 
   container.addEventListener("click", async (e) => {
     if (e.target.closest("#adm-refresh")) { load(); return; }
+    const delBtn = e.target.closest("[data-delete]");
+    if (delBtn) {
+      const target = (state.users || []).find((u) => u.id === delBtn.getAttribute("data-delete"));
+      if (!target) return;
+      if (!window.confirm("Supprimer définitivement le compte " + target.email + " ?\n\nCette personne ne pourra plus se connecter. Cette action est irréversible.")) return;
+      delBtn.disabled = true;
+      state.messages[target.id] = "Suppression…";
+      render();
+      try {
+        const headers = await window.adminAuth.authHeader();
+        const res = await fetch("/api/admin/users?id=" + encodeURIComponent(target.id), { method: "DELETE", headers });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || "Échec de la suppression.");
+        await load();
+      } catch (err) {
+        state.messages[target.id] = err.message || "Échec de la suppression.";
+        render();
+      }
+      return;
+    }
     const btn = e.target.closest("[data-reset]");
     if (!btn) return;
     const user = (state.users || []).find((u) => u.id === btn.getAttribute("data-reset"));

@@ -422,7 +422,7 @@
   // coupure de session) pendant qu'un article est en cours de modification,
   // on sauvegarde immédiatement le brouillon sans attendre le débounce.
   function flushDraftSave() {
-    if (state.screen !== "edit") return;
+    if (!state || state.screen !== "edit") return;
     if (draftSaveTimer) { clearTimeout(draftSaveTimer); draftSaveTimer = null; }
     window.AdminDrafts.save(draftKey(), readEditFields());
   }
