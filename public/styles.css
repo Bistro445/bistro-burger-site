@@ -469,3 +469,9 @@ a:not(.btn):hover { color: var(--green-700); }
 .article-body img { display: block; max-width: 100%; height: auto; border-radius: 16px; margin: 28px auto 0; box-shadow: 0 10px 26px rgba(14,70,61,.15); }
 .article-body p, .article-body h2, .article-body h3 { margin-bottom: 0; }
 .article-body > * + p, .article-body p + p { margin-top: 16px; }
+
+/* Commande en ligne (panier) masquée sur le site public ; elle reste disponible dans /admin.
+   Pour la réactiver : supprimer ce bloc. */
+#cart-open-btn, #cart-open-btn-mobile, .cart-open-trigger,
+[data-go="commander"], [data-cart-add], [data-b-order],
+#commander, #cart-backdrop, #upsell-backdrop, #order-contact-backdrop { display: none !important; }
