@@ -121,6 +121,12 @@
           </span>
           <span class="sidebar-link-text">Réservations</span>
         </button>
+        <button type="button" class="sidebar-link" id="nav-horaires" data-nav="horaires">
+          <span class="sidebar-link-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+          </span>
+          <span class="sidebar-link-text">Horaires d'ouverture</span>
+        </button>
         <button type="button" class="sidebar-link" id="nav-popup" data-nav="popup">
           <span class="sidebar-link-icon">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -365,7 +371,7 @@
               </span>
               <span class="section-card-bottom">
                 <span class="section-card-label">Réservations</span>
-                <span class="section-card-sub">Créneaux, horaires, couverts</span>
+                <span class="section-card-sub">Créneaux et couverts</span>
                 <span class="section-card-btn">Modifier</span>
               </span>
             </button>
@@ -445,6 +451,7 @@
         <section id="platdujour-view" class="page-view editor-card" hidden></section>
         <section id="offres-view" class="page-view editor-card" hidden></section>
         <section id="reservations-view" class="page-view editor-card" hidden></section>
+        <section id="horaires-view" class="page-view editor-card" style="max-width:720px;" hidden></section>
         <section id="popup-view" class="page-view editor-card" hidden></section>
         <section id="annonces-view" class="page-view editor-card" hidden></section>
         <section id="blog-view" class="page-view editor-card" hidden></section>
@@ -461,6 +468,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
   <script src="config.generated.js"></script>
+  <script src="/hours.js"></script>
   <script src="admin.js"></script>
   <script src="burgers.js"></script>
   <script src="burgerdumoment.js"></script>
@@ -468,6 +476,7 @@
   <script src="platdujour.js"></script>
   <script src="offres.js"></script>
   <script src="reservations.js"></script>
+  <script src="horaires.js"></script>
   <script src="popup.js"></script>
   <script src="annonces.js"></script>
   <script src="blog.js"></script>

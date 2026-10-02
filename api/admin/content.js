@@ -7,7 +7,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const DEPLOY_HOOK_URL = process.env.DEPLOY_HOOK_URL;
 
-const ALLOWED_KEYS = ["burgers", "cartes", "plat_du_jour", "offres", "reservation_settings", "promo_popup", "annonces", "burger_du_moment", "blog"];
+const ALLOWED_KEYS = ["burgers", "cartes", "plat_du_jour", "offres", "reservation_settings", "promo_popup", "annonces", "burger_du_moment", "blog", "horaires"];
 
 async function requireUser(req) {
   const auth = req.headers.authorization || "";

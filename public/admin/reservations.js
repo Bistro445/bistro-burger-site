@@ -42,7 +42,7 @@
   const FIELDS = [
     { key: "heures", label: "Créneaux horaires proposés", placeholder: "Ajouter un créneau (ex : 12h30)" },
     { key: "couverts", label: "Nombre de couverts proposé", placeholder: "Ajouter un nombre (ex : 4 personnes)" },
-    { key: "horaires_text", label: "Horaires affichés sur le site", placeholder: "Ajouter une ligne d'horaire" },
+    { key: "horaires_text", label: "Autres lignes affichées sous les horaires (ex : parking). Les horaires se règlent dans « Horaires d'ouverture ».", placeholder: "Ajouter une ligne d'information" },
   ];
 
   function chipRowHtml(key, values) {

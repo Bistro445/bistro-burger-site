@@ -106,6 +106,7 @@ window.AdminDrafts = (() => {
     { key: "platdujour", title: "Plat du jour", editor: () => window.PlatDuJourEditor },
     { key: "offres", title: "Offres", editor: () => window.OffresEditor },
     { key: "reservations", title: "Réservations", editor: () => window.ReservationsEditor },
+    { key: "horaires", title: "Horaires d'ouverture", editor: () => window.HorairesEditor },
     { key: "popup", title: "Pop-up promo", editor: () => window.PopupEditor },
     { key: "annonces", title: "Annonces", editor: () => window.AnnoncesEditor },
     { key: "blog", title: "Blog", editor: () => window.BlogEditor },

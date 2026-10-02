@@ -143,6 +143,26 @@ app.get("/healthz", (req, res) =>
   })
 );
 
+// Page d'accueil : les horaires des données structurées Google (JSON-LD) sont
+// générés à partir des horaires enregistrés dans l'admin.
+const BBHours = require("./public/hours.js");
+const HOME_HTML_PATH = path.join(PAGES_DIR, "index.html");
+const HOURS_LD_RE = /"openingHoursSpecification":\s*\[[\s\S]*?\n\s*\],/;
+app.get(["/", "/index.html"], async (req, res, next) => {
+  try {
+    const files = await siteData.getFiles();
+    const hours = BBHours.normalize(files.data && files.data.horaires);
+    const specs = JSON.stringify(BBHours.schemaSpecs(hours), null, 2).replace(/\n/g, "\n  ");
+    const html = fs
+      .readFileSync(HOME_HTML_PATH, "utf8")
+      .replace(HOURS_LD_RE, () => '"openingHoursSpecification": ' + specs + ",");
+    res.setHeader("Cache-Control", "no-cache");
+    res.type("html").send(html);
+  } catch (err) {
+    next();
+  }
+});
+
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(

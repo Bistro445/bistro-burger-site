@@ -207,6 +207,9 @@
     horaires_text: ["Lundi · 9h00–14h00", "Du mardi au vendredi · 9h00–14h00 et 17h30–21h30", "Fermé le samedi et le dimanche", "Parking gratuit devant le restaurant"],
   };
 
+  // Horaires d'ouverture (clé "horaires" de Supabase, sinon valeurs par défaut de hours.js).
+  const HOURS = window.BBHours ? window.BBHours.normalize(SITE_DATA.horaires) : null;
+
   const GRADS = ["ph-1", "ph-2", "ph-3"];
 
   const REVIEWS = [
@@ -227,6 +230,10 @@
     { q: "Livrez-vous à domicile ?", a: "Oui, sur Gardanne et les communes limitrophes. Zone et délais à confirmer avec la plateforme de commande." },
     { q: "Y a-t-il un parking ?", a: "Un parking gratuit se trouve directement devant le restaurant, dans la ZAC Avon. Aucun horodateur, aucune limite de durée." }
   ];
+  if (HOURS) {
+    const hoursFaq = FAQ.find((f) => f.q === "Quels sont vos horaires ?");
+    if (hoursFaq) hoursFaq.a = window.BBHours.faqText(HOURS);
+  }
 
   const DEFAULT_BLOG = {
     categories: ["Brasserie", "Traiteur", "Annonce"],
@@ -300,7 +307,11 @@
     const goEl = e.target.closest("[data-go]");
     if (goEl) {
       const target = goEl.getAttribute("data-go");
-      jump(target === "commander" ? "contact" : target);
+      if (target === "commander") {
+        window.location.href = "tel:+33465848918";
+        return;
+      }
+      jump(target);
       return;
     }
     const cartOpenEl = e.target.closest(".cart-open-trigger");
@@ -632,8 +643,21 @@
       couvertsSelect.innerHTML = RESERVATION_SETTINGS.couverts.map((c) => '<option style="color:#2C2C2A;">' + esc(c) + "</option>").join("");
     }
     const horairesList = document.getElementById("reservation-horaires-list");
-    if (horairesList && Array.isArray(RESERVATION_SETTINGS.horaires_text) && RESERVATION_SETTINGS.horaires_text.length) {
-      horairesList.innerHTML = RESERVATION_SETTINGS.horaires_text.map((line) => "<div>" + esc(line) + "</div>").join("");
+    if (horairesList) {
+      // Les lignes d'horaires viennent de l'éditeur « Horaires d'ouverture » ; on ne garde de
+      // horaires_text que les lignes qui ne parlent pas d'horaires (ex : parking).
+      const isHoursLine = (l) => /\d\s?h|fermé|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche/i.test(l);
+      const extra = Array.isArray(RESERVATION_SETTINGS.horaires_text) ? RESERVATION_SETTINGS.horaires_text.filter((l) => !isHoursLine(l)) : [];
+      const lines = (HOURS ? window.BBHours.longLines(HOURS) : RESERVATION_SETTINGS.horaires_text || []).concat(HOURS ? extra : []);
+      if (lines.length) horairesList.innerHTML = lines.map((line) => "<div>" + esc(line) + "</div>").join("");
+    }
+    if (HOURS) {
+      document.querySelectorAll("[data-hours-long]").forEach((node) => {
+        node.innerHTML = window.BBHours.longLines(HOURS).map(esc).join("<br>");
+      });
+      document.querySelectorAll("[data-hours-short]").forEach((node) => {
+        node.innerHTML = window.BBHours.shortLines(HOURS).map((l) => "<span>" + esc(l) + "</span>").join("");
+      });
     }
   }
   renderReservationSettings();
@@ -1387,7 +1411,11 @@
         const m = (opt.textContent || "").trim().match(/^(\d{1,2})h(\d{2})$/);
         const mins = m ? Number(m[1]) * 60 + Number(m[2]) : null;
         const tooSoon = isToday && mins !== null && mins < minMinutes;
-        const closedByDay = day === 0 || day === 6 || (day === 1 && mins !== null && mins >= 15 * 60);
+        const closedByDay = mins === null
+          ? false
+          : HOURS
+          ? !window.BBHours.isOpenSlot(HOURS, day, mins)
+          : day === 0 || day === 6 || (day === 1 && mins >= 15 * 60);
         const unavailable = tooSoon || closedByDay;
         opt.disabled = unavailable;
         opt.hidden = unavailable;
