@@ -475,3 +475,21 @@ a:not(.btn):hover { color: var(--green-700); }
 #cart-open-btn, #cart-open-btn-mobile, .cart-open-trigger,
 [data-go="commander"], [data-cart-add], [data-b-order],
 #commander, #cart-backdrop, #upsell-backdrop, #order-contact-backdrop { display: none !important; }
+
+/* ---- Robustesse mobile : tous les iPhone / Android, pas une taille précise ---- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { overflow-x: clip; }
+body { overflow-wrap: break-word; }
+img, video { max-width: 100%; }
+a, button, summary, label, select { touch-action: manipulation; }
+[data-two-grid] > *, [data-three-grid] > *, .footer-grid > *, .footer-contact > *, #reviews-grid > * { min-width: 0; }
+@supports (height: 100dvh) {
+  @media (max-width: 1024px) { header nav[data-nav-main][data-open="true"] { max-height: calc(100dvh - 150px); } }
+}
+#floating-cta { bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important; right: calc(24px + env(safe-area-inset-right, 0px)) !important; }
+/* iOS Safari ignore la hauteur/le style des champs date et zoome sur les champs < 16px */
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; min-height: 45px; text-align: left; }
+input[type="date"]::-webkit-date-and-time-value, input[type="time"]::-webkit-date-and-time-value { text-align: left; min-height: 1.2em; }
+@media (max-width: 700px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: max(16px, 1em) !important; }
+}
