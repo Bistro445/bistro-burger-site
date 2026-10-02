@@ -48,6 +48,13 @@ window.AdminDrafts = (() => {
     return;
   }
 
+  // À lire avant que Supabase ne traite (et n'efface) le fragment de l'adresse :
+  // on arrive ici par un lien d'invitation ou de réinitialisation du mot de passe.
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const arrivedByLink = /^(invite|recovery)$/.test(hashParams.get("type") || "");
+  const linkHasError = !!(hashParams.get("error") || hashParams.get("error_code"));
+  let passwordPrompted = false;
+
   const supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
 
   window.adminAuth = {
@@ -361,6 +368,10 @@ window.AdminDrafts = (() => {
       // modification était en cours au moment de la coupure.
       reopenLastSection();
     }
+    if (arrivedByLink && !passwordPrompted) {
+      passwordPrompted = true;
+      promptChoosePassword();
+    }
     // Un simple rafraîchissement de jeton en arrière-plan (session déjà
     // active, ex. toutes les heures) ne doit jamais faire bouger l'écran :
     // onAuthStateChange rappelle showLoggedIn() à chaque TOKEN_REFRESHED,
@@ -456,6 +467,11 @@ window.AdminDrafts = (() => {
     }
   });
 
+  if (linkHasError) {
+    errorBox.hidden = false;
+    errorBox.textContent = "Ce lien a expiré ou a déjà été utilisé. Cliquez sur « Mot de passe oublié ? » pour en recevoir un nouveau.";
+  }
+
   async function doLogout() {
     await supabase.auth.signOut();
   }
@@ -528,6 +544,20 @@ window.AdminDrafts = (() => {
   const passwordSuccess = document.getElementById("password-success");
   const passwordError = document.getElementById("password-error");
 
+  function promptChoosePassword() {
+    openProfilePanel();
+    passwordForm.hidden = false;
+    document.getElementById("pp-password-toggle").classList.add("is-open");
+    if (!document.getElementById("password-prompt")) {
+      passwordForm.insertAdjacentHTML(
+        "afterbegin",
+        '<p id="password-prompt" class="password-success">Bienvenue ! Choisissez un mot de passe pour pouvoir vous reconnecter plus tard.</p>'
+      );
+    }
+    const input = document.getElementById("new-password");
+    if (input) input.focus();
+  }
+
   passwordForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     passwordSuccess.hidden = true;
@@ -547,6 +577,8 @@ window.AdminDrafts = (() => {
     } else {
       passwordSuccess.hidden = false;
       passwordForm.reset();
+      const promptEl = document.getElementById("password-prompt");
+      if (promptEl) promptEl.remove();
     }
   });
 
