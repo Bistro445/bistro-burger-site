@@ -589,6 +589,9 @@
     if (!u) { setStatus("Indiquez une adresse valide, par exemple https://exemple.fr/une-page.", "error"); return; }
     el("page-url").value = u.toString();
     const kw = el("keyword").value.trim();
+    // Une analyse de page seule ne doit pas laisser traîner les résultats d'un audit du site entier.
+    el("site-audit").innerHTML = "";
+    el("site-health").innerHTML = "";
     el("run-btn").disabled = true; el("audit-btn").disabled = true;
     setStatus("Analyse en cours…");
     try {
@@ -624,6 +627,7 @@
     if (!u) { setStatus("Indiquez d'abord une adresse du site à auditer.", "error"); return; }
     el("run-btn").disabled = true; el("audit-btn").disabled = true;
     el("result").innerHTML = "";
+    el("site-health").innerHTML = "";
     try {
       setStatus("Recherche du plan du site…");
       const { urls, source } = await discoverPages(u.origin);
@@ -659,6 +663,7 @@
       "</tbody></table></div></section>";
     el("site-audit").querySelectorAll("[data-detail]").forEach((b) => b.addEventListener("click", () => {
       const x = rows[Number(b.dataset.detail)];
+      el("site-health").innerHTML = "";
       el("site-audit").innerHTML = "";
       el("page-url").value = x.url;
       el("keyword").value = x.r.keyword || "";
