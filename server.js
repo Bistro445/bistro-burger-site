@@ -11,6 +11,9 @@ const siteData = require("./lib/siteDataStore");
 const { buildConfigFiles } = require("./lib/siteData");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
+// Les pages HTML du site sont hors de public/ : Hostinger sert directement le contenu de public/
+// sans passer par ce serveur, ce qui contournerait le mode maintenance.
+const PAGES_DIR = path.join(__dirname, "pages");
 const API_DIR = path.join(__dirname, "api");
 const PORT = process.env.PORT || 3000;
 
@@ -141,6 +144,7 @@ app.get("/healthz", (req, res) =>
 );
 
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
+app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(
   express.static(PUBLIC_DIR, {
     dotfiles: "ignore",
@@ -151,10 +155,10 @@ app.use(
 );
 
 // Articles de blog : /blog/mon-article -> modèle unique (équivalent de la réécriture Vercel).
-app.get("/blog/:slug", (req, res) => res.sendFile(path.join(PUBLIC_DIR, "blog", "article.html")));
+app.get("/blog/:slug", (req, res) => res.sendFile(path.join(PAGES_DIR, "blog", "article.html")));
 
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html"));
+  res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));
 });
 
 app.use((err, req, res, next) => {
