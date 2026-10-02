@@ -19,7 +19,13 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(compression());
 
+// Site masqué aux moteurs de recherche tant que la variable d'environnement
+// ALLOW_INDEXING n'est pas "true". On n'interdit pas l'exploration dans
+// robots.txt : Google doit pouvoir lire cet en-tête pour retirer les pages déjà indexées.
+const HIDE_FROM_SEARCH = process.env.ALLOW_INDEXING !== "true";
+
 app.use((req, res, next) => {
+  if (HIDE_FROM_SEARCH) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -90,6 +96,10 @@ function serveConfig(pick) {
 }
 app.get("/admin/config.generated.js", serveConfig((f) => f.adminConfigJs));
 app.get("/app/config.generated.js", serveConfig((f) => f.appConfigJs));
+if (HIDE_FROM_SEARCH) {
+  app.get("/robots.txt", (req, res) => res.type("text/plain").send("User-agent: *\nAllow: /\n"));
+  app.get("/sitemap.xml", (req, res) => res.status(404).type("text/plain").send("Not found"));
+}
 app.get("/sitemap.xml", serveGenerated((f) => f.sitemapXml, { type: "application/xml", body: null }));
 
 /* ------------------------------ Pages statiques ------------------------------ */
