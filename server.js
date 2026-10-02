@@ -136,6 +136,10 @@ siteData.getFiles().then(
 
 if (require.main === module) {
   app.listen(PORT, () => console.log("Bistro Burger : serveur démarré sur le port " + PORT));
+  // Relit les données toutes les 5 minutes pour que les modifications faites
+  // directement dans Supabase (hors /admin) finissent par apparaître. En cas
+  // d'échec, les dernières données valides restent servies.
+  setInterval(() => { siteData.refresh().catch(() => {}); }, 5 * 60 * 1000).unref();
 }
 
 module.exports = app;
