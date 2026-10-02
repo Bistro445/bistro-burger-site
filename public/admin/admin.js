@@ -111,6 +111,7 @@ window.AdminDrafts = (() => {
     { key: "blog", title: "Blog", editor: () => window.BlogEditor },
     { key: "commandes", title: "Commandes", editor: () => window.CommandesEditor },
     { key: "reservations-clients", title: "Réservations reçues", editor: () => window.ReservationsClientsEditor },
+    { key: "administrateurs", title: "Administrateurs", editor: () => window.AdministrateursEditor },
   ];
 
   SECTIONS.forEach((s) => {
@@ -329,7 +330,9 @@ window.AdminDrafts = (() => {
     });
     presenceChannel
       .on("presence", { event: "sync" }, () => {
+        window.adminPresenceState = presenceChannel.presenceState();
         renderPresence(presenceChannel.presenceState());
+        window.dispatchEvent(new Event("admin-presence"));
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -346,6 +349,7 @@ window.AdminDrafts = (() => {
       supabase.removeChannel(presenceChannel);
       presenceChannel = null;
     }
+    window.adminPresenceState = {};
     presenceStack.innerHTML = "";
   }
 
