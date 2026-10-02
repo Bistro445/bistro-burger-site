@@ -202,9 +202,9 @@
   ];
 
   const RESERVATION_SETTINGS = SITE_DATA.reservation_settings || {
-    heures: ["12h00", "12h30", "13h00", "13h30", "14h00", "19h00", "19h30", "20h00", "20h30", "21h00"],
+    heures: ["12h00", "12h30", "13h00", "13h30", "14h00", "17h30", "18h00", "18h30", "19h00", "19h30", "20h00", "20h30", "21h00"],
     couverts: ["2 personnes", "3 personnes", "4 personnes", "5 personnes", "6 personnes"],
-    horaires_text: ["Du lundi au vendredi · midi et soir", "Samedi · soir uniquement", "Fermé samedi midi et dimanche toute la journée", "Parking gratuit devant le restaurant"],
+    horaires_text: ["Du lundi au vendredi · 9h00–15h00 et 17h30–21h30", "Samedi · 17h30–21h30 (soir uniquement)", "Fermé samedi midi et dimanche toute la journée", "Parking gratuit devant le restaurant"],
   };
 
   const GRADS = ["ph-1", "ph-2", "ph-3"];
@@ -222,7 +222,7 @@
     { q: "Proposez-vous des options végétariennes ?", a: "Oui. Le Jardinier est disponible toute l'année, et un burger végétarien du moment change chaque mois. Nos frites sont cuites dans un bain séparé." },
     { q: "Quels sont les allergènes présents dans vos burgers ?", a: "La présence d'allergènes dépend de la composition de chaque burger, de son pain, de ses sauces et de certains produits utilisés dans sa préparation. Les principaux allergènes identifiés dans notre carte peuvent notamment inclure le gluten, le lait, l'œuf, le poisson, la moutarde et les mollusques. Pour connaître précisément les allergènes d'un burger, consultez le détail ci-dessous ou demandez confirmation à notre équipe avant de commander. Si vous avez une allergie ou une intolérance alimentaire, signalez-la impérativement au personnel." },
     { q: "Quel est le détail des allergènes par burger ?", a: "Classique — Identifiés : gluten, lait. À confirmer : composition du bun's, sauce origan.\n\nSmash — Identifiés : gluten, lait. À confirmer : composition du bun's, smashed sauce, cornichons.\n\nBlack Peppers — Identifiés : gluten, lait. À confirmer : composition du bun's, oignons frits, sauce au poivre, lard fumé.\n\nCow-Boy — Identifiés : gluten, lait. À confirmer : œuf et/ou moutarde possibles selon les tenders et le coleslaw, composition du bun's.\n\nFisher — Identifiés : gluten, poisson, lait. À confirmer : œuf et/ou moutarde possibles dans la panure et la sauce tartare, composition du bun's.\n\nPull-Pork — Identifiés : gluten, lait. À confirmer : allergènes de la bière et de la sauce barbecue, œuf et/ou moutarde possibles dans le coleslaw, composition du bun's.\n\nPull-Beef — Identifiés : gluten, lait. À confirmer : allergènes éventuels de la préparation bourguignonne, composition du bun's.\n\nPull-Duck — Identifiés : gluten, moutarde. À confirmer : composition exacte de la sauce moutarde miel, éventuels lait/œuf selon la recette, composition du bun's.\n\nLe Poulpe — Identifiés : gluten, mollusques, œuf, lait. À confirmer : composition exacte du pain, sauce mayo sriracha, éventuels autres allergènes de la sauce.\n\nLe Cam — Identifiés : gluten, lait. À confirmer : œuf possible dans la panure, composition de la smashed sauce, composition du bun's.\n\nLe Big BB — Identifiés : gluten, lait. À confirmer : œuf possible dans la panure, composition de la sauce enfant, composition du bun's." },
-    { q: "Quels sont vos horaires ?", a: "Du lundi au vendredi, midi et soir. Le samedi, le soir uniquement. Nous sommes fermés le samedi midi et le dimanche toute la journée." },
+    { q: "Quels sont vos horaires ?", a: "Du lundi au vendredi de 9h00 à 15h00 et de 17h30 à 21h30. Le samedi, de 17h30 à 21h30 uniquement. Nous sommes fermés le samedi midi et le dimanche toute la journée." },
     { q: "Faut-il réserver ?", a: "Ce n'est pas obligatoire, mais c'est plus sûr le vendredi et le samedi soir. Pour les groupes de plus de dix personnes, appelez-nous au 04 65 84 89 18." },
     { q: "Livrez-vous à domicile ?", a: "Oui, sur Gardanne et les communes limitrophes. Zone et délais à confirmer avec la plateforme de commande." },
     { q: "Y a-t-il un parking ?", a: "Un parking gratuit se trouve directement devant le restaurant, dans la ZAC Avon. Aucun horodateur, aucune limite de durée." }
@@ -611,6 +611,8 @@
       body.appendChild(head);
       body.appendChild(el("h3", { style: "font-family:var(--font-heading); font-weight:600; font-size:17.5px; line-height:1.3; margin:16px 0 0;" }, esc(offer.title || "")));
       body.appendChild(el("p", { style: "font-size:13.5px; line-height:1.6; margin:10px 0 0; flex:1; white-space:pre-line;" }, esc(offer.description || "")));
+      const isCardOffer = offer.tag === "Carte de fidélité" || offer.tag === "Carte cadeau";
+      body.appendChild(el("a", { href: isCardOffer ? "#contact" : "#reservation", class: "btn btn-gradient", "data-shine": "", style: "margin-top:18px; width:100%; text-decoration:none; text-align:center; box-sizing:border-box;" }, isCardOffer ? "Nous rendre visite" : "Réserver"));
       card.appendChild(body);
       grid.appendChild(card);
     });
@@ -910,6 +912,8 @@
       card.appendChild(el("p", { style: "font-size:15px; line-height:1.7; color:var(--text-muted); margin:18px 0 0;" }, esc(r.text)));
       grid.appendChild(card);
     });
+    const moreBtn = document.getElementById("reviews-more");
+    if (moreBtn) moreBtn.hidden = pages < 2;
     const dots = document.getElementById("reviews-dots");
     dots.innerHTML = "";
     for (let i = 0; i < pages; i++) {
@@ -920,6 +924,8 @@
     }
   }
   renderReviews();
+  const reviewsMoreBtn = document.getElementById("reviews-more");
+  if (reviewsMoreBtn) reviewsMoreBtn.addEventListener("click", () => { state.reviewPage += 1; renderReviews(); });
 
   /* ---------------------------------------------------------------- */
   /* FAQ accordion                                                      */
@@ -1155,7 +1161,45 @@
       `<h1 class="article-title">${esc(post.title)}</h1>` +
       (post.img ? `<div class="article-cover"><img src="${esc(blogImgUrl(post.img))}" alt="${esc(post.imgAlt || post.title)}"></div>` : "") +
       `<div class="article-body">${articleBodyHtml(post.body)}</div>` +
-      `<div class="article-actions"><button type="button" class="btn btn-primary btn-gradient" data-shine data-go="reservation">Réserver une table</button><button type="button" class="btn btn-outline" data-go="commander">Commander à emporter</button></div>`;
+      `<div class="article-actions"><button type="button" class="btn btn-primary btn-gradient" data-shine data-go="reservation">Réserver une table</button><button type="button" class="btn btn-outline" data-go="commander">Commander à emporter</button></div>` +
+      `<div class="article-newsletter" style="margin-top:36px; padding:28px 26px; border-radius:var(--radius-card); background:linear-gradient(115deg,#2E8F7C 0%,var(--green-700) 30%,var(--color-primary) 62%,var(--green-900) 100%); color:var(--color-secondary); text-align:center;">` +
+        `<div style="font-family:var(--font-heading); font-weight:700; font-size:22px; line-height:1.25;">Ne manquez plus nos offres</div>` +
+        `<p style="font-size:15px; line-height:1.6; color:rgba(237,224,211,.85); margin:10px auto 0; max-width:460px;">Abonnez-vous à la newsletter : plat du jour, nouveautés de la carte et offres réservées aux abonnés.</p>` +
+        `<form id="article-nl-form" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;">` +
+          `<input type="email" name="email" required placeholder="votre@email.fr" aria-label="Votre adresse e-mail" style="flex:1; min-width:220px; max-width:320px; box-sizing:border-box; font-family:var(--font-body); font-size:16px; padding:13px 15px; border-radius:var(--radius-field); background:rgba(14,70,61,.32); border:1px solid rgba(237,224,211,.35); color:var(--color-secondary); outline:none;">` +
+          `<button type="submit" class="btn btn-on-green btn-cream" data-shine>S'abonner à la newsletter</button>` +
+        `</form>` +
+        `<div id="article-nl-msg" hidden style="margin:14px auto 0; max-width:420px; border-radius:var(--radius-button); padding:11px; font-size:14px; background:rgba(237,224,211,.18); border:1px solid rgba(237,224,211,.4);"></div>` +
+      `</div>`;
+
+    const articleNlForm = document.getElementById("article-nl-form");
+    if (articleNlForm) {
+      const nlMsg = document.getElementById("article-nl-msg");
+      articleNlForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = articleNlForm.querySelector("button[type=submit]");
+        const label = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Envoi…";
+        nlMsg.hidden = true;
+        try {
+          const res = await fetch("/api/newsletter", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: new FormData(articleNlForm).get("email") }),
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(json.error || "Échec de l'inscription.");
+          nlMsg.textContent = "Merci, votre inscription est enregistrée.";
+          articleNlForm.reset();
+        } catch (err) {
+          nlMsg.textContent = err.message || "Échec de l'inscription.";
+        }
+        nlMsg.hidden = false;
+        btn.disabled = false;
+        btn.textContent = label;
+      });
+    }
 
     const related = POSTS.filter((p) => p.slug !== post.slug)
       .sort((a, b) => (b.category === post.category) - (a.category === post.category))
@@ -1807,7 +1851,7 @@
         if (confirmMsg) {
           confirmMsg.hidden = false;
           if (saved) {
-            confirmMsg.textContent = "✓ Votre commande a bien été enregistrée.";
+            confirmMsg.textContent = "✓ Votre commande a été enregistrée, préparez-vous à la recevoir.";
             confirmMsg.style.cssText = "font-family:var(--font-heading); font-weight:600; font-size:14.5px; padding:14px 16px; border-radius:var(--radius-field); margin:0 0 20px; background:rgba(46,143,124,.12); border:1px solid rgba(46,143,124,.4); color:var(--green-700);";
           } else {
             confirmMsg.textContent = "Votre commande n'a pas pu être enregistrée automatiquement : merci de nous appeler pour la confirmer.";
