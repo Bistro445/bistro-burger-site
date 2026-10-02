@@ -76,10 +76,20 @@
     btn.disabled = true;
     btn.textContent = "Connexion…";
     try {
+      // Mêmes identifiants que l'espace admin : on se connecte à Supabase, puis le
+      // serveur échange cette session contre le jeton de l'outil.
+      const cfg = window.SUPABASE_CONFIG;
+      if (!window.supabase || !cfg || !cfg.url || !cfg.anonKey) throw new Error("Configuration manquante. Contactez la personne qui gère le site.");
+      const client = window.supabase.createClient(cfg.url, cfg.anonKey);
+      const { data, error } = await client.auth.signInWithPassword({
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+      });
+      if (error || !data.session) throw new Error("E-mail ou mot de passe incorrect.");
       const res = await fetch("/api/seo?action=login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: document.getElementById("password").value }),
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + data.session.access_token },
+        body: JSON.stringify({}),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "Échec de la connexion.");
@@ -403,7 +413,7 @@
       localStorage.removeItem(TOKEN_KEY);
       showPasswordForm();
       loginError.hidden = false;
-      loginError.textContent = "Session expirée : saisissez le mot de passe de l'outil pour vous reconnecter.";
+      loginError.textContent = "Session expirée : reconnectez-vous avec vos identifiants de l'espace admin.";
       throw new Error("Session expirée : reconnectez-vous.");
     }
     if (!res.ok) throw new Error(json.error || "Impossible de charger cette page.");
