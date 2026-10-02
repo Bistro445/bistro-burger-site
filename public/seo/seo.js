@@ -522,6 +522,7 @@
       '<div class="seo-ring ' + g.cls + '" style="--p:' + r.score + '"><div class="seo-ring-in"><strong>' + r.score + '</strong><span>/ 100</span></div></div>' +
       '<div class="seo-score-body"><div class="seo-grade ' + g.cls + '">' + g.label + (r.isArticle ? ' <span class="seo-type-tag">Article</span>' : "") + "</div>" +
       "<h2>" + esc(u.hostname + u.pathname) + "</h2>" +
+      '<p class="seo-note"><strong>Cette page uniquement</strong> · titre lu : « ' + esc(r.meta.title || "(sans titre)") + ' » · ' + r.meta.wordCount + " mots lus</p>" +
       '<p class="seo-note">' + r.pts + " points sur " + r.max + " possibles. " + (todo ? todo + " élément(s) à corriger." : "Aucune correction nécessaire.") + "</p>" +
       '<div class="seo-counts"><span class="is-ok">' + r.counts.ok + ' réussis</span><span class="is-warn">' + r.counts.warn + ' à améliorer</span><span class="is-fail">' + r.counts.fail + " critiques</span></div>" +
       '<div class="seo-actions"><button type="button" class="seo-btn seo-btn-primary" id="copy-report">Copier le rapport</button></div></div></section>' +
@@ -710,8 +711,8 @@
     if (!el("page-url").value) el("page-url").value = location.origin + "/";
     el("run-btn").addEventListener("click", run);
     el("audit-btn").addEventListener("click", auditSite);
-    el("page-url").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
-    el("keyword").addEventListener("keydown", (e) => { if (e.key === "Enter") run(); });
+    // La touche Entrée ne lance rien : on choisit explicitement « cette page » ou « le site entier ».
+    [el("page-url"), el("keyword")].forEach((input) => input.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); }));
 
     const params = new URLSearchParams(location.search);
     const wanted = params.get("page");

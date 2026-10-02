@@ -362,14 +362,14 @@
   navMain.addEventListener("click", (e) => {
     if (e.target.closest("a") && !e.target.closest("[data-nav-item]")) setMenuOpen(false);
   });
-  cartToggle.addEventListener("click", (e) => {
+  if (cartToggle && navPanel && navDrop) cartToggle.addEventListener("click", (e) => {
     e.preventDefault(); e.stopPropagation();
     const open = navPanel.getAttribute("data-open") === "true";
     navPanel.setAttribute("data-open", open ? "false" : "true");
     navDrop.setAttribute("data-open", open ? "false" : "true");
   });
   document.addEventListener("click", (e) => {
-    if (!navDrop.contains(e.target)) { navPanel.setAttribute("data-open", "false"); navDrop.setAttribute("data-open", "false"); }
+    if (navDrop && navPanel && !navDrop.contains(e.target)) { navPanel.setAttribute("data-open", "false"); navDrop.setAttribute("data-open", "false"); }
   });
   $$("[data-nav-item][data-go-carte]").forEach((btn) => {
     btn.addEventListener("click", () => {
