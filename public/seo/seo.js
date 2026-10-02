@@ -51,7 +51,8 @@
   }
 
   if (localStorage.getItem(TOKEN_KEY)) {
-    showLoggedIn();
+    // Différé : init() utilise des constantes définies plus bas dans ce fichier.
+    Promise.resolve().then(showLoggedIn);
   } else {
     tryAdminSession().then((ok) => { if (ok) showLoggedIn(); else showPasswordForm(); });
   }
@@ -398,7 +399,13 @@
   async function fetchViaProxy(url) {
     const res = await fetch("/api/seo?action=fetch&url=" + encodeURIComponent(url), { headers: authHeaders() });
     const json = await res.json().catch(() => ({}));
-    if (res.status === 401) { showLoggedOut(); localStorage.removeItem(TOKEN_KEY); throw new Error("Session expirée : reconnectez-vous."); }
+    if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      showPasswordForm();
+      loginError.hidden = false;
+      loginError.textContent = "Session expirée : saisissez le mot de passe de l'outil pour vous reconnecter.";
+      throw new Error("Session expirée : reconnectez-vous.");
+    }
     if (!res.ok) throw new Error(json.error || "Impossible de charger cette page.");
     return json;
   }
