@@ -19,13 +19,16 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(compression());
 
-// Site masqué aux moteurs de recherche tant que la variable d'environnement
-// ALLOW_INDEXING n'est pas "true". On n'interdit pas l'exploration dans
-// robots.txt : Google doit pouvoir lire cet en-tête pour retirer les pages déjà indexées.
-const HIDE_FROM_SEARCH = process.env.ALLOW_INDEXING !== "true";
+// Mode maintenance : tant que la variable d'environnement SITE_PUBLIC n'est
+// pas "true", les visiteurs voient une page "site en maintenance" (code 503,
+// non indexée). /admin, /app, /seo et /api restent accessibles. Le propriétaire
+// valide le vrai site via /preview/<PREVIEW_KEY> (cookie de 30 jours).
+const MAINTENANCE = process.env.SITE_PUBLIC !== "true";
+const PREVIEW_KEY = process.env.PREVIEW_KEY || "7406d42b821ef2f161a6c36ba810d6d0beb5";
+const MAINTENANCE_HTML = require("./lib/maintenancePage");
 
 app.use((req, res, next) => {
-  if (HIDE_FROM_SEARCH) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  if (MAINTENANCE) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -34,6 +37,29 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: "2mb" }));
+
+if (MAINTENANCE) {
+  const hasPreviewCookie = (req) => {
+    const m = /(?:^|;\s*)bb_preview=([^;]+)/.exec(req.headers.cookie || "");
+    return !!m && decodeURIComponent(m[1]) === PREVIEW_KEY;
+  };
+  app.get("/preview/:key", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    if (req.params.key === "off") {
+      res.clearCookie("bb_preview", { path: "/" });
+      return res.redirect("/");
+    }
+    if (req.params.key !== PREVIEW_KEY) return res.status(404).type("text/plain").send("Not found");
+    res.cookie("bb_preview", PREVIEW_KEY, { httpOnly: true, sameSite: "lax", secure: !!req.secure, path: "/", maxAge: 30 * 24 * 3600 * 1000 });
+    return res.redirect("/");
+  });
+  const OPEN_PREFIXES = /^\/(api|admin|app|seo)(\/|$)/;
+  const OPEN_PATHS = new Set(["/healthz", "/robots.txt", "/assets/logo-cream-sm.png"]);
+  app.use((req, res, next) => {
+    if (OPEN_PREFIXES.test(req.path) || OPEN_PATHS.has(req.path) || hasPreviewCookie(req)) return next();
+    res.status(503).set({ "Retry-After": "86400", "Cache-Control": "no-store" }).type("html").send(MAINTENANCE_HTML);
+  });
+}
 
 /* ---------------------------- Fonctions API ---------------------------- */
 
@@ -96,7 +122,7 @@ function serveConfig(pick) {
 }
 app.get("/admin/config.generated.js", serveConfig((f) => f.adminConfigJs));
 app.get("/app/config.generated.js", serveConfig((f) => f.appConfigJs));
-if (HIDE_FROM_SEARCH) {
+if (MAINTENANCE) {
   app.get("/robots.txt", (req, res) => res.type("text/plain").send("User-agent: *\nAllow: /\n"));
   app.get("/sitemap.xml", (req, res) => res.status(404).type("text/plain").send("Not found"));
 }
