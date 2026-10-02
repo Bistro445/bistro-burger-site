@@ -22,11 +22,11 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(compression());
 
-// Mode maintenance : tant que la variable d'environnement SITE_PUBLIC n'est
-// pas "true", les visiteurs voient une page "site en maintenance" (code 503,
+// Mode maintenance (désactivé par défaut) : si la variable d'environnement MAINTENANCE_MODE vaut "true",
+// les visiteurs voient une page "site en maintenance" (code 503,
 // non indexée). /admin, /app, /seo et /api restent accessibles. Le propriétaire
 // valide le vrai site via /preview/<PREVIEW_KEY> (cookie de 30 jours).
-const MAINTENANCE = process.env.SITE_PUBLIC !== "true";
+const MAINTENANCE = process.env.MAINTENANCE_MODE === "true";
 const PREVIEW_KEY = process.env.PREVIEW_KEY || "7406d42b821ef2f161a6c36ba810d6d0beb5";
 const MAINTENANCE_HTML = require("./lib/maintenancePage");
 
