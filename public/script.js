@@ -204,7 +204,7 @@
   const RESERVATION_SETTINGS = SITE_DATA.reservation_settings || {
     heures: ["12h00", "12h30", "13h00", "13h30", "14h00", "17h30", "18h00", "18h30", "19h00", "19h30", "20h00", "20h30", "21h00"],
     couverts: ["2 personnes", "3 personnes", "4 personnes", "5 personnes", "6 personnes"],
-    horaires_text: ["Du lundi au vendredi · 9h00–14h00 et 17h30–21h30", "Samedi · 17h30–21h30 (soir uniquement)", "Fermé samedi midi et dimanche toute la journée", "Parking gratuit devant le restaurant"],
+    horaires_text: ["Lundi · 9h00–14h00", "Du mardi au vendredi · 9h00–14h00 et 17h30–21h30", "Fermé le samedi et le dimanche", "Parking gratuit devant le restaurant"],
   };
 
   const GRADS = ["ph-1", "ph-2", "ph-3"];
@@ -222,8 +222,8 @@
     { q: "Proposez-vous des options végétariennes ?", a: "Oui. Le Jardinier est disponible toute l'année, et un burger végétarien du moment change chaque mois. Nos frites sont cuites dans un bain séparé." },
     { q: "Quels sont les allergènes présents dans vos burgers ?", a: "La présence d'allergènes dépend de la composition de chaque burger, de son pain, de ses sauces et de certains produits utilisés dans sa préparation. Les principaux allergènes identifiés dans notre carte peuvent notamment inclure le gluten, le lait, l'œuf, le poisson, la moutarde et les mollusques. Pour connaître précisément les allergènes d'un burger, consultez le détail ci-dessous ou demandez confirmation à notre équipe avant de commander. Si vous avez une allergie ou une intolérance alimentaire, signalez-la impérativement au personnel." },
     { q: "Quel est le détail des allergènes par burger ?", a: "Classique — Identifiés : gluten, lait. À confirmer : composition du bun's, sauce origan.\n\nSmash — Identifiés : gluten, lait. À confirmer : composition du bun's, smashed sauce, cornichons.\n\nBlack Peppers — Identifiés : gluten, lait. À confirmer : composition du bun's, oignons frits, sauce au poivre, lard fumé.\n\nCow-Boy — Identifiés : gluten, lait. À confirmer : œuf et/ou moutarde possibles selon les tenders et le coleslaw, composition du bun's.\n\nFisher — Identifiés : gluten, poisson, lait. À confirmer : œuf et/ou moutarde possibles dans la panure et la sauce tartare, composition du bun's.\n\nPull-Pork — Identifiés : gluten, lait. À confirmer : allergènes de la bière et de la sauce barbecue, œuf et/ou moutarde possibles dans le coleslaw, composition du bun's.\n\nPull-Beef — Identifiés : gluten, lait. À confirmer : allergènes éventuels de la préparation bourguignonne, composition du bun's.\n\nPull-Duck — Identifiés : gluten, moutarde. À confirmer : composition exacte de la sauce moutarde miel, éventuels lait/œuf selon la recette, composition du bun's.\n\nLe Poulpe — Identifiés : gluten, mollusques, œuf, lait. À confirmer : composition exacte du pain, sauce mayo sriracha, éventuels autres allergènes de la sauce.\n\nLe Cam — Identifiés : gluten, lait. À confirmer : œuf possible dans la panure, composition de la smashed sauce, composition du bun's.\n\nLe Big BB — Identifiés : gluten, lait. À confirmer : œuf possible dans la panure, composition de la sauce enfant, composition du bun's." },
-    { q: "Quels sont vos horaires ?", a: "Du lundi au vendredi de 9h00 à 14h00 et de 17h30 à 21h30. Le samedi, de 17h30 à 21h30 uniquement. Nous sommes fermés le samedi midi et le dimanche toute la journée." },
-    { q: "Faut-il réserver ?", a: "Ce n'est pas obligatoire, mais c'est plus sûr le vendredi et le samedi soir. Pour les groupes de plus de dix personnes, appelez-nous au 04 65 84 89 18." },
+    { q: "Quels sont vos horaires ?", a: "Le lundi, de 9h00 à 14h00. Du mardi au vendredi, de 9h00 à 14h00 et de 17h30 à 21h30. Nous sommes fermés le samedi et le dimanche." },
+    { q: "Faut-il réserver ?", a: "Ce n'est pas obligatoire, mais c'est plus sûr le vendredi soir. Pour les groupes de plus de dix personnes, appelez-nous au 04 65 84 89 18." },
     { q: "Livrez-vous à domicile ?", a: "Oui, sur Gardanne et les communes limitrophes. Zone et délais à confirmer avec la plateforme de commande." },
     { q: "Y a-t-il un parking ?", a: "Un parking gratuit se trouve directement devant le restaurant, dans la ZAC Avon. Aucun horodateur, aucune limite de durée." }
   ];
@@ -1367,6 +1367,7 @@
       if (!dateInput.value || dateInput.value < todayStr) dateInput.value = todayStr;
     }
 
+    // Jours d'ouverture : fermé le samedi et le dimanche, le lundi seulement le midi (avant 15h).
     // Si la date sélectionnée est aujourd'hui, retire les créneaux trop proches :
     // il faut au moins 45 minutes d'avance (le temps de préparer la commande),
     // donc quelqu'un qui se connecte à midi ne peut pas réserver pour midi.
@@ -1379,15 +1380,18 @@
       const isToday = dateInput.value === todayStr;
       const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
       const minMinutes = nowMinutes + MIN_LEAD_MINUTES;
+      const day = new Date(dateInput.value + "T00:00:00").getDay();
       let anyEnabled = false;
       let firstEnabledValue = null;
       Array.from(heureSelect.options).forEach((opt) => {
         const m = (opt.textContent || "").trim().match(/^(\d{1,2})h(\d{2})$/);
         const mins = m ? Number(m[1]) * 60 + Number(m[2]) : null;
         const tooSoon = isToday && mins !== null && mins < minMinutes;
-        opt.disabled = tooSoon;
-        opt.hidden = tooSoon;
-        if (!tooSoon) {
+        const closedByDay = day === 0 || day === 6 || (day === 1 && mins !== null && mins >= 15 * 60);
+        const unavailable = tooSoon || closedByDay;
+        opt.disabled = unavailable;
+        opt.hidden = unavailable;
+        if (!unavailable) {
           anyEnabled = true;
           if (firstEnabledValue === null) firstEnabledValue = opt.value || opt.textContent;
         }
