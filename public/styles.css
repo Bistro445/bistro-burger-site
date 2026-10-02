@@ -473,7 +473,7 @@ a:not(.btn):hover { color: var(--green-700); }
 /* Commande en ligne (panier) masquée sur le site public ; elle reste disponible dans /admin.
    Pour la réactiver : supprimer ce bloc. */
 #cart-open-btn, #cart-open-btn-mobile, .cart-open-trigger,
-[data-go="commander"], [data-cart-add], [data-b-order],
+[data-cart-add], [data-b-order],
 #commander, #cart-backdrop, #upsell-backdrop, #order-contact-backdrop { display: none !important; }
 
 /* ---- Robustesse mobile : tous les iPhone / Android, pas une taille précise ---- */

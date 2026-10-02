@@ -300,7 +300,7 @@
     const goEl = e.target.closest("[data-go]");
     if (goEl) {
       const target = goEl.getAttribute("data-go");
-      jump(target);
+      jump(target === "commander" ? "contact" : target);
       return;
     }
     const cartOpenEl = e.target.closest(".cart-open-trigger");
