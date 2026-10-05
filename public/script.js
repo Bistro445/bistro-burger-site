@@ -583,6 +583,11 @@
       : plat.meta || plat.horaire || "";
     pdjSetText("pdj-meta", metaText);
     pdjSetText("pdj-title", plat.title);
+    const pdjDescEl = document.getElementById("pdj-desc");
+    if (pdjDescEl) {
+      pdjDescEl.textContent = plat.description || "";
+      pdjDescEl.hidden = !plat.description;
+    }
     pdjSetText("pdj-price", plat.price);
     if (!pdjSuggestions.length) return;
     renderPdjSuggestion();

@@ -63,6 +63,7 @@
       date: rawPlat.date || "",
       horaire: rawPlat.horaire != null ? rawPlat.horaire : rawPlat.meta || "",
       title: rawPlat.title || "",
+      description: rawPlat.description || "",
       price: rawPlat.price || "",
     };
     let suggestions = value && Array.isArray(value.suggestions) ? value.suggestions : null;
@@ -106,6 +107,7 @@
       date: state.data.plat.date || "",
       horaire: custom || state.data.plat.horaire || "",
       title: document.getElementById("pdj-title").value.trim(),
+      description: (document.getElementById("pdj-desc").value || "").trim(),
       price: document.getElementById("pdj-price").value.trim(),
     };
   }
@@ -244,6 +246,8 @@
       '<input class="field" id="pdj-horaire-custom" placeholder="Ex : Service continu" value="' + (HORAIRE_PRESETS.includes(plat.horaire) ? "" : esc(plat.horaire)) + '">' +
       '<label class="field-label" for="pdj-title">Nom du plat</label>' +
       '<input class="field" id="pdj-title" required value="' + esc(plat.title) + '">' +
+      '<label class="field-label" for="pdj-desc">Description (facultatif)</label>' +
+      '<textarea class="field" id="pdj-desc" rows="3" placeholder="Décrivez le plat en une ou deux phrases (ingrédients, accompagnement…)">' + esc(plat.description) + '</textarea>' +
       '<label class="field-label" for="pdj-price">Prix</label>' +
       '<input class="field" id="pdj-price" placeholder="14,50 €" value="' + esc(plat.price) + '">' +
       '<button type="submit" class="btn-primary" id="pdj-save"' + (state.savingPlat ? " disabled" : "") + ">" +
