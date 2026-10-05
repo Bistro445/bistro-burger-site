@@ -6,7 +6,7 @@ const webpush = require("web-push");
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_CONTACT_EMAIL = process.env.VAPID_CONTACT_EMAIL || "louangeprecieux0@gmail.com";
+const VAPID_CONTACT_EMAIL = process.env.VAPID_CONTACT_EMAIL || "brasserie.zone.avon@gmail.com";
 
 let configured = false;
 function ensureConfigured() {

@@ -8,7 +8,7 @@ const { notifyAdmins } = require("./_lib/notify");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ALERT_EMAIL = "louangeprecieux0@gmail.com";
+const ALERT_EMAIL = process.env.ALERT_EMAIL || "brasserie.zone.avon@gmail.com";
 const MAX_QTY_PER_ITEM = 30;
 const MAX_ITEMS = 60;
 

@@ -38,7 +38,7 @@ ligne** : tout `push` sur la branche déployée part en production après un red
 - Données Supabase modifiées à la main : le site les relit toutes les 5 minutes, ou tout de suite après un
   enregistrement dans l'admin.
 - Variables d'environnement (jamais dans le code, jamais dans le chat) : `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `RECAPTCHA_SITE_KEY`/`RECAPTCHA_SECRET_KEY`, `VAPID_*`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `ALERT_EMAIL` (adresse de secours des alertes, par défaut brasserie.zone.avon@gmail.com), `RECAPTCHA_SITE_KEY`/`RECAPTCHA_SECRET_KEY`, `VAPID_*`,
   `MAINTENANCE_MODE` (="true" met le site en maintenance), `PREVIEW_KEY` (accès privé via `/preview/<clé>`).
   Facultatives : `BREVO_*` (newsletter, pas encore reliée), `RESEND_*`, `GOOGLE_CSE_*`.
   `DEPLOY_HOOK_URL` et `SEO_TOOL_PASSWORD` sont obsolètes.
