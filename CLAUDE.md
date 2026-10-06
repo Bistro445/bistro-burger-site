@@ -5,7 +5,7 @@ Site vitrine + espace d'administration du restaurant Bistro Burger (Gardanne), e
 
 ## Règle d'or
 **Le site est en production et des clients s'en servent (réservations, plat du jour, horaires).**
-Fais des changements petits, vérifie-les avant de les envoyer, et ne casse jamais ce qui marche.
+Fais des changements petits,  vérifie-les avant de les envoyer, et ne casse jamais ce qui marche.
 Dans le doute, demande à la personne avant d'agir. Réponds en français, simplement : la personne
 n'est pas développeuse.
 
