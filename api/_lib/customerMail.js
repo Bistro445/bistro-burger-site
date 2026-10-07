@@ -81,10 +81,16 @@ function buildMessage(row) {
   return { subject: "Votre réservation est confirmée — " + RESTAURANT.nom, html, text: texte };
 }
 
-// Renvoie "envoye" | "non_configure" | "pas_d_email" | "echec".
+// Renvoie { status, detail } avec status = "envoye" | "non_configure" |
+// "pas_d_email" | "echec". En cas d'échec, `detail` donne la raison (réponse de
+// Resend ou erreur réseau) pour que l'admin puisse la lire. La clé n'y figure jamais.
 async function sendReservationConfirmed(row) {
-  if (!row || !row.email) return "pas_d_email";
-  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) return "non_configure";
+  if (!row || !row.email) return { status: "pas_d_email" };
+  if (!RESEND_API_KEY || !RESEND_FROM_EMAIL) return { status: "non_configure" };
+
+  // Retire espaces, retours à la ligne et guillemets collés par erreur autour des valeurs.
+  const apiKey = String(RESEND_API_KEY).trim().replace(/^["']|["']$/g, "");
+  const fromEmail = String(RESEND_FROM_EMAIL).trim().replace(/^["']|["']$/g, "");
 
   const { subject, html, text } = buildMessage(row);
   const controller = new AbortController();
@@ -94,11 +100,11 @@ async function sendReservationConfirmed(row) {
       method: "POST",
       signal: controller.signal,
       headers: {
-        Authorization: "Bearer " + RESEND_API_KEY,
+        Authorization: "Bearer " + apiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: RESTAURANT.nom + " <" + RESEND_FROM_EMAIL + ">",
+        from: RESTAURANT.nom + " <" + fromEmail + ">",
         to: row.email,
         reply_to: REPLY_TO,
         subject,
@@ -106,9 +112,19 @@ async function sendReservationConfirmed(row) {
         text,
       }),
     });
-    return res.ok ? "envoye" : "echec";
-  } catch {
-    return "echec";
+    if (res.ok) return { status: "envoye" };
+    let msg = "";
+    try {
+      const j = await res.json();
+      msg = [j && j.name, j && j.message].filter(Boolean).join(" : ");
+    } catch {}
+    const detail = "Resend a répondu " + res.status + (msg ? " (" + msg + ")" : "");
+    console.error("[customerMail] " + detail);
+    return { status: "echec", detail };
+  } catch (e) {
+    const detail = e && e.name === "AbortError" ? "Resend n'a pas répondu à temps" : "Erreur réseau : " + (e && e.message ? e.message : "inconnue");
+    console.error("[customerMail] " + detail);
+    return { status: "echec", detail };
   } finally {
     clearTimeout(timer);
   }

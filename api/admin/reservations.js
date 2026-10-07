@@ -84,10 +84,13 @@ module.exports = async (req, res) => {
     }
 
     let email = "non_concerne";
+    let emailDetail = "";
     if (status === "confirmee" && before && (before.status || "nouveau") !== "confirmee") {
-      email = await sendReservationConfirmed(before);
+      const result = await sendReservationConfirmed(before);
+      email = result.status;
+      emailDetail = result.detail || "";
     }
-    res.status(200).json({ ok: true, email });
+    res.status(200).json({ ok: true, email, emailDetail });
     return;
   }
 

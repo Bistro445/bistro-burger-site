@@ -56,8 +56,9 @@
   }
 
   // Message affiché après un changement de statut (surtout : l'e-mail au client).
-  function noticeFor(status, emailResult) {
+  function noticeFor(status, emailResult, detail) {
     if (status !== "confirmee") return "";
+    if (emailResult === "echec") return "Réservation confirmée, mais l'e-mail n'a pas pu être envoyé : prévenez le client par téléphone." + (detail ? " Détail : " + detail + "." : "");
     if (emailResult === "envoye") return "✓ Réservation confirmée, e-mail de confirmation envoyé au client.";
     if (emailResult === "pas_d_email") return "Réservation confirmée. Ce client n'a pas laissé d'e-mail : pensez à le prévenir par téléphone.";
     if (emailResult === "non_configure") return "Réservation confirmée. L'envoi d'e-mails aux clients n'est pas encore activé : pensez à prévenir le client par téléphone.";
@@ -164,7 +165,7 @@
         btn.disabled = true;
         try {
           const result = await apiSetStatus(id, status);
-          state.notice = noticeFor(status, result && result.email);
+          state.notice = noticeFor(status, result && result.email, result && result.emailDetail);
           const r = state.items.find((x) => x.id === id);
           if (r) r.status = status;
           render();
