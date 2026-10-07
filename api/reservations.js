@@ -3,6 +3,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { notifyAdmins } = require("./_lib/notify");
 const { notifyPush } = require("./_lib/push");
+const { adminNewReservation } = require("./_lib/emailTemplates");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -109,7 +110,7 @@ module.exports = async (req, res) => {
     heure: row.reservation_time,
     couverts: row.party_size,
     message: row.message,
-  });
+  }, adminNewReservation(row));
 
   const whenParts = [];
   if (row.reservation_date) whenParts.push(row.reservation_date);

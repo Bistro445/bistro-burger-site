@@ -5,6 +5,7 @@
 // modifiée à la main ne puisse pas changer un prix ou un total.
 const { createClient } = require("@supabase/supabase-js");
 const { notifyAdmins } = require("./_lib/notify");
+const { adminNewOrder } = require("./_lib/emailTemplates");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -148,7 +149,7 @@ module.exports = async (req, res) => {
     téléphone: row.customer_phone,
     articles: row.items.map((it) => it.qty + "x " + it.name).join(", "),
     total: row.total + " €",
-  });
+  }, adminNewOrder(row));
 
   res.status(200).json({ ok: true });
 };
