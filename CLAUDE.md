@@ -40,7 +40,9 @@ ligne** : tout `push` sur la branche déployée part en production après un red
 - Variables d'environnement (jamais dans le code, jamais dans le chat) : `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
   `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `ALERT_EMAIL` (adresse de secours des alertes, par défaut brasserie.zone.avon@gmail.com), `RECAPTCHA_SITE_KEY`/`RECAPTCHA_SECRET_KEY`, `VAPID_*`,
   `MAINTENANCE_MODE` (="true" met le site en maintenance), `PREVIEW_KEY` (accès privé via `/preview/<clé>`).
-  Facultatives : `BREVO_*` (newsletter, pas encore reliée), `RESEND_*`, `GOOGLE_CSE_*`.
+  Facultatives : `BREVO_*` (newsletter, pas encore reliée), `GOOGLE_CSE_*`, et `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (+ `RESEND_REPLY_TO`) :
+  e-mail de confirmation envoyé au client quand le restaurant clique sur "Confirmer" dans l'admin (`api/_lib/customerMail.js`).
+  Sans ces variables, rien n'est envoyé et l'admin le signale.
   `DEPLOY_HOOK_URL` et `SEO_TOOL_PASSWORD` sont obsolètes.
 
 ## Tester avant d'envoyer

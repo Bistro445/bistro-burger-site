@@ -48,6 +48,21 @@
       body: JSON.stringify({ id, status }),
     });
     if (!res.ok) throw new Error("Échec de la mise à jour.");
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  }
+
+  // Message affiché après un changement de statut (surtout : l'e-mail au client).
+  function noticeFor(status, emailResult) {
+    if (status !== "confirmee") return "";
+    if (emailResult === "envoye") return "✓ Réservation confirmée, e-mail de confirmation envoyé au client.";
+    if (emailResult === "pas_d_email") return "Réservation confirmée. Ce client n'a pas laissé d'e-mail : pensez à le prévenir par téléphone.";
+    if (emailResult === "non_configure") return "Réservation confirmée. L'envoi d'e-mails aux clients n'est pas encore activé : pensez à prévenir le client par téléphone.";
+    if (emailResult === "echec") return "Réservation confirmée, mais l'e-mail n'a pas pu être envoyé : prévenez le client par téléphone.";
+    return "";
   }
 
   async function apiDelete(id) {
@@ -125,6 +140,7 @@
       '<button type="button" class="back-btn" id="rc-back">‹ Retour</button>' +
       "<h1>Réservations reçues</h1>" +
       '<p class="dashboard-note">Toutes les demandes de réservation envoyées depuis le site.</p>' +
+      (state.notice ? '<div class="rec-notice" style="background:#e7f1ed;border-left:4px solid #1f5d4c;padding:10px 14px;margin:0 0 12px;border-radius:4px;font-size:14px">' + esc(state.notice) + "</div>" : "") +
       '<div class="rec-toolbar"><div class="rec-filter">' +
       FILTERS.map((f) => '<button type="button" class="rec-filter-btn' + (state.filter === f.key ? " is-active" : "") + '" data-filter="' + f.key + '">' + esc(f.label) + "</button>").join("") +
       "</div></div>" +
@@ -147,7 +163,8 @@
         const status = btn.dataset.status;
         btn.disabled = true;
         try {
-          await apiSetStatus(id, status);
+          const result = await apiSetStatus(id, status);
+          state.notice = noticeFor(status, result && result.email);
           const r = state.items.find((x) => x.id === id);
           if (r) r.status = status;
           render();

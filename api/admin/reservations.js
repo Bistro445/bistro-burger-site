@@ -1,6 +1,7 @@
 // API protégée pour l'espace admin : consultation et suivi des demandes
 // de réservation enregistrées depuis le site public.
 const { createClient } = require("@supabase/supabase-js");
+const { sendReservationConfirmed } = require("../_lib/customerMail");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -65,12 +66,28 @@ module.exports = async (req, res) => {
       return;
     }
 
+    // Lit l'ancien statut pour n'envoyer l'e-mail qu'au passage à « confirmée ».
+    const { data: before, error: readError } = await supabase
+      .from("reservations")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (readError) {
+      res.status(500).json({ error: readError.message });
+      return;
+    }
+
     const { error } = await supabase.from("reservations").update({ status }).eq("id", id);
     if (error) {
       res.status(500).json({ error: error.message });
       return;
     }
-    res.status(200).json({ ok: true });
+
+    let email = "non_concerne";
+    if (status === "confirmee" && before && (before.status || "nouveau") !== "confirmee") {
+      email = await sendReservationConfirmed(before);
+    }
+    res.status(200).json({ ok: true, email });
     return;
   }
 
