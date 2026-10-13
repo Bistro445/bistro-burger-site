@@ -1182,7 +1182,8 @@
       "@context": "https://schema.org", "@type": "BlogPosting", headline: post.seoTitle || post.title, description: desc, image: imgAbs,
       datePublished: post.date, author: { "@type": "Organization", name: "Bistro Burger" }, publisher: { "@type": "Organization", name: "Bistro Burger" }
     });
-    document.head.appendChild(ld);
+    // Le serveur injecte déjà ce bloc (lib/blogSeo.js) : on évite le doublon.
+    if (!document.querySelector('script[type="application/ld+json"][data-ssr]')) document.head.appendChild(ld);
 
     root.innerHTML =
       `<a href="index.html" class="footer-link" style="display:block; color:var(--green-700); font-size:14px; font-weight:600;">← Retour au blog</a>` +

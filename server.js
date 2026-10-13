@@ -9,6 +9,7 @@ const express = require("express");
 const compression = require("compression");
 const siteData = require("./lib/siteDataStore");
 const { buildConfigFiles } = require("./lib/siteData");
+const blogSeo = require("./lib/blogSeo");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 // Les pages HTML du site sont hors de public/ : Hostinger sert directement le contenu de public/
@@ -36,6 +37,17 @@ app.use((req, res, next) => {
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   if (req.secure) res.setHeader("Strict-Transport-Security", "max-age=31536000");
+  next();
+});
+
+// Une seule adresse pour le site : « www. » est redirigé (301) vers le domaine sans « www »,
+// pour éviter que Google voie deux copies du même site.
+const SITE_HOST = (() => {
+  try { return new URL(process.env.SITE_URL || "https://bistroburgergardanne.com").hostname.replace(/^www\./, ""); }
+  catch { return "bistroburgergardanne.com"; }
+})();
+app.use((req, res, next) => {
+  if (req.hostname === "www." + SITE_HOST) return res.redirect(301, "https://" + SITE_HOST + req.originalUrl);
   next();
 });
 
@@ -148,7 +160,9 @@ app.get("/healthz", (req, res) =>
 const BBHours = require("./public/hours.js");
 const HOME_HTML_PATH = path.join(PAGES_DIR, "index.html");
 const HOURS_LD_RE = /"openingHoursSpecification":\s*\[[\s\S]*?\n\s*\],/;
-app.get(["/", "/index.html"], async (req, res, next) => {
+// /index.html est la même page que « / » : redirection définitive (évite un doublon dans Google).
+app.get("/index.html", (req, res) => res.redirect(301, "/" + req.url.slice("/index.html".length)));
+app.get("/", async (req, res, next) => {
   try {
     const files = await siteData.getFiles();
     const hours = BBHours.normalize(files.data && files.data.horaires);
@@ -175,7 +189,31 @@ app.use(
 );
 
 // Articles de blog : /blog/mon-article -> modèle unique (équivalent de la réécriture Vercel).
-app.get("/blog/:slug", (req, res) => res.sendFile(path.join(PAGES_DIR, "blog", "article.html")));
+// Le serveur y injecte le titre, la description, la canonique et le texte de l'article pour
+// que Google les lise dans le code brut (voir lib/blogSeo.js). Si les données ne sont pas
+// disponibles, on retombe sur le modèle seul (le JavaScript remplit alors la page).
+const ARTICLE_TEMPLATE_PATH = path.join(PAGES_DIR, "blog", "article.html");
+const articleCache = new Map(); // slug -> { sig, html } : l'article n'est recalculé que s'il change
+app.get("/blog/:slug", async (req, res) => {
+  try {
+    const slug = decodeURIComponent(req.params.slug).replace(/\.html$/i, "");
+    const files = await siteData.getFiles();
+    const { known, post } = blogSeo.findPost(files.data, slug);
+    if (known && !post) return res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));
+    if (!post) return res.sendFile(ARTICLE_TEMPLATE_PATH);
+    const sig = JSON.stringify([post.title, post.seoTitle, post.seoDesc, post.excerpt, post.img, post.date, post.body]);
+    let cached = articleCache.get(slug);
+    if (!cached || cached.sig !== sig) {
+      cached = { sig, html: blogSeo.renderArticleHtml(fs.readFileSync(ARTICLE_TEMPLATE_PATH, "utf8"), post, process.env.SITE_URL) };
+      if (articleCache.size > 200) articleCache.clear();
+      articleCache.set(slug, cached);
+    }
+    res.setHeader("Cache-Control", "no-cache");
+    return res.type("html").send(cached.html);
+  } catch (err) {
+    return res.sendFile(ARTICLE_TEMPLATE_PATH);
+  }
+});
 
 app.use((req, res) => {
   res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));

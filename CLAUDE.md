@@ -90,6 +90,13 @@ ligne** : tout `push` sur la branche déployée part en production après un red
   `/admin`, `/seo`, `/app` et `/api` restent accessibles ; l'accès privé au vrai site se fait via `/preview/<PREVIEW_KEY>`.
 
 ## SEO
+Articles de blog : toutes les URL `/blog/<slug>.html` utilisent le même modèle `pages/blog/article.html` (rempli en
+JavaScript). Pour que Google le lise, **le serveur injecte** titre, description, canonique, données structurées et texte
+de chaque article (`lib/blogSeo.js`, appelé par `server.js`) ; un article inconnu répond 404. Ne remets jamais une
+canonique commune dans le modèle. Le serveur redirige aussi `www.` vers le domaine sans `www` et `/index.html` vers `/`.
+Après un changement d'article, vérifier avec `curl https://bistroburgergardanne.com/blog/<slug>.html` (le `<title>`
+doit être celui de l'article). Search Console : « Pages » montre ce que Google n'indexe pas et pourquoi.
+
 Mot-clé principal de l'accueil : "restaurant à Gardanne" (titre, description, H1, premier paragraphe). Les articles
 du blog suivent : H1, H2/H3, au moins 300–500 mots, mot-clé en gras dans le texte, liens internes au milieu
 (pas de lien en fin d'article), aucune information inventée. Le logo contient encore "Brasserie & Burgers" :
