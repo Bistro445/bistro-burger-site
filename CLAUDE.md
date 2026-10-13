@@ -101,3 +101,12 @@ Mot-clé principal de l'accueil : "restaurant à Gardanne" (titre, description, 
 du blog suivent : H1, H2/H3, au moins 300–500 mots, mot-clé en gras dans le texte, liens internes au milieu
 (pas de lien en fin d'article), aucune information inventée. Le logo contient encore "Brasserie & Burgers" :
 incohérence connue avec le positionnement "restaurant".
+
+## Vitesse (mesurée le 13/10/2026 : mobile 55 → 90 sur PageSpeed)
+- **Images** : une image ajoutée doit faire au plus ~1100 px de large et ~150 Ko (JPEG qualité ~78 ou WebP). Les images sous
+  la ligne de flottaison portent `loading="lazy"` ; l'image principale de l'accueil (`hero-burger.webp` + `hero-burger-800.webp`
+  pour mobile) est préchargée dans le `<head>`. Ne pas remettre d'image de plusieurs centaines de Ko.
+- **reCAPTCHA** : son script (~350 Ko) ne se charge que quand le formulaire approche de l'écran ou qu'on y touche (`script.js`).
+- **Polices** : `<link>` + `preconnect` dans chaque page (pas de `@import` dans `styles.css`).
+- **Maillage interne** : le serveur injecte les liens vers les articles dans l'accueil (`<!--BLOG_LATEST-->` dans
+  `pages/index.html`) et dans la page blog (`lib/blogSeo.js`). Ne pas supprimer ce repère.
