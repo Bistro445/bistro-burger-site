@@ -21,6 +21,10 @@
 <meta name="twitter:title" content="Restaurant à Gardanne : burgers maison | Bistro Burger">
 <meta name="twitter:description" content="Restaurant à Gardanne : burgers faits maison, plat du jour du lundi au vendredi et produits frais.">
 <meta name="twitter:image" content="https://bistroburgergardanne.com/assets/hero-burger.webp">
+<link rel="preload" as="image" href="assets/hero-burger.webp" imagesrcset="assets/hero-burger-800.webp 800w, assets/hero-burger.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Geologica:ital,wght@0,400;0,500;1,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {
@@ -114,7 +118,7 @@
 
   <!-- 03 · HÉRO -->
   <section id="accueil" style="position:relative; color:var(--color-secondary); overflow:hidden;">
-    <img src="assets/hero-burger.webp" alt="Burger signature Bistro Burger servi avec des frites maison, enseigne néon Bistro Burger en fond" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:60% 45%; display:block;">
+    <img src="assets/hero-burger.webp" srcset="assets/hero-burger-800.webp 800w, assets/hero-burger.webp 1600w" sizes="100vw" fetchpriority="high" decoding="async" alt="Burger signature Bistro Burger servi avec des frites maison, enseigne néon Bistro Burger en fond" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:60% 45%; display:block;">
     <div style="position:absolute; inset:0; background:linear-gradient(100deg,var(--green-900) 0%,rgba(14,70,61,.92) 22%,rgba(18,87,76,.7) 42%,rgba(27,109,95,.25) 62%,transparent 80%);"></div>
     <div style="position:relative; max-width:1240px; margin:0 auto; padding:132px 24px 140px; min-height:520px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;">
       <div style="max-width:640px;" data-reveal>
@@ -148,13 +152,13 @@
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" data-reveal>
         <div style="grid-column:1 / -1; aspect-ratio:16/9; border-radius:var(--radius-photo); overflow:hidden;">
-          <img src="assets/salle.webp" alt="La salle du Bistro Burger à Gardanne, tables dressées et guirlande de drapeaux" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <img loading="lazy" decoding="async" src="assets/salle.webp" alt="La salle du Bistro Burger à Gardanne, tables dressées et guirlande de drapeaux" style="width:100%; height:100%; object-fit:cover; display:block;">
         </div>
         <div style="aspect-ratio:1; border-radius:var(--radius-photo); overflow:hidden;">
-          <img src="assets/matin.webp" alt="Café, jus d'orange et viennoiserie sur une table du Bistro Burger le matin" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <img loading="lazy" decoding="async" src="assets/matin.webp" alt="Café, jus d'orange et viennoiserie sur une table du Bistro Burger le matin" style="width:100%; height:100%; object-fit:cover; display:block;">
         </div>
         <div style="aspect-ratio:1; border-radius:var(--radius-photo); overflow:hidden;">
-          <img src="assets/tablee.jpg" alt="Grande tablée d'une vingtaine de convives attablés au Bistro Burger" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <img loading="lazy" decoding="async" src="assets/tablee.jpg" alt="Grande tablée d'une vingtaine de convives attablés au Bistro Burger" style="width:100%; height:100%; object-fit:cover; display:block;">
         </div>
       </div>
     </div>
@@ -218,7 +222,7 @@
       </div>
       <div id="burger-du-moment" data-two-grid style="margin-top:44px; border-radius:var(--radius-card); overflow:hidden; background:linear-gradient(115deg,var(--green-900) 0%,var(--color-primary) 55%,var(--green-700) 100%); box-shadow:0 20px 48px rgba(14,70,61,.3); display:grid; grid-template-columns:1fr 1fr;" data-reveal>
         <div style="aspect-ratio:4/3; overflow:hidden;">
-          <img id="bdm-img" src="assets/hero-burger.webp" alt="Burger du moment du Bistro Burger" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <img loading="lazy" decoding="async" id="bdm-img" src="assets/hero-burger.webp" alt="Burger du moment du Bistro Burger" style="width:100%; height:100%; object-fit:cover; display:block;">
         </div>
         <div style="padding:40px 42px; display:flex; flex-direction:column; justify-content:center; color:var(--color-secondary);">
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -249,7 +253,7 @@
 
   <!-- 06 · NOTRE CARTE -->
   <section id="carte" style="position:relative; padding:100px 24px; color:var(--color-secondary); overflow:hidden;">
-    <img src="assets/carte-fond.jpg" alt="Assiette de frites maison et salade servie au Bistro Burger" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;">
+    <img loading="lazy" decoding="async" src="assets/carte-fond.jpg" alt="Assiette de frites maison et salade servie au Bistro Burger" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;">
     <div style="position:relative; max-width:1240px; margin:0 auto;">
       <div style="text-align:center;" data-reveal>
         <div class="eyebrow">Notre carte sur place et emporter</div>
@@ -275,7 +279,7 @@
   <!-- 07 · RÉSERVATION -->
   <section id="reservation" style="position:relative; padding:96px 24px 0; color:var(--color-secondary);">
     <div style="position:absolute; inset:0; overflow:hidden;">
-      <img src="assets/table-reservee.jpg" alt="Table dressée avec un carton Table Réservée" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;">
+      <img loading="lazy" decoding="async" src="assets/table-reservee.jpg" alt="Table dressée avec un carton Table Réservée" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;">
       <div style="position:absolute; inset:0; background:linear-gradient(100deg,var(--green-900) 0%,rgba(18,87,76,.88) 26%,rgba(27,109,95,.55) 50%,rgba(46,143,124,.18) 72%,transparent 88%);"></div>
     </div>
     <div style="position:relative; max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; padding-bottom:96px;">
@@ -327,7 +331,7 @@
       <div id="offers-grid" data-offers-grid style="display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin-top:44px; align-items:stretch;">
         <div data-offer="light" class="offer-card" style="background:linear-gradient(180deg,#FFFFFF,var(--cream-400)); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; display:flex; flex-direction:column;">
           <div data-offer-visual style="aspect-ratio:16/10; overflow:hidden; position:relative;">
-            <img src="assets/menu-etudiant.jpg" alt="Menu étudiant : cheeseburger, frites maison et boisson sur plateau" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <img loading="lazy" decoding="async" src="assets/menu-etudiant.jpg" alt="Menu étudiant : cheeseburger, frites maison et boisson sur plateau" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
           <div style="padding:22px 22px 26px; display:flex; flex-direction:column; flex:1;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -340,7 +344,7 @@
         </div>
         <div data-offer="light" class="offer-card" style="background:linear-gradient(180deg,#FFFFFF,var(--cream-400)); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; display:flex; flex-direction:column;">
           <div data-offer-visual style="aspect-ratio:16/10; overflow:hidden; position:relative;">
-            <img src="assets/menu-enfant.jpg" alt="Menu enfant : cheeseburger, tenders de poulet, frites maison et boisson" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <img loading="lazy" decoding="async" src="assets/menu-enfant.jpg" alt="Menu enfant : cheeseburger, tenders de poulet, frites maison et boisson" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
           <div style="padding:22px 22px 26px; display:flex; flex-direction:column; flex:1;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -353,7 +357,7 @@
         </div>
         <div data-offer="light" class="offer-card" style="background:linear-gradient(180deg,#FFFFFF,var(--cream-400)); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; display:flex; flex-direction:column;">
           <div data-offer-visual style="aspect-ratio:16/10; overflow:hidden; position:relative;">
-            <img src="assets/carte-fidelite.jpg" alt="Carte de fidélité Bistro Burger verte et dorée à dix cases" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <img loading="lazy" decoding="async" src="assets/carte-fidelite.jpg" alt="Carte de fidélité Bistro Burger verte et dorée à dix cases" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
           <div style="padding:22px 22px 26px; display:flex; flex-direction:column; flex:1;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -365,7 +369,7 @@
         </div>
         <div data-offer="light" class="offer-card" style="background:linear-gradient(180deg,#FFFFFF,var(--cream-400)); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; display:flex; flex-direction:column;">
           <div data-offer-visual style="aspect-ratio:16/10; overflow:hidden; position:relative;">
-            <img src="assets/carte-cadeau.jpg" alt="Carte cadeau Bistro Burger verte et dorée, nouée d'un ruban" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <img loading="lazy" decoding="async" src="assets/carte-cadeau.jpg" alt="Carte cadeau Bistro Burger verte et dorée, nouée d'un ruban" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
           <div style="padding:22px 22px 26px; display:flex; flex-direction:column; flex:1;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -390,12 +394,14 @@
       <div id="reviews-dots" style="display:flex; justify-content:center; gap:9px; margin-top:30px;"></div>
       <div style="display:flex; justify-content:center; margin-top:22px;"><button type="button" id="reviews-more" class="btn btn-gradient" data-shine style="font-family:var(--font-heading); font-weight:600; font-size:14.5px; padding:14px 26px;">Lire d'autres avis</button></div>
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:34px;" data-reveal>
-        <img src="assets/google-avis.png" alt="Avis clients Google — 5 étoiles" style="width:196px; height:auto; display:block; margin-bottom:4px;">
+        <img loading="lazy" decoding="async" src="assets/google-avis.png" alt="Avis clients Google — 5 étoiles" style="width:196px; height:auto; display:block; margin-bottom:4px;">
         <p style="font-size:15.5px; line-height:1.6; color:var(--text-muted); margin:0; text-align:center; max-width:520px;">Vous avez déjeuné chez nous ? Votre avis nous aide à progresser et guide les prochains clients.</p>
         <a href="https://g.page/r/CfALRKAUDVFgEAE/review" target="_blank" rel="noopener" data-shine class="btn btn-gradient" style="font-family:var(--font-heading); font-weight:600; font-size:14.5px; padding:14px 26px;">Laisser un avis</a>
       </div>
     </div>
   </section>
+
+  <!--BLOG_LATEST-->
 
   <!-- 11 · À EMPORTER ET LIVRAISON -->
   <section id="commander" style="position:relative; background:linear-gradient(115deg,var(--color-primary),var(--green-700) 60%,var(--green-900)); color:var(--color-secondary); padding:96px 24px; overflow:hidden;">
@@ -410,7 +416,7 @@
         </div>
       </div>
       <div style="position:relative; aspect-ratio:1; border-radius:var(--radius-card); overflow:hidden; box-shadow:0 26px 60px rgba(14,70,61,.45);" data-reveal>
-        <img src="assets/livraison.jpg" alt="Livreur Bistro Burger à vélo dans les rues de Gardanne" style="width:100%; height:100%; object-fit:cover; display:block; animation:bbRide 9s ease-in-out infinite;">
+        <img loading="lazy" decoding="async" src="assets/livraison.jpg" alt="Livreur Bistro Burger à vélo dans les rues de Gardanne" style="width:100%; height:100%; object-fit:cover; display:block; animation:bbRide 9s ease-in-out infinite;">
       </div>
     </div>
   </section>
@@ -485,7 +491,7 @@
   <footer style="background:linear-gradient(180deg,var(--green-900),var(--color-primary)); color:var(--color-secondary); padding:72px 24px 32px;">
     <div id="footer-grid" style="max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:48px;">
       <div>
-        <img src="assets/logo-cream-sm.png" alt="Bistro Burger — Brasserie &amp; Burgers" style="height:62px; width:auto; display:block;">
+        <img loading="lazy" decoding="async" src="assets/logo-cream-sm.png" alt="Bistro Burger — Brasserie &amp; Burgers" style="height:62px; width:auto; display:block;">
         <p style="font-size:14.5px; line-height:1.7; color:rgba(237,224,211,.7); margin:18px 0 0; max-width:300px;">Burgers faits maison et plats du jour, à Gardanne, entre Aix-en-Provence et Marseille.</p>
       </div>
       <div>

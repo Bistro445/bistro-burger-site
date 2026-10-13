@@ -483,7 +483,7 @@
       const card = el("div", { "data-burger-card": "", style: "display:flex; flex-direction:column; gap:11px; padding:18px; border-radius:var(--radius-card); background:#FFFFFF; border:1px solid var(--border-default); box-shadow:0 10px 26px rgba(44,44,42,.1);" });
       const photo = el("div", { "data-b-photo": "", style: "position:relative; aspect-ratio:4/3; border-radius:var(--radius-photo); background:linear-gradient(150deg,#FFFFFF,var(--cream-400)); box-shadow:0 8px 20px rgba(44,44,42,.14); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(18,87,76,.45); overflow:hidden;" });
       if (b.img) {
-        photo.innerHTML = `<img src="${esc(b.img)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+        photo.innerHTML = `<img loading="lazy" decoding="async" src="${esc(b.img)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
           <span aria-hidden="true" style="position:absolute; z-index:1; bottom:10px; right:10px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(14,70,61,.55); color:#FFFFFF; opacity:0; transition:opacity .2s ease; pointer-events:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>`;
         photo.style.cursor = "zoom-in";
         photo.addEventListener("mouseenter", () => { photo.querySelector("span").style.opacity = "1"; });
@@ -618,7 +618,7 @@
     OFFRES.forEach((offer) => {
       const card = el("div", { "data-offer": "light", class: "offer-card", style: "background:linear-gradient(180deg,#FFFFFF,var(--cream-400)); border:1px solid var(--border-default); border-radius:var(--radius-card); overflow:hidden; display:flex; flex-direction:column;" });
       const visual = el("div", { "data-offer-visual": "", style: "aspect-ratio:16/10; overflow:hidden; position:relative;" },
-        offer.img ? '<img src="' + esc(offer.img) + '" alt="' + esc(offer.title || offer.tag || "") + '" style="width:100%; height:100%; object-fit:cover; display:block;">' : "");
+        offer.img ? '<img loading="lazy" decoding="async" src="' + esc(offer.img) + '" alt="' + esc(offer.title || offer.tag || "") + '" style="width:100%; height:100%; object-fit:cover; display:block;">' : "");
       card.appendChild(visual);
       const body = el("div", { style: "padding:22px 22px 26px; display:flex; flex-direction:column; flex:1;" });
       const head = el("div", { style: "display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;" });
@@ -705,7 +705,7 @@
         const card = document.createElement("div");
         card.className = "cart-product-card";
         card.innerHTML =
-          '<div class="cart-product-thumb">' + (b.img ? '<img src="' + esc(b.img) + '" alt="' + esc(b.name) + '">' : "<span>Photo</span>") + "</div>" +
+          '<div class="cart-product-thumb">' + (b.img ? '<img loading="lazy" decoding="async" src="' + esc(b.img) + '" alt="' + esc(b.name) + '">' : "<span>Photo</span>") + "</div>" +
           '<div class="cart-product-info">' +
           '<span class="cart-product-name">' + esc(b.name) + "</span>" +
           (b.desc ? '<span class="cart-product-desc">' + esc(b.desc) + "</span>" : "") +
@@ -787,7 +787,7 @@
         const row = document.createElement("div");
         row.className = "cart-item-row";
         row.innerHTML =
-          '<div class="cart-item-thumb">' + (img ? '<img src="' + esc(img) + '" alt="' + esc(it.name) + '">' : "<span>Photo</span>") + "</div>" +
+          '<div class="cart-item-thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + esc(img) + '" alt="' + esc(it.name) + '">' : "<span>Photo</span>") + "</div>" +
           '<div class="cart-item-info">' +
           '<span class="cart-item-name">' + esc(it.name) + "</span>" +
           '<span class="cart-item-price">' + esc(formatPrice(it.price)) + " l'unité</span>" +
@@ -1450,6 +1450,8 @@
     const recaptchaSiteKey = SITE_DATA.recaptchaSiteKey || "";
     const recaptchaBox = document.getElementById("reservation-recaptcha");
     let recaptchaWidgetId = null;
+    let recaptchaRequested = false;
+    let recaptchaLoader = null;
     if (recaptchaSiteKey && recaptchaBox) {
       recaptchaBox.hidden = false;
       window.__onRecaptchaLoad = function () {
@@ -1457,11 +1459,27 @@
           recaptchaWidgetId = window.grecaptcha.render(recaptchaBox, { sitekey: recaptchaSiteKey });
         }
       };
-      const s = document.createElement("script");
-      s.src = "https://www.google.com/recaptcha/api.js?onload=__onRecaptchaLoad&render=explicit";
-      s.async = true;
-      s.defer = true;
-      document.head.appendChild(s);
+      // Le script reCAPTCHA (~350 Ko) n'est chargé que quand le formulaire approche de l'écran
+      // ou qu'on y touche : il ralentissait l'ouverture de la page pour tous les visiteurs.
+      recaptchaLoader = () => {
+        if (recaptchaRequested) return;
+        recaptchaRequested = true;
+        const s = document.createElement("script");
+        s.src = "https://www.google.com/recaptcha/api.js?onload=__onRecaptchaLoad&render=explicit";
+        s.async = true;
+        s.defer = true;
+        document.head.appendChild(s);
+      };
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((en) => en.isIntersecting)) { io.disconnect(); recaptchaLoader(); }
+        }, { rootMargin: "600px 0px" });
+        io.observe(form);
+      } else {
+        recaptchaLoader();
+      }
+      form.addEventListener("focusin", recaptchaLoader);
+      form.addEventListener("pointerdown", recaptchaLoader);
     }
 
     form.addEventListener("submit", async (e) => {
@@ -1477,6 +1495,14 @@
         return;
       }
       let recaptchaToken = "";
+      if (recaptchaSiteKey && !window.grecaptcha && recaptchaLoader) {
+        // Envoi très rapide (remplissage automatique) avant le chargement du contrôle anti-robot.
+        recaptchaLoader();
+        errorBox.textContent = "Le contrôle anti-robot est en cours de chargement : cochez « Je ne suis pas un robot », puis validez de nouveau.";
+        errorBox.hidden = false;
+        errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       if (recaptchaSiteKey && window.grecaptcha) {
         recaptchaToken = window.grecaptcha.getResponse(recaptchaWidgetId ?? undefined);
         if (!recaptchaToken) {

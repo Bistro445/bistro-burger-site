@@ -169,9 +169,26 @@ app.get("/", async (req, res, next) => {
     const specs = JSON.stringify(BBHours.schemaSpecs(hours), null, 2).replace(/\n/g, "\n  ");
     const html = fs
       .readFileSync(HOME_HTML_PATH, "utf8")
-      .replace(HOURS_LD_RE, () => '"openingHoursSpecification": ' + specs + ",");
+      .replace(HOURS_LD_RE, () => '"openingHoursSpecification": ' + specs + ",")
+      // Section « Nos derniers articles » : liens vers les articles visibles dans le code brut.
+      .replace("<!--BLOG_LATEST-->", () => blogSeo.homeLatestHtml(files.data));
     res.setHeader("Cache-Control", "no-cache");
     res.type("html").send(html);
+  } catch (err) {
+    next();
+  }
+});
+
+// Page « blog » : la liste des articles est injectée dans le code brut (liens internes vers
+// chaque article visibles par Google sans JavaScript). /blog redirige vers /blog/.
+const BLOG_INDEX_PATH = path.join(PAGES_DIR, "blog", "index.html");
+app.get("/blog", (req, res, next) => (req.originalUrl.split("?")[0] === "/blog" ? res.redirect(301, "/blog/") : next()));
+app.get(["/blog/", "/blog/index.html"], async (req, res, next) => {
+  try {
+    const files = await siteData.getFiles();
+    const html = blogSeo.renderBlogIndexHtml(fs.readFileSync(BLOG_INDEX_PATH, "utf8"), files.data);
+    res.setHeader("Cache-Control", "no-cache");
+    return res.type("html").send(html);
   } catch (err) {
     next();
   }
