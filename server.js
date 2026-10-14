@@ -216,7 +216,11 @@ app.get("/blog/:slug", async (req, res) => {
     const slug = decodeURIComponent(req.params.slug).replace(/\.html$/i, "");
     const files = await siteData.getFiles();
     const { known, post } = blogSeo.findPost(files.data, slug);
-    if (known && !post) return res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));
+    if (known && !post) {
+      const target = blogSeo.LEGACY_SLUGS[slug];
+      if (target && blogSeo.findPost(files.data, target).post) return res.redirect(301, "/blog/" + target + ".html");
+      return res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));
+    }
     if (!post) return res.sendFile(ARTICLE_TEMPLATE_PATH);
     const sig = JSON.stringify([post.title, post.seoTitle, post.seoDesc, post.excerpt, post.img, post.date, post.body]);
     let cached = articleCache.get(slug);
