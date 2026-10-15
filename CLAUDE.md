@@ -117,3 +117,5 @@ incohérence connue avec le positionnement "restaurant".
   lancent pas JavaScript), plus le balisage FAQPage (réponses sans « à confirmer » uniquement). `/llms.txt` est généré avec
   les horaires et le plat du jour à jour. Ne pas déplacer les repères `pdj-*`, `burger-track`, `carte-groups`, `faq-list`, `reviews-grid`.
 - Ne jamais écrire « à confirmer » dans un texte public : il est lu par les IA et recopié.
+- Les réponses FAQ « Où déjeuner à Gardanne ? » et « Servez-vous le petit-déjeuner ? » citent l'ouverture à 9h : les mettre à jour
+  (public/site-content.js) si les horaires changent. Même chose pour la ligne « Services » de `lib/aiSeo.js` (llms.txt).
