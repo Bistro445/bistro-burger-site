@@ -110,3 +110,10 @@ incohérence connue avec le positionnement "restaurant".
 - **Polices** : `<link>` + `preconnect` dans chaque page (pas de `@import` dans `styles.css`).
 - **Maillage interne** : le serveur injecte les liens vers les articles dans l'accueil (`<!--BLOG_LATEST-->` dans
   `pages/index.html`) et dans la page blog (`lib/blogSeo.js`). Ne pas supprimer ce repère.
+
+## Lisibilité par les IA et Google (ajouté le 15/10/2026)
+- La FAQ et les avis de l'accueil sont dans `public/site-content.js` (source unique). **Modifier le texte là**, pas dans `script.js`.
+- Le serveur (`lib/aiSeo.js`) écrit dans le code de l'accueil le plat du jour, la carte, la FAQ et les avis (les robots IA ne
+  lancent pas JavaScript), plus le balisage FAQPage (réponses sans « à confirmer » uniquement). `/llms.txt` est généré avec
+  les horaires et le plat du jour à jour. Ne pas déplacer les repères `pdj-*`, `burger-track`, `carte-groups`, `faq-list`, `reviews-grid`.
+- Ne jamais écrire « à confirmer » dans un texte public : il est lu par les IA et recopié.

@@ -10,6 +10,7 @@ const compression = require("compression");
 const siteData = require("./lib/siteDataStore");
 const { buildConfigFiles } = require("./lib/siteData");
 const blogSeo = require("./lib/blogSeo");
+const aiSeo = require("./lib/aiSeo");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
 // Les pages HTML du site sont hors de public/ : Hostinger sert directement le contenu de public/
@@ -160,6 +161,17 @@ app.get("/healthz", (req, res) =>
 const BBHours = require("./public/hours.js");
 const HOME_HTML_PATH = path.join(PAGES_DIR, "index.html");
 const HOURS_LD_RE = /"openingHoursSpecification":\s*\[[\s\S]*?\n\s*\],/;
+// /llms.txt : résumé du restaurant pour les IA (horaires et plat du jour toujours à jour).
+app.get("/llms.txt", async (req, res) => {
+  try {
+    const files = await siteData.getFiles();
+    res.setHeader("Cache-Control", "no-cache");
+    res.type("text/plain; charset=utf-8").send(aiSeo.llmsTxt(files.data, process.env.SITE_URL));
+  } catch (err) {
+    res.status(503).type("text/plain").send("Indisponible");
+  }
+});
+
 // /index.html est la même page que « / » : redirection définitive (évite un doublon dans Google).
 app.get("/index.html", (req, res) => res.redirect(301, "/" + req.url.slice("/index.html".length)));
 app.get("/", async (req, res, next) => {
@@ -167,11 +179,13 @@ app.get("/", async (req, res, next) => {
     const files = await siteData.getFiles();
     const hours = BBHours.normalize(files.data && files.data.horaires);
     const specs = JSON.stringify(BBHours.schemaSpecs(hours), null, 2).replace(/\n/g, "\n  ");
-    const html = fs
+    let html = fs
       .readFileSync(HOME_HTML_PATH, "utf8")
       .replace(HOURS_LD_RE, () => '"openingHoursSpecification": ' + specs + ",")
       // Section « Nos derniers articles » : liens vers les articles visibles dans le code brut.
       .replace("<!--BLOG_LATEST-->", () => blogSeo.homeLatestHtml(files.data));
+    // Plat du jour, carte, FAQ et avis écrits dans le code de la page, pour Google et les IA.
+    html = aiSeo.enhanceHome(html, files.data);
     res.setHeader("Cache-Control", "no-cache");
     res.type("html").send(html);
   } catch (err) {

@@ -33,6 +33,9 @@
   "name": "Bistro Burger",
   "image": "https://bistroburgergardanne.com/assets/hero-burger.webp",
   "url": "https://bistroburgergardanne.com/",
+  "logo": "https://bistroburgergardanne.com/icon-512.png",
+  "geo": { "@type": "GeoCoordinates", "latitude": 43.4467947, "longitude": 5.4579057 },
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=Bistro+Burger+ZAC+Avon+Gardanne",
   "telephone": "+33465848918",
   "email": "brasserie.zone.avon@gmail.com",
   "servesCuisine": ["Burgers", "Française"],
@@ -175,12 +178,12 @@
         <div style="flex:1; padding:44px 42px; display:flex; flex-direction:column; justify-content:center;">
           <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
             <span class="badge badge-cream">Plat du jour</span>
-            <span id="pdj-meta" style="font-size:13px; color:rgba(237,224,211,.7);">Jeudi 7 août · servi de 12h à 14h</span>
+            <span id="pdj-meta" style="font-size:13px; color:rgba(237,224,211,.7);">Chaque midi, une recette différente</span>
           </div>
-          <h3 id="pdj-title" style="font-family:var(--font-heading); font-weight:700; font-size:36px; margin:18px 0 0; line-height:1.14;">Brochette de magret de canard aux abricots marinée, boulgour aux légumes croquants</h3>
+          <h3 id="pdj-title" style="font-family:var(--font-heading); font-weight:700; font-size:36px; margin:18px 0 0; line-height:1.14;">Le plat du jour est annoncé chaque matin</h3>
           <p id="pdj-desc" hidden style="font-size:15.5px; line-height:1.65; color:rgba(237,224,211,.82); margin:14px 0 0; max-width:520px;"></p>
           <div style="display:flex; align-items:center; gap:24px; margin:26px 0 28px; flex-wrap:wrap;">
-            <span id="pdj-price" style="font-family:var(--font-heading); font-weight:700; font-size:32px;">14,50&nbsp;€</span>
+            <span id="pdj-price" style="font-family:var(--font-heading); font-weight:700; font-size:32px;"></span>
           </div>
           <div style="display:flex; gap:12px; flex-wrap:wrap;">
             <button type="button" class="btn btn-on-green btn-sm btn-cream" data-shine data-go="reservation">Réserver pour ce midi</button>
@@ -726,6 +729,7 @@
 </div>
 <script src="/hours.js"></script>
 <script src="data.generated.js"></script>
+<script src="/site-content.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
