@@ -63,7 +63,8 @@ ligne** : tout `push` sur la branche déployée part en production après un red
 3. Ne lance pas un traitement qui utilise une constante définie plus bas dans le fichier (erreur
    "Cannot access … before initialization", cause d'un bug de l'outil SEO).
 4. Fonctionnalités **masquées par CSS** en fin de `public/styles.css` : panier / commande en ligne et
-   newsletter. Pour les réactiver : supprimer le bloc concerné. La politique de confidentialité a été
+   newsletter. Pour les réactiver : supprimer le bloc concerné. (La section d'accueil `#commander`,
+   « Votre burger livré ou à emporter » avec appel + Uber Eats, est affichée depuis le 15/10/2026.) La politique de confidentialité a été
    modifiée en conséquence (historique git pour restaurer la mention Brevo/newsletter). Le bouton
    "Commander" lance un appel téléphonique (`tel:`).
 5. Modifier de gros blocs avec `sed`/`perl` en plusieurs lignes a déjà abîmé des fichiers : préfère l'outil
