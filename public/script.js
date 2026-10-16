@@ -182,6 +182,23 @@
     }
   };
 
+  // Jamais de « à confirmer » en public : un plat dont le prix n'est pas confirmé, ou une note provisoire, est masqué
+  // (les données restent dans l'admin). Même règle côté serveur dans lib/aiSeo.js.
+  (function hideUnconfirmed() {
+    const pending = (s) => /à confirmer/i.test(String(s || ""));
+    Object.keys(CARTES).forEach((mode) => {
+      Object.keys(CARTES[mode]).forEach((tab) => {
+        CARTES[mode][tab] = (CARTES[mode][tab] || []).filter((g) => {
+          if (pending(g.note)) g.note = "";
+          if (pending(g.price)) g.price = "";
+          g.items = (g.items || []).filter((it) => !pending(it.price) && !pending(it.desc));
+          return g.items.length > 0;
+        });
+        if (!CARTES[mode][tab].length) delete CARTES[mode][tab];
+      });
+    });
+  })();
+
   const PLAT_DU_JOUR = SITE_DATA.plat_du_jour || {
     plat: { label: "Plat du jour", meta: "Jeudi 7 août · servi de 12h à 14h", title: "Brochette de magret de canard aux abricots marinée, boulgour aux légumes croquants", price: "14,50 €" },
     suggestions: [{ label: "Suggestion du jour", title: "Burger du boucher, sauce poivre", description: "La suggestion que le chef ajoute à la carte, selon le marché du matin. Servie avec frites maison et salade.", price: "16,90 €" }],
@@ -1178,7 +1195,7 @@
       `<div class="article-meta">${post.category ? `<span class="blog-cat">${esc(post.category)}</span>` : ""}<span>Bistro Burger &bull; ${esc(blogDate(post.date))}</span></div>` +
       `<h1 class="article-title">${esc(post.title)}</h1>` +
       (post.img ? `<div class="article-cover"><img src="${esc(blogImgUrl(post.img))}" alt="${esc(post.imgAlt || post.title)}"></div>` : "") +
-      `<div class="article-body">${articleBodyHtml(post.body)}</div>` +
+      `<div class="article-body">${articleBodyHtml(post.body)}<p class="article-home-link"><a href="/">Découvrez notre restaurant à Gardanne</a> : plat du jour, carte et réservation en ligne.</p></div>` +
       `<div class="article-actions"><button type="button" class="btn btn-primary btn-gradient" data-shine data-go="reservation">Réserver une table</button><button type="button" class="btn btn-outline" data-go="commander">Commander à emporter</button></div>` +
       `<div class="article-newsletter" style="margin-top:36px; padding:28px 26px; border-radius:var(--radius-card); background:linear-gradient(115deg,#2E8F7C 0%,var(--green-700) 30%,var(--color-primary) 62%,var(--green-900) 100%); color:var(--color-secondary); text-align:center;">` +
         `<div style="font-family:var(--font-heading); font-weight:700; font-size:22px; line-height:1.25;">Ne manquez plus nos offres</div>` +
