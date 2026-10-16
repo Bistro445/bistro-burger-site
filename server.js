@@ -208,20 +208,9 @@ app.get(["/blog/", "/blog/index.html"], async (req, res, next) => {
   }
 });
 
-// Page « carte » : toute la carte en texte (burgers, sur place, à emporter), visible sans JavaScript.
-// /carte.html est la même page : redirection définitive vers /carte.
-const CARTE_PATH = path.join(PAGES_DIR, "carte.html");
-app.get("/carte.html", (req, res) => res.redirect(301, "/carte"));
-app.get("/carte", async (req, res, next) => {
-  try {
-    const files = await siteData.getFiles();
-    const html = aiSeo.renderCartePage(fs.readFileSync(CARTE_PATH, "utf8"), files.data, process.env.SITE_URL);
-    res.setHeader("Cache-Control", "no-cache");
-    return res.type("html").send(html);
-  } catch (err) {
-    next();
-  }
-});
+// La carte vit sur l'accueil (section #carte). Il n'y a pas de page /carte : si Google ou un lien la connaît,
+// redirection définitive vers l'accueil.
+app.get(["/carte", "/carte.html", "/carte/"], (req, res) => res.redirect(301, "/"));
 
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));

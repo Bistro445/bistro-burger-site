@@ -119,9 +119,9 @@ incohérence connue avec le positionnement "restaurant".
   les horaires et le plat du jour à jour. Ne pas déplacer les repères `pdj-*`, `burger-track`, `carte-groups`, `faq-list`, `reviews-grid`.
 - Ne jamais écrire « à confirmer » dans un texte public : il est lu par les IA et recopié. Le serveur ignore automatiquement
   les prix, descriptions et notes de la carte qui contiennent « à confirmer » (accueil et `/carte`).
-- `/carte` : page « carte complète » en texte (burgers + cartes sur place et à emporter + balisage `Menu`), fabriquée par le
-  serveur à partir des données de l'admin (`renderCartePage` dans `lib/aiSeo.js`, modèle `pages/carte.html`). Les liens
-  « Carte sur place / à emporter » du menu pointent vers elle ; sur l'accueil, `script.js` les garde fluides (défilement).
+- Il n'y a **pas de page `/carte`** (retirée à la demande du restaurant le 16/10/2026) : la carte vit sur l'accueil (`#carte`).
+  Le serveur redirige `/carte` vers `/`. Les liens « Carte sur place / à emporter » du menu sont de vrais liens `/#carte` ;
+  sur l'accueil, `script.js` les garde fluides (changement d'onglet et défilement).
 - Les horaires écrits dans les articles du blog sont à relire à la main : ils ne suivent pas l'éditeur d'horaires
   (corrigés le 16/10/2026 : plus de « samedi soir »).
 - Les réponses FAQ « Où déjeuner à Gardanne ? » et « Servez-vous le petit-déjeuner ? » citent l'ouverture à 9h : les mettre à jour

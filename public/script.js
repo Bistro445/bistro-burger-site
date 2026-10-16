@@ -375,7 +375,7 @@
   });
   $$("[data-nav-item][data-go-carte]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
-      // Lien réel vers /carte pour les robots ; hors de l'accueil (pas de carte sur la page), on laisse le lien s'ouvrir.
+      // Lien réel vers /#carte pour les robots ; hors de l'accueil (pas de carte sur la page), on laisse le lien s'ouvrir.
       if (!document.getElementById("mode-toggle")) return;
       e.preventDefault();
       const mode = btn.getAttribute("data-go-carte");
