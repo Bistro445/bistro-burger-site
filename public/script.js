@@ -246,8 +246,10 @@
     ]
   };
   const BLOG = SITE_DATA.blog && Array.isArray(SITE_DATA.blog.posts) ? SITE_DATA.blog : DEFAULT_BLOG;
+  // Articles fusionnés dans /traiteur : retirés des listes (même liste que MOVED_SLUGS dans lib/blogSeo.js).
+  const MOVED_SLUGS = ["traiteur-a-gardanne", "traiteur-pour-entreprise-a-gardanne"];
   const POSTS = BLOG.posts
-    .filter((p) => p && p.published !== false && p.slug)
+    .filter((p) => p && p.published !== false && p.slug && !MOVED_SLUGS.includes(p.slug))
     .slice()
     .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
   const BLOG_CATEGORIES = Array.isArray(BLOG.categories) && BLOG.categories.length ? BLOG.categories : Array.from(new Set(POSTS.map((p) => p.category).filter(Boolean)));

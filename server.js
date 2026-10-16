@@ -212,6 +212,13 @@ app.get(["/blog/", "/blog/index.html"], async (req, res, next) => {
 // redirection définitive vers l'accueil.
 app.get(["/carte", "/carte.html", "/carte/"], (req, res) => res.redirect(301, "/"));
 
+// Page « traiteur » : fusion des deux anciens articles. /traiteur.html redirige vers /traiteur.
+app.get("/traiteur.html", (req, res) => res.redirect(301, "/traiteur"));
+app.get("/traiteur", (req, res) => {
+  res.setHeader("Cache-Control", "no-cache");
+  res.sendFile(path.join(PAGES_DIR, "traiteur.html"));
+});
+
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(
@@ -229,9 +236,11 @@ app.use(
 // disponibles, on retombe sur le modèle seul (le JavaScript remplit alors la page).
 const ARTICLE_TEMPLATE_PATH = path.join(PAGES_DIR, "blog", "article.html");
 const articleCache = new Map(); // slug -> { sig, html } : l'article n'est recalculé que s'il change
+// Articles fusionnés dans la page /traiteur : redirection définitive (avant même la lecture des données).
 app.get("/blog/:slug", async (req, res) => {
   try {
     const slug = decodeURIComponent(req.params.slug).replace(/\.html$/i, "");
+    if (Object.prototype.hasOwnProperty.call(blogSeo.MOVED_SLUGS, slug)) return res.redirect(301, blogSeo.MOVED_SLUGS[slug]);
     const files = await siteData.getFiles();
     const { known, post } = blogSeo.findPost(files.data, slug);
     if (known && !post) {
