@@ -36,6 +36,7 @@
   "logo": "https://bistroburgergardanne.com/icon-512.png",
   "geo": { "@type": "GeoCoordinates", "latitude": 43.4467947, "longitude": 5.4579057 },
   "hasMap": "https://www.google.com/maps/search/?api=1&query=Bistro+Burger+ZAC+Avon+Gardanne",
+  "hasMenu": "https://bistroburgergardanne.com/carte",
   "telephone": "+33465848918",
   "email": "brasserie.zone.avon@gmail.com",
   "servesCuisine": ["Burgers", "Française"],
@@ -96,8 +97,8 @@
             <div style="background:rgba(14,70,61,.96); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid var(--border-on-dark); border-radius:var(--radius-card); box-shadow:0 20px 44px rgba(14,70,61,.45); padding:8px; display:flex; flex-direction:column; gap:2px;">
               <a href="#plat-du-jour" data-nav-item class="nav-item" style="color:var(--color-secondary); font-size:14px; padding:10px 14px; border-radius:8px; opacity:.9;">Plat du jour &amp; suggestion</a>
               <a href="#burgers" data-nav-item class="nav-item" style="color:var(--color-secondary); font-size:14px; padding:10px 14px; border-radius:8px; opacity:.9;">Nos burgers</a>
-              <button type="button" data-nav-item data-go-carte="Sur place" class="nav-item" style="text-align:left; font-family:var(--font-body); font-size:14px; color:var(--color-secondary); background:transparent; border:none; cursor:pointer; padding:10px 14px; border-radius:8px; opacity:.9;">Carte sur place</button>
-              <button type="button" data-nav-item data-go-carte="À emporter" class="nav-item" style="text-align:left; font-family:var(--font-body); font-size:14px; color:var(--color-secondary); background:transparent; border:none; cursor:pointer; padding:10px 14px; border-radius:8px; opacity:.9;">Carte à emporter</button>
+              <a href="/carte" data-nav-item data-go-carte="Sur place" class="nav-item" style="display:block; text-decoration:none; text-align:left; font-family:var(--font-body); font-size:14px; color:var(--color-secondary); background:transparent; border:none; cursor:pointer; padding:10px 14px; border-radius:8px; opacity:.9;">Carte sur place</a>
+              <a href="/carte" data-nav-item data-go-carte="À emporter" class="nav-item" style="display:block; text-decoration:none; text-align:left; font-family:var(--font-body); font-size:14px; color:var(--color-secondary); background:transparent; border:none; cursor:pointer; padding:10px 14px; border-radius:8px; opacity:.9;">Carte à emporter</a>
             </div>
           </div>
         </div>
@@ -277,6 +278,7 @@
       <div style="display:flex; justify-content:center; gap:12px; margin-top:40px; flex-wrap:wrap;">
         <button type="button" class="btn btn-primary btn-gradient btn-carte-cta" data-shine data-go="reservation">Réserver une table</button>
         <button type="button" class="btn btn-outline-on-green btn-carte-cta" data-go="commander">Commander</button>
+        <a href="/carte" class="btn btn-outline-on-green btn-carte-cta" style="text-decoration:none;">Voir la carte complète</a>
       </div>
     </div>
   </section>
