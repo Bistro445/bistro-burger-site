@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Un souci est survenu — Bistro Burger</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Geologica:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  body{ background:var(--surface-alt); }
+  .nf-header{
+    padding:20px 24px; background:var(--green-900); display:flex; align-items:center;
+  }
+  .nf-header a{ font-family:var(--font-heading); font-weight:700; font-size:18px; letter-spacing:.02em; color:var(--cream-500); text-decoration:none; }
+  .nf-wrap{
+    min-height:calc(100vh - 68px); display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:60px 24px;
+  }
+  .nf-code{
+    font-family:var(--font-heading); font-weight:700; font-size:15px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--color-accent); margin-bottom:14px;
+  }
+  .nf-title{ font-family:var(--font-heading); font-weight:600; font-size:clamp(26px,5vw,38px); color:var(--text-body); max-width:560px; line-height:1.2; }
+  .nf-sub{ margin-top:14px; color:var(--text-muted); font-size:16px; max-width:480px; line-height:1.6; }
+  .nf-actions{ margin-top:32px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+  .nf-links{ margin-top:40px; display:flex; flex-wrap:wrap; gap:8px 22px; justify-content:center; }
+  .nf-links a{ font-family:var(--font-body); font-size:14px; color:var(--text-muted); text-decoration:underline; text-underline-offset:3px; }
+  .nf-footer{ text-align:center; padding:22px; font-size:13px; color:var(--text-muted); border-top:1px solid var(--border-default); }
+</style>
+</head>
+<body>
+
+  <header class="nf-header"><a href="/">Bistro Burger</a></header>
+
+  <main class="nf-wrap">
+    <div class="nf-code">Erreur 500</div>
+    <h1 class="nf-title">Un souci est survenu de notre côté.</h1>
+    <p class="nf-sub">Notre site rencontre un problème passager. Réessayez dans quelques instants, ou contactez-nous directement.</p>
+    <div class="nf-actions">
+      <a href="tel:+33465848918" class="btn btn-primary btn-gradient">Appeler le 04 65 84 89 18</a>
+      <a href="/" class="btn btn-outline">Retour à l'accueil</a>
+    </div>
+    <div class="nf-links">
+      <a href="/#carte">La carte</a>
+      <a href="/blog/index.html">Le blog</a>
+      <a href="/#contact">Nous contacter</a>
+    </div>
+  </main>
+
+  <footer class="nf-footer">Bistro Burger — Brasserie &amp; Burgers à Gardanne</footer>
+
+</body>
+</html>

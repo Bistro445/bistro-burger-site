@@ -271,6 +271,8 @@ app.use((err, req, res, next) => {
   if (err && err.type === "entity.parse.failed") return res.status(400).json({ error: "Corps de requête invalide." });
   console.error(err);
   if (res.headersSent) return next(err);
+  const wantsPage = !req.path.startsWith("/api") && req.accepts(["json", "html"]) === "html";
+  if (wantsPage) return res.status(500).set("Cache-Control", "no-store").sendFile(path.join(PAGES_DIR, "500.html"));
   res.status(500).json({ error: "Erreur serveur." });
 });
 

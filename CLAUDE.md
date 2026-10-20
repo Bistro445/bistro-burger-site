@@ -12,7 +12,7 @@ n'est pas développeuse.
 ## Architecture
 - `server.js` : serveur Express (Node ≥ 20). Sert les pages, monte chaque fichier de `api/` comme route
   (`api/orders.js` → `/api/orders`), garde en mémoire les données du site, mode maintenance, `/healthz`.
-- `pages/` : **toutes les pages HTML publiques** (accueil, blog, CGV, confidentialité, mentions légales, 404).
+- `pages/` : **toutes les pages HTML publiques** (accueil, blog, CGV, confidentialité, mentions légales, 404, 500 : pages d'erreur à l'image du site ; la 500 s'affiche si le serveur plante sur une page, jamais pour `/api`).
 - `public/` : fichiers statiques (CSS, JS, images, `admin/`, `seo/`, `app/`). Voir le piège n°1 ci-dessous.
 - `api/` : fonctions serveur. `api/admin/*` exige une session admin Supabase. `api/_lib/` = code partagé.
 - `lib/siteData.js` + `lib/siteDataStore.js` : lisent Supabase et fabriquent `data.generated.js` en mémoire.
