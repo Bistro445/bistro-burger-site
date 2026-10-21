@@ -378,7 +378,7 @@
       (state.uploadingImg ? "Téléversement…" : "Ajouter des images") +
       "</button>" +
       (state.uploadError ? '<div class="login-error">' + esc(state.uploadError) + "</div>" : "") +
-      '<p class="edit-hero-hint">Images du burger : ' + imgs.length + " sur " + MAX_IMAGES + " maximum<br>Sur le site, elles s'affichent en <strong>grille</strong>. La première est l'image principale (flèches pour changer l'ordre).<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo par image</p>" +
+      '<p class="edit-hero-hint">Images du burger : ' + imgs.length + " sur " + MAX_IMAGES + " maximum<br>Sur le site, elles <strong>défilent</strong> (carrousel). La première est l'image principale (flèches pour changer l'ordre).<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo par image</p>" +
       "</div>" +
       "</div>" +
       '<form id="b-item-form">' +

@@ -28,8 +28,7 @@ Clés de `site_content` : `burgers`, `cartes`, `plat_du_jour`, `offres`, `reserv
 `promo_popup`, `annonces`, `burger_du_moment`, `blog` (articles), `horaires`.
 Le contenu se modifie **de préférence dans l'espace admin** (`/admin/`), qui enregistre puis rafraîchit le site.
 Un burger (`burgers`) a `img` (image principale) et `imgs` (jusqu'à 6 images, saisies dans l'admin : ajout multiple,
-flèches pour l'ordre). Le site les affiche en grille sur la carte du burger (1 = image seule, 2 = côte à côte,
-3 = une grande + deux petites, 4 et plus = 2 × 2 avec « +N »), et une visionneuse à flèches s'ouvre au clic.
+flèches pour l'ordre). Le site les affiche en carrousel sur la carte du burger (défilement au doigt, flèches et points ; un clic ouvre l'image en grand, avec flèches).
 `img` doit toujours rester égale à `imgs[0]` (panier et anciens contenus s'en servent).
 Les articles du blog sont dans la clé `blog` ; leur texte est écrit en dur (une mention d'horaires dans un
 article ne suit pas l'éditeur d'horaires : à relire à la main).

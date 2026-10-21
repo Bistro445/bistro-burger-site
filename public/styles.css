@@ -496,3 +496,6 @@ input[type="date"]::-webkit-date-and-time-value, input[type="time"]::-webkit-dat
 /* Newsletter masquée sur le site public (accueil et articles) en attendant la mise en route.
    Pour la réactiver : supprimer ce bloc. */
 #newsletter, .article-newsletter { display: none !important; }
+
+/* Carrousel des photos d'un burger : pas de barre de défilement visible */
+[data-b-slider]::-webkit-scrollbar{ display:none; }

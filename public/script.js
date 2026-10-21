@@ -528,18 +528,30 @@
       const card = el("div", { "data-burger-card": "", style: "display:flex; flex-direction:column; gap:11px; padding:18px; border-radius:var(--radius-card); background:#FFFFFF; border:1px solid var(--border-default); box-shadow:0 10px 26px rgba(44,44,42,.1);" });
       const photo = el("div", { "data-b-photo": "", style: "position:relative; aspect-ratio:4/3; border-radius:var(--radius-photo); background:linear-gradient(150deg,#FFFFFF,var(--cream-400)); box-shadow:0 8px 20px rgba(44,44,42,.14); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(18,87,76,.45); overflow:hidden;" });
       if (b.images.length > 1) {
-        // Plusieurs images : grille (2 = côte à côte, 3 = une grande + deux petites, 4 et plus = 2 × 2 avec « +N »).
-        const shown = b.images.slice(0, 4);
-        const extra = b.images.length - 4;
-        const tpl = shown.length === 2 ? "grid-template-columns:1fr 1fr;" : "grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;";
-        const cells = shown.map((src, i) => {
-          const span = shown.length === 3 && i === 0 ? " grid-row:span 2;" : "";
-          const more = extra > 0 && i === 3
-            ? `<span aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(14,70,61,.55); color:#FFFFFF; font-family:var(--font-heading); font-weight:700; font-size:24px;">+${extra}</span>`
-            : "";
-          return `<button type="button" data-b-img="${i}" aria-label="Agrandir la photo ${i + 1} sur ${b.images.length} : ${esc(b.name)}" style="position:relative; display:block; padding:0; margin:0; border:0; background:transparent; overflow:hidden; cursor:zoom-in; min-width:0; min-height:0;${span}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">${more}</button>`;
-        }).join("");
-        photo.innerHTML = `<div data-b-grid style="position:absolute; inset:0; display:grid; gap:3px; ${tpl}">${cells}</div>`;
+        // Plusieurs images : carrousel qu'on fait défiler (doigt, flèches ou points) ; un clic ouvre l'image en grand.
+        const arrow = "position:absolute; z-index:3; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:50%; border:0; padding:0; display:flex; align-items:center; justify-content:center; background:rgba(14,70,61,.55); color:#FFFFFF; font-size:22px; line-height:1; cursor:pointer;";
+        const slides = b.images.map((src, i) =>
+          `<button type="button" data-b-img="${i}" aria-label="Agrandir la photo ${i + 1} sur ${b.images.length} : ${esc(b.name)}" style="position:relative; flex:0 0 100%; scroll-snap-align:center; display:block; padding:0; margin:0; border:0; background:transparent; cursor:zoom-in;"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;"></button>`
+        ).join("");
+        const dots = b.images.map((_, i) => `<span data-b-dot="${i}" style="width:7px; height:7px; border-radius:50%; background:#FFFFFF; opacity:${i === 0 ? 1 : 0.5}; box-shadow:0 0 3px rgba(0,0,0,.45); transition:opacity .2s ease;"></span>`).join("");
+        photo.innerHTML =
+          `<div data-b-slider style="position:absolute; inset:0; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch;">${slides}</div>` +
+          `<button type="button" data-b-prev aria-label="Photo précédente" style="${arrow} left:8px;">‹</button>` +
+          `<button type="button" data-b-next aria-label="Photo suivante" style="${arrow} right:8px;">›</button>` +
+          `<div aria-hidden="true" style="position:absolute; z-index:2; bottom:9px; left:0; right:0; display:flex; justify-content:center; gap:6px; pointer-events:none;">${dots}</div>`;
+        const slider = photo.querySelector("[data-b-slider]");
+        const dotEls = photo.querySelectorAll("[data-b-dot]");
+        const current = () => Math.round(slider.scrollLeft / Math.max(slider.clientWidth, 1));
+        const goTo = (i) => {
+          const n = b.images.length;
+          slider.scrollTo({ left: ((i + n) % n) * slider.clientWidth, behavior: "smooth" });
+        };
+        slider.addEventListener("scroll", () => {
+          const c = current();
+          dotEls.forEach((d, i) => { d.style.opacity = i === c ? "1" : "0.5"; });
+        }, { passive: true });
+        photo.querySelector("[data-b-prev]").addEventListener("click", () => goTo(current() - 1));
+        photo.querySelector("[data-b-next]").addEventListener("click", () => goTo(current() + 1));
         photo.querySelectorAll("[data-b-img]").forEach((cell) => {
           cell.addEventListener("click", () => openLightbox(b.images, b.name, Number(cell.dataset.bImg)));
         });
