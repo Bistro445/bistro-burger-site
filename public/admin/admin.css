@@ -836,6 +836,43 @@ button.section-card:hover .section-card-btn{
   color:var(--muted);
   font-size:13.5px;
 }
+.edit-gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+  gap:10px;
+}
+.edit-gallery-item{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--page-bg);
+}
+.edit-gallery-item img{
+  display:block;
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+}
+.edit-gallery-badge{
+  position:absolute; top:6px; left:6px;
+  font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:999px;
+  background:var(--green-700); color:var(--cream-500);
+}
+.edit-gallery-actions{
+  display:flex; justify-content:space-between; gap:4px;
+  padding:6px;
+}
+.edit-gallery-actions button{
+  flex:1; min-height:34px;
+  font-size:18px; line-height:1;
+  border:1px solid var(--border); border-radius:8px;
+  background:#fff; color:var(--ink); cursor:pointer;
+}
+.edit-gallery-actions button:hover:not(:disabled){border-color:var(--green-700)}
+.edit-gallery-actions button[data-g-del]:hover{color:var(--error); border-color:var(--error)}
+.edit-gallery-actions button:disabled{opacity:.35; cursor:default}
 .edit-hero-body{
   padding:14px 0 0;
   display:flex;

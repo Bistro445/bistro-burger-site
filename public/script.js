@@ -460,11 +460,34 @@
     role: "dialog", "aria-modal": "true", "aria-label": "Image en grand", tabindex: "-1",
     style: "position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(14,70,61,.82); backdrop-filter:blur(4px); cursor:zoom-out;",
   }, `<img id="lightbox-img" alt="" style="max-width:min(880px,92vw); max-height:88vh; width:auto; height:auto; border-radius:var(--radius-photo); box-shadow:0 30px 70px rgba(0,0,0,.5); cursor:default;">
-      <button type="button" aria-label="Fermer" id="lightbox-close" style="position:absolute; top:18px; right:18px; width:42px; height:42px; border-radius:50%; border:1.5px solid rgba(237,224,211,.55); background:rgba(14,70,61,.5); color:var(--color-secondary); font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>`);
+      <button type="button" aria-label="Fermer" id="lightbox-close" style="position:absolute; top:18px; right:18px; width:42px; height:42px; border-radius:50%; border:1.5px solid rgba(237,224,211,.55); background:rgba(14,70,61,.5); color:var(--color-secondary); font-size:20px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+      <button type="button" aria-label="Image précédente" id="lightbox-prev" hidden style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(237,224,211,.55); background:rgba(14,70,61,.5); color:var(--color-secondary); font-size:26px; line-height:1; cursor:pointer; align-items:center; justify-content:center;">‹</button>
+      <button type="button" aria-label="Image suivante" id="lightbox-next" hidden style="position:absolute; right:14px; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(237,224,211,.55); background:rgba(14,70,61,.5); color:var(--color-secondary); font-size:26px; line-height:1; cursor:pointer; align-items:center; justify-content:center;">›</button>`);
   document.body.appendChild(lightbox);
-  function openLightbox(src, alt) {
-    lightbox.querySelector("#lightbox-img").src = src;
-    lightbox.querySelector("#lightbox-img").alt = alt || "";
+  let lightboxList = [];
+  let lightboxIndex = 0;
+  function showLightboxImage() {
+    const img = lightbox.querySelector("#lightbox-img");
+    img.src = lightboxList[lightboxIndex].src;
+    img.alt = lightboxList[lightboxIndex].alt || "";
+    const many = lightboxList.length > 1;
+    lightbox.querySelector("#lightbox-prev").hidden = !many;
+    lightbox.querySelector("#lightbox-next").hidden = !many;
+    lightbox.querySelector("#lightbox-prev").style.display = many ? "flex" : "none";
+    lightbox.querySelector("#lightbox-next").style.display = many ? "flex" : "none";
+  }
+  function stepLightbox(delta) {
+    if (lightboxList.length < 2) return;
+    lightboxIndex = (lightboxIndex + delta + lightboxList.length) % lightboxList.length;
+    showLightboxImage();
+  }
+  // openLightbox(src, alt) pour une image seule, ou openLightbox(liste, alt, index) pour parcourir plusieurs images.
+  function openLightbox(srcOrList, alt, index) {
+    lightboxList = Array.isArray(srcOrList)
+      ? srcOrList.map((s) => ({ src: s, alt }))
+      : [{ src: srcOrList, alt }];
+    lightboxIndex = Math.min(Math.max(index || 0, 0), lightboxList.length - 1);
+    showLightboxImage();
     lightbox.style.display = "flex";
     document.body.style.overflow = "hidden";
     lightbox.focus();
@@ -473,9 +496,19 @@
     lightbox.style.display = "none";
     document.body.style.overflow = "";
     lightbox.querySelector("#lightbox-img").src = "";
+    lightboxList = [];
   }
-  lightbox.addEventListener("click", (e) => { if (e.target === lightbox || e.target.id === "lightbox-close") closeLightbox(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && lightbox.style.display === "flex") closeLightbox(); });
+  lightbox.addEventListener("click", (e) => {
+    if (e.target.id === "lightbox-prev") return stepLightbox(-1);
+    if (e.target.id === "lightbox-next") return stepLightbox(1);
+    if (e.target === lightbox || e.target.id === "lightbox-close") closeLightbox();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (lightbox.style.display !== "flex") return;
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowLeft") stepLightbox(-1);
+    else if (e.key === "ArrowRight") stepLightbox(1);
+  });
 
   /* ---------------------------------------------------------------- */
   /* Burgers carousel                                                   */
@@ -483,19 +516,40 @@
   function renderBurgers() {
     const track = document.getElementById("burger-track");
     if (!track) return;
-    const flat = BURGERS.flatMap((fam) => fam.items.map((b) => ({ ...b, noImg: !b.img })));
-    flat.sort((a, b) => (a.img ? 0 : 1) - (b.img ? 0 : 1));
+    // Un burger peut avoir plusieurs images (`imgs`, saisies dans l'admin) ; `img` reste la principale.
+    const burgerImages = (b) => {
+      const list = Array.isArray(b.imgs) ? b.imgs.filter(Boolean) : [];
+      return list.length ? list : b.img ? [b.img] : [];
+    };
+    const flat = BURGERS.flatMap((fam) => fam.items.map((b) => ({ ...b, images: burgerImages(b), noImg: !burgerImages(b).length })));
+    flat.sort((a, b) => (a.images.length ? 0 : 1) - (b.images.length ? 0 : 1));
     track.innerHTML = "";
     flat.forEach((b) => {
       const card = el("div", { "data-burger-card": "", style: "display:flex; flex-direction:column; gap:11px; padding:18px; border-radius:var(--radius-card); background:#FFFFFF; border:1px solid var(--border-default); box-shadow:0 10px 26px rgba(44,44,42,.1);" });
       const photo = el("div", { "data-b-photo": "", style: "position:relative; aspect-ratio:4/3; border-radius:var(--radius-photo); background:linear-gradient(150deg,#FFFFFF,var(--cream-400)); box-shadow:0 8px 20px rgba(44,44,42,.14); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(18,87,76,.45); overflow:hidden;" });
-      if (b.img) {
-        photo.innerHTML = `<img loading="lazy" decoding="async" src="${esc(b.img)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
+      if (b.images.length > 1) {
+        // Plusieurs images : grille (2 = côte à côte, 3 = une grande + deux petites, 4 et plus = 2 × 2 avec « +N »).
+        const shown = b.images.slice(0, 4);
+        const extra = b.images.length - 4;
+        const tpl = shown.length === 2 ? "grid-template-columns:1fr 1fr;" : "grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;";
+        const cells = shown.map((src, i) => {
+          const span = shown.length === 3 && i === 0 ? " grid-row:span 2;" : "";
+          const more = extra > 0 && i === 3
+            ? `<span aria-hidden="true" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(14,70,61,.55); color:#FFFFFF; font-family:var(--font-heading); font-weight:700; font-size:24px;">+${extra}</span>`
+            : "";
+          return `<button type="button" data-b-img="${i}" aria-label="Agrandir la photo ${i + 1} sur ${b.images.length} : ${esc(b.name)}" style="position:relative; display:block; padding:0; margin:0; border:0; background:transparent; overflow:hidden; cursor:zoom-in; min-width:0; min-height:0;${span}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">${more}</button>`;
+        }).join("");
+        photo.innerHTML = `<div data-b-grid style="position:absolute; inset:0; display:grid; gap:3px; ${tpl}">${cells}</div>`;
+        photo.querySelectorAll("[data-b-img]").forEach((cell) => {
+          cell.addEventListener("click", () => openLightbox(b.images, b.name, Number(cell.dataset.bImg)));
+        });
+      } else if (b.images.length === 1) {
+        photo.innerHTML = `<img loading="lazy" decoding="async" src="${esc(b.images[0])}" alt="${esc(b.name)}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; cursor:zoom-in;">
           <span aria-hidden="true" style="position:absolute; z-index:1; bottom:10px; right:10px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(14,70,61,.55); color:#FFFFFF; opacity:0; transition:opacity .2s ease; pointer-events:none;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>`;
         photo.style.cursor = "zoom-in";
         photo.addEventListener("mouseenter", () => { photo.querySelector("span").style.opacity = "1"; });
         photo.addEventListener("mouseleave", () => { photo.querySelector("span").style.opacity = "0"; });
-        photo.addEventListener("click", (e) => { if (e.target.closest("button")) return; openLightbox(b.img, b.name); });
+        photo.addEventListener("click", (e) => { if (e.target.closest("button")) return; openLightbox(b.images[0], b.name); });
       } else {
         photo.innerHTML = "<span>Photo</span>";
       }

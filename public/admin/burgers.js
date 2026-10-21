@@ -177,7 +177,7 @@
     }
     document.getElementById("b-add-item").addEventListener("click", () => {
       state.itemIndex = null;
-      state.editImgUrl = undefined;
+      state.editImgs = undefined;
       state.draftChecked = false;
       state.restoredFields = null;
       state.screen = "edit";
@@ -186,7 +186,7 @@
     container.querySelectorAll("[data-item]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.itemIndex = Number(btn.dataset.item);
-        state.editImgUrl = undefined;
+        state.editImgs = undefined;
         state.draftChecked = false;
         state.restoredFields = null;
         state.screen = "edit";
@@ -253,29 +253,60 @@
   };
   const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
-  async function uploadImage(file) {
+  const MAX_IMAGES = 6;
+
+  // Images d'un burger : la liste `imgs` si elle existe, sinon l'ancienne image unique `img`.
+  function itemImages(item) {
+    if (item && Array.isArray(item.imgs)) {
+      const list = item.imgs.filter(Boolean);
+      if (list.length) return list;
+    }
+    return item && item.img ? [item.img] : [];
+  }
+
+  async function uploadOne(file) {
+    const ext = EXT_BY_TYPE[file.type];
+    if (!ext) throw new Error("« " + file.name + " » : format non pris en charge. Utilisez JPG, PNG, WebP ou GIF.");
+    if (file.size > MAX_IMAGE_BYTES) throw new Error("« " + file.name + " » : image trop lourde (8 Mo maximum).");
+
+    const path = crypto.randomUUID() + "." + ext;
+    const { error } = await window.adminAuth.supabase.storage
+      .from(IMAGE_BUCKET)
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) throw new Error("« " + file.name + " » : " + error.message);
+
+    const { data } = window.adminAuth.supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  async function uploadImages(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const room = MAX_IMAGES - state.editImgs.length;
+    const errors = [];
+    if (files.length > room) errors.push("Maximum " + MAX_IMAGES + " images par burger : " + (files.length - room) + " image(s) ignorée(s).");
     state.uploadingImg = true;
     state.uploadError = null;
     render();
-    try {
-      const ext = EXT_BY_TYPE[file.type];
-      if (!ext) throw new Error("Format non pris en charge. Utilisez JPG, PNG, WebP ou GIF.");
-      if (file.size > MAX_IMAGE_BYTES) throw new Error("Image trop lourde (8 Mo maximum).");
-
-      const path = crypto.randomUUID() + "." + ext;
-      const { error } = await window.adminAuth.supabase.storage
-        .from(IMAGE_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (error) throw new Error(error.message);
-
-      const { data } = window.adminAuth.supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path);
-      state.editImgUrl = data.publicUrl;
-    } catch (err) {
-      state.uploadError = err.message;
-    } finally {
-      state.uploadingImg = false;
-      render();
+    for (const file of files.slice(0, Math.max(room, 0))) {
+      try {
+        state.editImgs.push(await uploadOne(file));
+      } catch (err) {
+        errors.push(err.message);
+      }
     }
+    state.uploadError = errors.length ? errors.join(" ") : null;
+    state.uploadingImg = false;
+    render();
+    scheduleDraftSave();
+  }
+
+  function moveImage(from, to) {
+    if (to < 0 || to >= state.editImgs.length) return;
+    const [moved] = state.editImgs.splice(from, 1);
+    state.editImgs.splice(to, 0, moved);
+    render();
+    scheduleDraftSave();
   }
 
   function burgerDraftKey() {
@@ -288,7 +319,7 @@
       desc: document.getElementById("b-desc").value,
       sur: document.getElementById("b-sur").value,
       emp: document.getElementById("b-emp").value,
-      img: state.editImgUrl || "",
+      imgs: (state.editImgs || []).slice(),
     };
   }
 
@@ -304,17 +335,30 @@
   function renderEdit() {
     const cat = state.data[state.catIndex];
     const isNew = state.itemIndex === null;
-    const item = state.restoredFields || (isNew ? { name: "", desc: "", sur: "", emp: "", img: "" } : cat.items[state.itemIndex]);
-    if (state.editImgUrl === undefined) state.editImgUrl = item.img || "";
+    const item = state.restoredFields || (isNew ? { name: "", desc: "", sur: "", emp: "", imgs: [] } : cat.items[state.itemIndex]);
+    if (state.editImgs === undefined) state.editImgs = itemImages(item);
 
     if (!state.draftChecked) {
       state.draftChecked = true;
       state.pendingDraft = window.AdminDrafts.load(burgerDraftKey());
     }
 
-    const imgPreview = state.editImgUrl
-      ? '<img class="edit-hero-img" src="' + esc(state.editImgUrl) + '" alt="">'
-      : '<div class="edit-hero-empty">Aucune image</div>';
+    const imgs = state.editImgs;
+    const galleryItems = imgs
+      .map((url, i) =>
+        '<div class="edit-gallery-item">' +
+        '<img src="' + esc(url) + '" alt="Image ' + (i + 1) + '">' +
+        (i === 0 ? '<span class="edit-gallery-badge">Principale</span>' : "") +
+        '<div class="edit-gallery-actions">' +
+        '<button type="button" data-g-left="' + i + '" aria-label="Déplacer vers la gauche"' + (i === 0 ? " disabled" : "") + ">‹</button>" +
+        '<button type="button" data-g-right="' + i + '" aria-label="Déplacer vers la droite"' + (i === imgs.length - 1 ? " disabled" : "") + ">›</button>" +
+        '<button type="button" data-g-del="' + i + '" aria-label="Retirer cette image">×</button>' +
+        "</div></div>")
+      .join("");
+    const imgPreview =
+      imgs.length
+        ? '<div class="edit-gallery-grid">' + galleryItems + "</div>"
+        : '<div class="edit-hero-empty">Aucune image</div>';
 
     container.innerHTML =
       '<button type="button" class="back-btn" id="b-back-items">‹ ' + esc(cat.title) + "</button>" +
@@ -329,15 +373,12 @@
       '<div class="edit-hero">' +
       imgPreview +
       '<div class="edit-hero-body">' +
-      '<input type="file" id="b-img-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden' + (state.uploadingImg ? " disabled" : "") + ">" +
-      '<button type="button" class="edit-hero-btn" id="b-img-pick"' + (state.uploadingImg ? " disabled" : "") + ">" +
-      (state.uploadingImg ? "Téléversement…" : "Modifier") +
+      '<input type="file" id="b-img-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden' + (state.uploadingImg ? " disabled" : "") + ">" +
+      '<button type="button" class="edit-hero-btn" id="b-img-pick"' + (state.uploadingImg || imgs.length >= MAX_IMAGES ? " disabled" : "") + ">" +
+      (state.uploadingImg ? "Téléversement…" : "Ajouter des images") +
       "</button>" +
-      (state.editImgUrl && !state.uploadingImg
-        ? '<button type="button" class="edit-hero-remove" id="b-img-remove">Retirer l\'image</button>'
-        : "") +
       (state.uploadError ? '<div class="login-error">' + esc(state.uploadError) + "</div>" : "") +
-      '<p class="edit-hero-hint">Image du burger<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo</p>' +
+      '<p class="edit-hero-hint">Images du burger : ' + imgs.length + " sur " + MAX_IMAGES + " maximum<br>Sur le site, elles s'affichent en <strong>grille</strong>. La première est l'image principale (flèches pour changer l'ordre).<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo par image</p>" +
       "</div>" +
       "</div>" +
       '<form id="b-item-form">' +
@@ -364,22 +405,22 @@
       document.getElementById("b-img-file").click();
     });
     document.getElementById("b-img-file").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) uploadImage(file);
+      uploadImages(e.target.files);
     });
-    if (state.editImgUrl && !state.uploadingImg) {
-      document.getElementById("b-img-remove").addEventListener("click", () => {
-        state.editImgUrl = "";
-        render();
-        scheduleDraftSave();
-      });
-    }
+    container.querySelectorAll("[data-g-left]").forEach((b) => b.addEventListener("click", () => moveImage(Number(b.dataset.gLeft), Number(b.dataset.gLeft) - 1)));
+    container.querySelectorAll("[data-g-right]").forEach((b) => b.addEventListener("click", () => moveImage(Number(b.dataset.gRight), Number(b.dataset.gRight) + 1)));
+    container.querySelectorAll("[data-g-del]").forEach((b) => b.addEventListener("click", () => {
+      state.editImgs.splice(Number(b.dataset.gDel), 1);
+      render();
+      scheduleDraftSave();
+    }));
 
     if (state.pendingDraft) {
       document.getElementById("b-draft-restore").addEventListener("click", () => {
         const d = state.pendingDraft.data;
-        state.restoredFields = { name: d.name || "", desc: d.desc || "", sur: d.sur || "", emp: d.emp || "", img: d.img || item.img || "" };
-        if (d.img) state.editImgUrl = d.img;
+        const draftImgs = Array.isArray(d.imgs) ? d.imgs.filter(Boolean) : d.img ? [d.img] : itemImages(item);
+        state.restoredFields = { name: d.name || "", desc: d.desc || "", sur: d.sur || "", emp: d.emp || "", imgs: draftImgs };
+        state.editImgs = draftImgs.slice();
         state.pendingDraft = null;
         render();
       });
@@ -403,7 +444,7 @@
       stopDraftTicker();
       state.screen = "items";
       state.saveError = null;
-      state.editImgUrl = undefined;
+      state.editImgs = undefined;
       render();
     });
 
@@ -415,12 +456,15 @@
         sur: document.getElementById("b-sur").value.trim(),
         emp: document.getElementById("b-emp").value.trim(),
       };
-      if (state.editImgUrl) newItem.img = state.editImgUrl;
+      if (state.editImgs.length) {
+        newItem.img = state.editImgs[0];
+        newItem.imgs = state.editImgs.slice();
+      }
 
       if (isNew) cat.items.push(newItem);
       else cat.items[state.itemIndex] = newItem;
 
-      state.editImgUrl = undefined;
+      state.editImgs = undefined;
       window.AdminDrafts.clear(burgerDraftKey());
       stopDraftTicker();
       await persist("items");
