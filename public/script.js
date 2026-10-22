@@ -188,6 +188,7 @@
     const pending = (s) => /à confirmer/i.test(String(s || ""));
     Object.keys(CARTES).forEach((mode) => {
       Object.keys(CARTES[mode]).forEach((tab) => {
+        if (tab === "_order") return; // liste des catégories dans l'ordre voulu, pas une catégorie
         CARTES[mode][tab] = (CARTES[mode][tab] || []).filter((g) => {
           if (pending(g.note)) g.note = "";
           if (pending(g.price)) g.price = "";
