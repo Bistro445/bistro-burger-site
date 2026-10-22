@@ -208,7 +208,7 @@
   const OFFRES = SITE_DATA.offres || [
     { tag: "Menu étudiant", price: "11,90 €", title: "Burger smash, frites maison, boisson 33 cl", description: "Offre valable uniquement sur présentation de la carte étudiante, un menu par carte.", img: "assets/menu-etudiant.jpg" },
     { tag: "Menu enfant", price: "11,90 €", title: "Cheeseburger, tenders de poulet ou steak haché, boisson 33 cl", description: "Le mardi soir et le mercredi midi, le menu enfant est offert pour tout achat d'un menu adulte. Valable également pour tout repas sur place.", img: "assets/menu-enfant.jpg" },
-    { tag: "Carte de fidélité", price: "", title: "1 case = 15 € d'achat", description: "10 cases complètes = 15 € offerts\n• Offres cumulables\n• Carte nominative\nPassez récupérer votre carte au comptoir.", img: "assets/carte-fidelite.jpg" },
+    { tag: "Carte de fidélité", price: "", title: "1 case = 15 € d'achat", description: "Dix cases complétées, quinze euros offerts. Passez récupérer votre carte au comptoir. Offre non cumulable, carte nominative.", img: "assets/carte-fidelite.jpg" },
     { tag: "Carte cadeau", price: "", title: "Scannez le QR code en salle pour gagner des lots", description: "Tentez votre chance, gagnez, et venez récupérer vos cadeaux sur place.", img: "assets/carte-cadeau.jpg" },
   ];
 
