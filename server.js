@@ -219,6 +219,13 @@ app.get("/traiteur", (req, res) => {
   res.sendFile(path.join(PAGES_DIR, "traiteur.html"));
 });
 
+// Page « Venir chez nous » (adresse, accès, communes livrées). /venir-chez-nous.html redirige vers /venir-chez-nous.
+app.get("/venir-chez-nous.html", (req, res) => res.redirect(301, "/venir-chez-nous"));
+app.get("/venir-chez-nous", (req, res) => {
+  res.setHeader("Cache-Control", "no-cache");
+  res.sendFile(path.join(PAGES_DIR, "venir-chez-nous.html"));
+});
+
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(
