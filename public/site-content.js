@@ -27,7 +27,7 @@
     */
     { q: "Quels sont vos horaires ?", a: "Le lundi, de 9h00 à 14h00. Du mardi au vendredi, de 9h00 à 14h00 et de 17h30 à 21h30. Nous sommes fermés le samedi et le dimanche." },
     { q: "Faut-il réserver ?", a: "Ce n'est pas obligatoire, mais c'est plus sûr le vendredi soir. Pour les groupes de plus de dix personnes, appelez-nous au 04 65 84 89 18." },
-    { q: "Livrez-vous à domicile ?", a: "Oui, de deux façons : vous pouvez commander sur Uber Eats, ou nous appeler au 04 65 84 89 18 pour une livraison assurée par notre équipe, sur Gardanne et les communes limitrophes." },
+    { q: "Livrez-vous à domicile ?", a: "Oui, de deux façons : vous pouvez commander sur Uber Eats, ou nous appeler au 04 65 84 89 18 pour une livraison assurée par notre équipe, sur Gardanne, Biver, Meyreuil, Fuveau, Mimet, Gréasque, Bouc-Bel-Air et Cabriès." },
     { q: "Y a-t-il un parking ?", a: "Un parking gratuit se trouve directement devant le restaurant, dans la ZAC Avon. Aucun horodateur, aucune limite de durée." },
     { q: "Y a-t-il une terrasse ?", a: "Oui, le restaurant dispose d'une terrasse." },
     { q: "Le restaurant est-il climatisé ?", a: "Oui, la salle est climatisée." },
