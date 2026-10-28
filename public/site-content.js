@@ -27,11 +27,13 @@
     */
     { q: "Quels sont vos horaires ?", a: "Le lundi, de 9h00 à 14h00. Du mardi au vendredi, de 9h00 à 14h00 et de 17h30 à 21h30. Nous sommes fermés le samedi et le dimanche." },
     { q: "Faut-il réserver ?", a: "Ce n'est pas obligatoire, mais c'est plus sûr le vendredi soir. Pour les groupes de plus de dix personnes, appelez-nous au 04 65 84 89 18." },
+    { q: "Comment réserver une table ?", a: "Vous pouvez réserver en ligne sur notre site, ou par téléphone au 04 65 84 89 18. Le formulaire en ligne propose les créneaux du soir à partir de 19h." },
     { q: "Livrez-vous à domicile ?", a: "Oui, de deux façons : vous pouvez commander sur Uber Eats, ou nous appeler au 04 65 84 89 18 pour une livraison assurée par notre équipe, sur Gardanne, Biver, Meyreuil, Fuveau, Mimet, Gréasque, Bouc-Bel-Air et Cabriès." },
     { q: "Y a-t-il un parking ?", a: "Un parking gratuit se trouve directement devant le restaurant, dans la ZAC Avon. Aucun horodateur, aucune limite de durée." },
     { q: "Y a-t-il une terrasse ?", a: "Oui, le restaurant dispose d'une terrasse." },
     { q: "Le restaurant est-il climatisé ?", a: "Oui, la salle est climatisée." },
-    { q: "Quels moyens de paiement acceptez-vous ?", a: "Nous acceptons les cartes bancaires, y compris le paiement sans contact." }
+    { q: "Quels moyens de paiement acceptez-vous ?", a: "Nous acceptons les cartes bancaires, y compris le paiement sans contact, ainsi que les tickets restaurant." },
+    { q: "Avez-vous un menu étudiant ?", a: "Oui : un burger, des frites et une boisson à 11,90 €, midi ou soir, sur présentation de votre carte étudiante." }
   ];
 
   return { reviews: reviews, faq: faq };
