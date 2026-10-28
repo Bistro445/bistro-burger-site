@@ -220,7 +220,7 @@
   ];
 
   const RESERVATION_SETTINGS = SITE_DATA.reservation_settings || {
-    heures: ["12h00", "12h30", "13h00", "13h30", "14h00", "17h30", "18h00", "18h30", "19h00", "19h30", "20h00", "20h30", "21h00"],
+    heures: ["12h00", "12h30", "13h00", "13h30", "14h00", "19h00", "19h30", "20h00", "20h30", "21h00"],
     couverts: ["2 personnes", "3 personnes", "4 personnes", "5 personnes", "6 personnes"],
     horaires_text: ["Lundi · 9h00–14h00", "Du mardi au vendredi · 9h00–14h00 et 17h30–21h30", "Fermé le samedi et le dimanche", "Parking gratuit devant le restaurant"],
   };
@@ -715,7 +715,15 @@
   function renderReservationSettings() {
     const heureSelect = document.getElementById("reservation-heure-select");
     if (heureSelect && Array.isArray(RESERVATION_SETTINGS.heures) && RESERVATION_SETTINGS.heures.length) {
-      heureSelect.innerHTML = RESERVATION_SETTINGS.heures.map((h) => '<option style="color:#2C2C2A;">' + esc(h) + "</option>").join("");
+      // Réservation du soir : à partir de 19h (même si l'éditeur en propose d'avant, entre 15h et 19h).
+      const EVENING_RESERVATION_START = 19 * 60;
+      const heures = RESERVATION_SETTINGS.heures.filter((h) => {
+        const m = String(h).trim().match(/^(\d{1,2})h(\d{2})$/);
+        if (!m) return true;
+        const mins = Number(m[1]) * 60 + Number(m[2]);
+        return mins < 15 * 60 || mins >= EVENING_RESERVATION_START;
+      });
+      heureSelect.innerHTML = (heures.length ? heures : RESERVATION_SETTINGS.heures).map((h) => '<option style="color:#2C2C2A;">' + esc(h) + "</option>").join("");
     }
     const couvertsSelect = document.getElementById("reservation-couverts-select");
     if (couvertsSelect && Array.isArray(RESERVATION_SETTINGS.couverts) && RESERVATION_SETTINGS.couverts.length) {
