@@ -518,9 +518,21 @@
     const track = document.getElementById("burger-track");
     if (!track) return;
     // Un burger peut avoir plusieurs images (`imgs`, saisies dans l'admin) ; `img` reste la principale.
+    // Photos de repli : servies seulement si le burger n'a aucune image dans l'admin (celles de l'admin priment toujours).
+    const BURGER_PHOTO_FALLBACK = {
+      smash: "assets/burger-smash.jpg",
+      blackpeppers: "assets/burger-black-peppers.jpg",
+      cowboy: "assets/burger-cow-boy.jpg",
+      fisher: "assets/burger-fisher.jpg",
+      pulledporc: "assets/burger-pulled-porc.jpg",
+      pullpork: "assets/burger-pulled-porc.jpg"
+    };
     const burgerImages = (b) => {
       const list = Array.isArray(b.imgs) ? b.imgs.filter(Boolean) : [];
-      return list.length ? list : b.img ? [b.img] : [];
+      if (list.length) return list;
+      if (b.img) return [b.img];
+      const fallback = BURGER_PHOTO_FALLBACK[String(b.name || "").toLowerCase().replace(/[^a-z]/g, "")];
+      return fallback ? [fallback] : [];
     };
     const flat = BURGERS.flatMap((fam) => fam.items.map((b) => ({ ...b, images: burgerImages(b), noImg: !burgerImages(b).length })));
     flat.sort((a, b) => (a.images.length ? 0 : 1) - (b.images.length ? 0 : 1));
