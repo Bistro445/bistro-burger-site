@@ -10,6 +10,7 @@ const compression = require("compression");
 const siteData = require("./lib/siteDataStore");
 const { buildConfigFiles } = require("./lib/siteData");
 const blogSeo = require("./lib/blogSeo");
+const blogViews = require("./lib/blogViews");
 const aiSeo = require("./lib/aiSeo");
 
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -264,6 +265,7 @@ app.get("/blog/:slug", async (req, res) => {
       articleCache.set(slug, cached);
     }
     res.setHeader("Cache-Control", "no-cache");
+    blogViews.track(req, post.slug); // compteur de consultations (visible uniquement dans l'admin)
     return res.type("html").send(cached.html);
   } catch (err) {
     return res.sendFile(ARTICLE_TEMPLATE_PATH);

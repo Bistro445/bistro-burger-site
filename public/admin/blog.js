@@ -165,6 +165,25 @@
     return normalize(json.value);
   }
 
+  // Nombre de consultations de chaque article : réservé aux comptes admin (API protégée).
+  // En cas d'échec on n'affiche simplement rien, la liste des articles reste utilisable.
+  async function apiViews() {
+    try {
+      const headers = await window.adminAuth.authHeader();
+      const res = await fetch("/api/admin/blog-views", { headers });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function viewsLabel(post) {
+    if (!state || !state.views || state.views.setupRequired || !post || !post.slug) return "";
+    const n = Number((state.views.views || {})[post.slug]) || 0;
+    return n + (n > 1 ? " consultations" : " consultation");
+  }
+
   async function apiSave(data) {
     const headers = await window.adminAuth.authHeader();
     const res = await fetch(API_URL, {
@@ -292,7 +311,7 @@
       '<button type="button" class="list-row" data-post="' + i + '">' +
       '<span class="list-row-main">' +
       '<span class="list-row-title">' + esc(p.title || "(Sans titre)") + "</span>" +
-      '<span class="list-row-sub">' + esc([p.category || "Sans catégorie", p.date ? formatDate(p.date) : "", p.published ? "Publié" : "Brouillon"].filter(Boolean).join(" · ")) + "</span>" +
+      '<span class="list-row-sub">' + esc([p.category || "Sans catégorie", p.date ? formatDate(p.date) : "", p.published ? "Publié" : "Brouillon", p.published ? viewsLabel(p) : ""].filter(Boolean).join(" · ")) + "</span>" +
       "</span>" +
       '<span class="list-row-arrow">›</span>' +
       "</button></div>"
@@ -310,6 +329,9 @@
       "</div>" +
       '<hr class="divider">' +
       '<label class="r-label">Articles</label>' +
+      (state.views && state.views.setupRequired
+        ? '<p class="dashboard-note">Le compteur de consultations n\'est pas encore activé : une étape unique dans Supabase (script <strong>scripts/blog-views.sql</strong>), à demander à la personne qui gère le site. Les nombres de consultations (visibles uniquement ici, par les administrateurs) apparaîtront ensuite sous chaque article.</p>'
+        : (state.views ? '<p class="dashboard-note">Le nombre de consultations est visible uniquement par les administrateurs. Les robots (Google…) ne sont pas comptés, et une même personne n\'est comptée qu\'une fois par demi-heure.</p>' : "")) +
       '<div class="list">' + (rows || '<p class="dashboard-note">Aucun article pour l\'instant.</p>') + "</div>" +
       '<div style="display:flex; gap:10px; align-items:center;">' +
       '<button type="button" class="btn-secondary" id="bl-add-post">+ Nouvel article</button>' +
@@ -717,6 +739,9 @@
     container.innerHTML =
       '<button type="button" class="back-btn" id="bl-back-list">‹ Tous les articles</button>' +
       "<h1>" + (isNew ? "Nouvel article" : "Modifier l'article") + "</h1>" +
+      (!isNew && existing && existing.published && viewsLabel(existing)
+        ? '<p class="dashboard-note">Consultations de cet article : <strong>' + esc(viewsLabel(existing)) + "</strong> (comptées depuis l'activation du compteur ; visibles uniquement par les administrateurs).</p>"
+        : "") +
       (state.pendingDraft
         ? '<div class="draft-banner">Un brouillon non enregistré existe pour cet article (' + window.AdminDrafts.timeAgo(state.pendingDraft.savedAt) + ").<div class=\"draft-banner-actions\">" +
           '<button type="button" class="draft-banner-btn" id="bl-draft-restore">Restaurer le brouillon</button>' +
@@ -915,7 +940,9 @@
       state = { screen: "loading", data: null, editIndex: null, saving: false, saveError: null, saveSuccess: false, deletedPosts: [], quill: null };
       render();
       try {
-        state.data = await apiGet();
+        const loaded = await Promise.all([apiGet(), apiViews()]);
+        state.data = loaded[0];
+        state.views = loaded[1];
         state.screen = "list";
       } catch (err) {
         state.screen = "error";

@@ -33,6 +33,15 @@ flèches pour l'ordre). Le site les affiche en carrousel sur la carte du burger 
 Les articles du blog sont dans la clé `blog` ; leur texte est écrit en dur (une mention d'horaires dans un
 article ne suit pas l'éditeur d'horaires : à relire à la main).
 
+## Compteur de consultations du blog (ajouté le 04/11/2026)
+Chaque ouverture d'un article (`/blog/<slug>.html`, humain uniquement : robots, pré-chargements et rechargements de moins de
+30 min par la même adresse IP ne comptent pas) ajoute 1 dans la table Supabase `blog_views` (fonction SQL
+`increment_blog_view`, appelée par `lib/blogViews.js` depuis `server.js`). La table est fermée au public (RLS sans politique) :
+**les chiffres ne s'affichent que dans l'admin** (Blog : sous chaque article et dans sa fiche), via `/api/admin/blog-views`
+(session admin obligatoire). **Ne jamais ranger ces chiffres dans `site_content`** : tout `site_content` est recopié dans le
+fichier public `data.generated.js`. Mise en service : exécuter **une seule fois** `scripts/blog-views.sql` dans Supabase
+(SQL Editor). Tant que ce n'est pas fait, le compteur ne compte rien et l'admin l'indique ; le site public n'est pas affecté.
+
 ## Déploiement
 Hébergeur : Hostinger (application Node.js), déploiement depuis GitHub. **Aucun environnement de test en
 ligne** : tout `push` sur la branche déployée part en production après un redéploiement.
