@@ -873,6 +873,42 @@ button.section-card:hover .section-card-btn{
 .edit-gallery-actions button:hover:not(:disabled){border-color:var(--green-700)}
 .edit-gallery-actions button[data-g-del]:hover{color:var(--error); border-color:var(--error)}
 .edit-gallery-actions button:disabled{opacity:.35; cursor:default}
+/* Corbeille des images retirées (burgers) */
+.edit-trash{
+  margin:14px 0 18px;
+  border:1px dashed var(--border); border-radius:12px;
+  background:var(--page-bg);
+  padding:10px 12px;
+}
+.edit-trash summary{
+  cursor:pointer; font-weight:600; font-size:14.5px; color:var(--ink);
+  padding:4px 0;
+}
+.edit-trash .edit-hero-hint{ margin:6px 0 10px; }
+.edit-trash-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+  gap:10px;
+}
+.edit-trash-item{
+  border-radius:10px; overflow:hidden;
+  border:1px solid var(--border); background:#fff;
+}
+.edit-trash-item img{
+  display:block; width:100%; aspect-ratio:4/3; object-fit:cover;
+  filter:grayscale(.35); opacity:.85;
+}
+.edit-trash-date{ display:block; font-size:11.5px; color:var(--muted); padding:5px 6px 0; }
+.edit-trash-actions{ display:flex; gap:4px; padding:6px; }
+.edit-trash-actions button{
+  min-height:32px; border:1px solid var(--border); border-radius:8px;
+  background:#fff; color:var(--ink); cursor:pointer; font:inherit; font-size:13px;
+}
+.edit-trash-restore{ flex:1; font-weight:600; color:var(--green-700) !important; }
+.edit-trash-restore:hover:not(:disabled){ border-color:var(--green-700); }
+.edit-trash-forget{ width:34px; font-size:16px !important; }
+.edit-trash-forget:hover{ color:var(--error) !important; border-color:var(--error); }
+.edit-trash-actions button:disabled{ opacity:.35; cursor:default; }
 .edit-hero-body{
   padding:14px 0 0;
   display:flex;

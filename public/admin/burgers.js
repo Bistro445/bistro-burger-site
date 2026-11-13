@@ -178,6 +178,8 @@
     document.getElementById("b-add-item").addEventListener("click", () => {
       state.itemIndex = null;
       state.editImgs = undefined;
+      state.editTrash = undefined;
+      state.trashOpen = false;
       state.draftChecked = false;
       state.restoredFields = null;
       state.screen = "edit";
@@ -187,6 +189,8 @@
       btn.addEventListener("click", () => {
         state.itemIndex = Number(btn.dataset.item);
         state.editImgs = undefined;
+        state.editTrash = undefined;
+        state.trashOpen = false;
         state.draftChecked = false;
         state.restoredFields = null;
         state.screen = "edit";
@@ -309,6 +313,47 @@
     scheduleDraftSave();
   }
 
+  // Corbeille des images : une image retirée n'est pas effacée du stockage, on garde son adresse
+  // dans `imgsTrash` (liste de { url, at }) pour pouvoir la remettre plus tard.
+  const MAX_TRASH = 30;
+
+  function itemTrash(item) {
+    return item && Array.isArray(item.imgsTrash)
+      ? item.imgsTrash.filter((t) => t && t.url).map((t) => ({ url: t.url, at: t.at || null }))
+      : [];
+  }
+
+  function trashImage(index) {
+    const [url] = state.editImgs.splice(index, 1);
+    if (url) {
+      state.editTrash = state.editTrash.filter((t) => t.url !== url);
+      state.editTrash.unshift({ url, at: new Date().toISOString() });
+      state.editTrash = state.editTrash.slice(0, MAX_TRASH);
+    }
+    render();
+    scheduleDraftSave();
+  }
+
+  function restoreImage(index) {
+    if (state.editImgs.length >= MAX_IMAGES) return;
+    const [t] = state.editTrash.splice(index, 1);
+    if (t && state.editImgs.indexOf(t.url) === -1) state.editImgs.push(t.url);
+    render();
+    scheduleDraftSave();
+  }
+
+  function forgetImage(index) {
+    if (!confirm("Retirer cette image de la corbeille ? Vous ne pourrez plus la restaurer depuis l'admin.")) return;
+    state.editTrash.splice(index, 1);
+    render();
+    scheduleDraftSave();
+  }
+
+  function trashDate(iso) {
+    const d = iso ? new Date(iso) : null;
+    return d && !isNaN(d) ? "Retirée le " + d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "Retirée";
+  }
+
   function burgerDraftKey() {
     return "burger:" + state.catIndex + ":" + (state.itemIndex === null ? "new" : state.itemIndex);
   }
@@ -320,12 +365,14 @@
       sur: document.getElementById("b-sur").value,
       emp: document.getElementById("b-emp").value,
       imgs: (state.editImgs || []).slice(),
+      imgsTrash: (state.editTrash || []).slice(),
     };
   }
 
   function scheduleDraftSave() {
     if (draftSaveTimer) clearTimeout(draftSaveTimer);
     draftSaveTimer = setTimeout(() => {
+      if (state.screen !== "edit" || !document.getElementById("b-name")) return; // formulaire déjà fermé
       window.AdminDrafts.save(burgerDraftKey(), readEditFields());
       const statusEl = document.getElementById("b-draft-status");
       if (statusEl) statusEl.textContent = "Brouillon enregistré automatiquement — à l'instant";
@@ -337,6 +384,7 @@
     const isNew = state.itemIndex === null;
     const item = state.restoredFields || (isNew ? { name: "", desc: "", sur: "", emp: "", imgs: [] } : cat.items[state.itemIndex]);
     if (state.editImgs === undefined) state.editImgs = itemImages(item);
+    if (state.editTrash === undefined) state.editTrash = itemTrash(item);
 
     if (!state.draftChecked) {
       state.draftChecked = true;
@@ -352,13 +400,31 @@
         '<div class="edit-gallery-actions">' +
         '<button type="button" data-g-left="' + i + '" aria-label="Déplacer vers la gauche"' + (i === 0 ? " disabled" : "") + ">‹</button>" +
         '<button type="button" data-g-right="' + i + '" aria-label="Déplacer vers la droite"' + (i === imgs.length - 1 ? " disabled" : "") + ">›</button>" +
-        '<button type="button" data-g-del="' + i + '" aria-label="Retirer cette image">×</button>' +
+        '<button type="button" data-g-del="' + i + '" aria-label="Mettre cette image à la corbeille" title="Mettre à la corbeille">×</button>' +
         "</div></div>")
       .join("");
     const imgPreview =
       imgs.length
         ? '<div class="edit-gallery-grid">' + galleryItems + "</div>"
         : '<div class="edit-hero-empty">Aucune image</div>';
+    const trash = state.editTrash;
+    const full = imgs.length >= MAX_IMAGES;
+    const trashHtml = trash.length
+      ? '<details class="edit-trash"' + (state.trashOpen ? " open" : "") + ">" +
+        '<summary>🗑 Corbeille des images (' + trash.length + ")</summary>" +
+        '<p class="edit-hero-hint">Les images retirées restent ici : cliquez sur « Restaurer » pour les remettre sur le burger, puis sur « Enregistrer ».' +
+        (full ? "<br><strong>Le burger a déjà " + MAX_IMAGES + " images : retirez-en une pour en restaurer une autre.</strong>" : "") + "</p>" +
+        '<div class="edit-trash-grid">' +
+        trash.map((t, i) =>
+          '<div class="edit-trash-item">' +
+          '<img src="' + esc(t.url) + '" alt="Image dans la corbeille ' + (i + 1) + '" loading="lazy">' +
+          '<span class="edit-trash-date">' + esc(trashDate(t.at)) + "</span>" +
+          '<div class="edit-trash-actions">' +
+          '<button type="button" class="edit-trash-restore" data-t-restore="' + i + '"' + (full ? " disabled" : "") + ">Restaurer</button>" +
+          '<button type="button" class="edit-trash-forget" data-t-forget="' + i + '" aria-label="Retirer définitivement de la corbeille" title="Retirer de la corbeille">×</button>' +
+          "</div></div>").join("") +
+        "</div></details>"
+      : "";
 
     container.innerHTML =
       '<button type="button" class="back-btn" id="b-back-items">‹ ' + esc(cat.title) + "</button>" +
@@ -378,9 +444,10 @@
       (state.uploadingImg ? "Téléversement…" : "Ajouter des images") +
       "</button>" +
       (state.uploadError ? '<div class="login-error">' + esc(state.uploadError) + "</div>" : "") +
-      '<p class="edit-hero-hint">Images du burger : ' + imgs.length + " sur " + MAX_IMAGES + " maximum<br>Sur le site, elles <strong>défilent</strong> (carrousel). La première est l'image principale (flèches pour changer l'ordre).<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo par image</p>" +
+      '<p class="edit-hero-hint">Images du burger : ' + imgs.length + " sur " + MAX_IMAGES + " maximum<br>Sur le site, elles <strong>défilent</strong> (carrousel). La première est l'image principale (flèches pour changer l'ordre).<br>Une image retirée avec « × » va dans la <strong>corbeille</strong> : vous pouvez la restaurer.<br>Format recommandé : <strong>JPG ou WebP</strong><br>Dimensions recommandées : <strong>1200 × 900&nbsp;px</strong> (format 4:3)<br>Poids maximal : 8 Mo par image</p>" +
       "</div>" +
       "</div>" +
+      trashHtml +
       '<form id="b-item-form">' +
       '<label class="field-label" for="b-name">Nom</label>' +
       '<input class="field" id="b-name" required value="' + esc(item.name) + '">' +
@@ -409,18 +476,20 @@
     });
     container.querySelectorAll("[data-g-left]").forEach((b) => b.addEventListener("click", () => moveImage(Number(b.dataset.gLeft), Number(b.dataset.gLeft) - 1)));
     container.querySelectorAll("[data-g-right]").forEach((b) => b.addEventListener("click", () => moveImage(Number(b.dataset.gRight), Number(b.dataset.gRight) + 1)));
-    container.querySelectorAll("[data-g-del]").forEach((b) => b.addEventListener("click", () => {
-      state.editImgs.splice(Number(b.dataset.gDel), 1);
-      render();
-      scheduleDraftSave();
-    }));
+    container.querySelectorAll("[data-g-del]").forEach((b) => b.addEventListener("click", () => trashImage(Number(b.dataset.gDel))));
+    container.querySelectorAll("[data-t-restore]").forEach((b) => b.addEventListener("click", () => { state.trashOpen = true; restoreImage(Number(b.dataset.tRestore)); }));
+    container.querySelectorAll("[data-t-forget]").forEach((b) => b.addEventListener("click", () => { state.trashOpen = true; forgetImage(Number(b.dataset.tForget)); }));
+    const trashBox = container.querySelector(".edit-trash");
+    if (trashBox) trashBox.addEventListener("toggle", () => { state.trashOpen = trashBox.open; });
 
     if (state.pendingDraft) {
       document.getElementById("b-draft-restore").addEventListener("click", () => {
         const d = state.pendingDraft.data;
         const draftImgs = Array.isArray(d.imgs) ? d.imgs.filter(Boolean) : d.img ? [d.img] : itemImages(item);
-        state.restoredFields = { name: d.name || "", desc: d.desc || "", sur: d.sur || "", emp: d.emp || "", imgs: draftImgs };
+        const draftTrash = Array.isArray(d.imgsTrash) ? itemTrash(d) : itemTrash(item);
+        state.restoredFields = { name: d.name || "", desc: d.desc || "", sur: d.sur || "", emp: d.emp || "", imgs: draftImgs, imgsTrash: draftTrash };
         state.editImgs = draftImgs.slice();
+        state.editTrash = draftTrash.slice();
         state.pendingDraft = null;
         render();
       });
@@ -445,6 +514,8 @@
       state.screen = "items";
       state.saveError = null;
       state.editImgs = undefined;
+      state.editTrash = undefined;
+      state.trashOpen = false;
       render();
     });
 
@@ -460,11 +531,14 @@
         newItem.img = state.editImgs[0];
         newItem.imgs = state.editImgs.slice();
       }
+      if (state.editTrash.length) newItem.imgsTrash = state.editTrash.slice();
 
       if (isNew) cat.items.push(newItem);
       else cat.items[state.itemIndex] = newItem;
 
       state.editImgs = undefined;
+      state.editTrash = undefined;
+      state.trashOpen = false;
       window.AdminDrafts.clear(burgerDraftKey());
       stopDraftTicker();
       await persist("items");

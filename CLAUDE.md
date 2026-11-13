@@ -30,6 +30,8 @@ Le contenu se modifie **de préférence dans l'espace admin** (`/admin/`), qui e
 Un burger (`burgers`) a `img` (image principale) et `imgs` (jusqu'à 6 images, saisies dans l'admin : ajout multiple,
 flèches pour l'ordre). Le site les affiche en carrousel sur la carte du burger (défilement au doigt, flèches et points ; un clic ouvre l'image en grand, avec flèches).
 `img` doit toujours rester égale à `imgs[0]` (panier et anciens contenus s'en servent).
+Corbeille des images (13/11/2026) : une image retirée avec « × » dans l'admin n'est pas effacée du stockage ; son adresse
+part dans `imgsTrash` (liste `{ url, at }`, 30 au plus) et l'admin propose « Restaurer ». Le site public ignore ce champ.
 Les articles du blog sont dans la clé `blog` ; leur texte est écrit en dur (une mention d'horaires dans un
 article ne suit pas l'éditeur d'horaires : à relire à la main).
 
