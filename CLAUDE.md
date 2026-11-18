@@ -93,6 +93,11 @@ ligne** : tout `push` sur la branche déployée part en production après un red
    guillemets/accolades en trop ajoutés automatiquement ; traduction Chrome désactivée. Préfère l'admin.
 10. L'espace admin et l'outil SEO partagent les mêmes comptes (Supabase). Tous les comptes ont les mêmes
     droits. Les mots de passe sont illisibles, par conception : on envoie un lien de réinitialisation.
+11. Connexion sur plusieurs appareils (corrigé le 18/11/2026) : la déconnexion utilise `signOut({ scope: "local" })`
+    (admin et `/app`) ; sans ce paramètre Supabase déconnecte **tous** les appareils du compte. Arrivée par un lien
+    d'invitation ou « Mot de passe oublié » : l'admin impose l'écran « Choisissez votre mot de passe » avant d'entrer
+    (drapeau `bb-admin-must-set-password` en sessionStorage). Changer de mot de passe déconnecte les autres appareils
+    (règle de sécurité de Supabase) : ils redemandent une fois le nouveau mot de passe.
 
 ## Sécurité
 - Aucun secret dans le dépôt, les commits ou le chat. Ne modifie pas les réglages d'authentification

@@ -53,7 +53,24 @@ window.AdminDrafts = (() => {
   const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   const arrivedByLink = /^(invite|recovery)$/.test(hashParams.get("type") || "");
   const linkHasError = !!(hashParams.get("error") || hashParams.get("error_code"));
-  let passwordPrompted = false;
+
+  // Arrivée par un lien (invitation ou « Mot de passe oublié ») : la personne doit
+  // choisir son mot de passe avant d'entrer. Sinon elle reste connectée sur cet
+  // appareil seulement, sans mot de passe connu, et ne peut pas se connecter
+  // ailleurs (elle redemande un lien, ce qui change le mot de passe et déconnecte
+  // les autres appareils : c'était la boucle signalée le 18/11/2026).
+  // Gardé en sessionStorage pour survivre à un rechargement de la page.
+  const MUST_SET_KEY = "bb-admin-must-set-password";
+  function mustSetPassword() {
+    try { return sessionStorage.getItem(MUST_SET_KEY) === "1"; } catch { return false; }
+  }
+  function setMustSetPassword(on) {
+    try {
+      if (on) sessionStorage.setItem(MUST_SET_KEY, "1");
+      else sessionStorage.removeItem(MUST_SET_KEY);
+    } catch {}
+  }
+  if (arrivedByLink && !linkHasError) setMustSetPassword(true);
 
   const supabase = window.supabase.createClient(cfg.url, cfg.anonKey);
 
@@ -355,6 +372,10 @@ window.AdminDrafts = (() => {
   }
 
   function showLoggedIn(session) {
+    if (mustSetPassword()) {
+      showSetPassword(session);
+      return;
+    }
     const email = session.user.email;
     const firstname = email.split("@")[0];
     userEmailEl.textContent = email;
@@ -373,10 +394,6 @@ window.AdminDrafts = (() => {
       // modification était en cours au moment de la coupure.
       reopenLastSection();
     }
-    if (arrivedByLink && !passwordPrompted) {
-      passwordPrompted = true;
-      promptChoosePassword();
-    }
     // Un simple rafraîchissement de jeton en arrière-plan (session déjà
     // active, ex. toutes les heures) ne doit jamais faire bouger l'écran :
     // onAuthStateChange rappelle showLoggedIn() à chaque TOKEN_REFRESHED,
@@ -390,11 +407,87 @@ window.AdminDrafts = (() => {
   function showLoggedOut() {
     loginScreen.hidden = false;
     appShell.hidden = true;
+    setPasswordForm.hidden = true;
+    if (forgotPasswordForm.hidden) loginForm.hidden = false;
     if (alertsInterval) {
       clearInterval(alertsInterval);
       alertsInterval = null;
     }
     stopPresence();
+  }
+
+  const forgotPasswordForm = document.getElementById("forgot-password-form");
+  const setPasswordForm = document.getElementById("set-password-form");
+  const setPasswordSubmit = document.getElementById("set-password-submit");
+  const setPasswordError = document.getElementById("set-password-error");
+
+  // Écran « Choisissez votre mot de passe » (obligatoire après un lien).
+  function showSetPassword(session) {
+    loginScreen.hidden = false;
+    appShell.hidden = true;
+    loginForm.hidden = true;
+    forgotPasswordForm.hidden = true;
+    errorBox.hidden = true;
+    setPasswordForm.hidden = false;
+    document.getElementById("set-password-username").value = (session.user && session.user.email) || "";
+    const input = document.getElementById("set-password");
+    if (input && document.activeElement !== input && document.activeElement !== document.getElementById("set-password-confirm")) input.focus();
+  }
+
+  setPasswordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setPasswordError.hidden = true;
+    const pwd = document.getElementById("set-password").value;
+    const confirmPwd = document.getElementById("set-password-confirm").value;
+    if (pwd.length < 8) {
+      setPasswordError.hidden = false;
+      setPasswordError.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+      return;
+    }
+    if (pwd !== confirmPwd) {
+      setPasswordError.hidden = false;
+      setPasswordError.textContent = "Les deux mots de passe ne sont pas identiques.";
+      return;
+    }
+    setPasswordSubmit.disabled = true;
+    setPasswordSubmit.textContent = "Enregistrement…";
+    const { error } = await supabase.auth.updateUser({ password: pwd });
+    setPasswordSubmit.disabled = false;
+    setPasswordSubmit.textContent = "Enregistrer et entrer";
+    // « same_password » : c'est déjà son mot de passe, donc elle le connaît : on la laisse entrer.
+    if (error && error.code !== "same_password") {
+      setPasswordError.hidden = false;
+      if (error.code === "weak_password") {
+        setPasswordError.textContent = "Mot de passe trop simple. Choisissez-en un plus long ou plus varié.";
+      } else if (error.code === "session_not_found" || error.code === "session_expired" || error.status === 401 || error.status === 403) {
+        setPasswordError.textContent = "Le lien a expiré. Revenez à la connexion et cliquez sur « Mot de passe oublié ? » pour en recevoir un nouveau.";
+      } else {
+        setPasswordError.textContent = "Échec de l'enregistrement : " + error.message;
+      }
+      return;
+    }
+    setMustSetPassword(false);
+    setPasswordForm.reset();
+    setPasswordForm.hidden = true;
+    loginForm.hidden = false;
+    const { data } = await supabase.auth.getSession();
+    if (data.session) showLoggedIn(data.session);
+    else showLoggedOut();
+  });
+
+  function loginErrorMessage(error) {
+    const code = error.code || "";
+    const status = error.status || 0;
+    if (code === "email_not_confirmed") {
+      return "Ce compte n'est pas encore activé : ouvrez le lien d'invitation reçu par e-mail, ou cliquez sur « Mot de passe oublié ? ».";
+    }
+    if (status === 429 || /rate_limit/.test(code)) {
+      return "Trop de tentatives. Patientez quelques minutes avant de réessayer.";
+    }
+    if (code === "invalid_credentials" || status === 400) {
+      return "E-mail ou mot de passe incorrect. Si vous l'avez oublié, cliquez sur « Mot de passe oublié ? » : vous choisirez un nouveau mot de passe, valable sur tous vos appareils.";
+    }
+    return "Connexion impossible pour le moment. Vérifiez votre connexion internet et réessayez.";
   }
 
   supabase.auth.getSession().then(({ data }) => {
@@ -416,6 +509,8 @@ window.AdminDrafts = (() => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
+    // Connexion avec le mot de passe : il est donc connu, pas besoin d'en choisir un.
+    setMustSetPassword(false);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     loginSubmit.disabled = false;
@@ -423,12 +518,11 @@ window.AdminDrafts = (() => {
 
     if (error) {
       errorBox.hidden = false;
-      errorBox.textContent = "E-mail ou mot de passe incorrect.";
+      errorBox.textContent = loginErrorMessage(error);
     }
   });
 
   const forgotPasswordLink = document.getElementById("forgot-password-link");
-  const forgotPasswordForm = document.getElementById("forgot-password-form");
   const forgotBackLink = document.getElementById("forgot-back-link");
   const forgotSubmit = document.getElementById("forgot-submit");
   const forgotSuccess = document.getElementById("forgot-success");
@@ -477,8 +571,11 @@ window.AdminDrafts = (() => {
     errorBox.textContent = "Ce lien a expiré ou a déjà été utilisé. Cliquez sur « Mot de passe oublié ? » pour en recevoir un nouveau.";
   }
 
+  // Déconnexion de CET appareil seulement. Par défaut, Supabase déconnecte
+  // tous les appareils du compte (téléphone + ordinateur) : ce n'est pas voulu.
   async function doLogout() {
-    await supabase.auth.signOut();
+    setMustSetPassword(false);
+    await supabase.auth.signOut({ scope: "local" });
   }
   logoutBtnPanel.addEventListener("click", doLogout);
 
@@ -549,20 +646,6 @@ window.AdminDrafts = (() => {
   const passwordSuccess = document.getElementById("password-success");
   const passwordError = document.getElementById("password-error");
 
-  function promptChoosePassword() {
-    openProfilePanel();
-    passwordForm.hidden = false;
-    document.getElementById("pp-password-toggle").classList.add("is-open");
-    if (!document.getElementById("password-prompt")) {
-      passwordForm.insertAdjacentHTML(
-        "afterbegin",
-        '<p id="password-prompt" class="password-success">Bienvenue ! Choisissez un mot de passe pour pouvoir vous reconnecter plus tard.</p>'
-      );
-    }
-    const input = document.getElementById("new-password");
-    if (input) input.focus();
-  }
-
   passwordForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     passwordSuccess.hidden = true;
@@ -582,8 +665,6 @@ window.AdminDrafts = (() => {
     } else {
       passwordSuccess.hidden = false;
       passwordForm.reset();
-      const promptEl = document.getElementById("password-prompt");
-      if (promptEl) promptEl.remove();
     }
   });
 

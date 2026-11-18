@@ -81,13 +81,23 @@
     loginSubmit.textContent = "Se connecter";
     if (error) {
       errorBox.hidden = false;
-      errorBox.textContent = "E-mail ou mot de passe incorrect.";
+      const code = error.code || "";
+      const status = error.status || 0;
+      errorBox.textContent =
+        code === "email_not_confirmed"
+          ? "Ce compte n'est pas encore activé : ouvrez le lien d'invitation reçu par e-mail, ou cliquez sur « Mot de passe oublié ? »."
+          : status === 429 || /rate_limit/.test(code)
+          ? "Trop de tentatives. Patientez quelques minutes avant de réessayer."
+          : code === "invalid_credentials" || status === 400
+          ? "E-mail ou mot de passe incorrect. Si vous l'avez oublié, cliquez sur « Mot de passe oublié ? »."
+          : "Connexion impossible pour le moment. Vérifiez votre connexion internet et réessayez.";
     }
   });
 
   logoutBtn.addEventListener("click", () => {
     Push.unsubscribe();
-    supabase.auth.signOut();
+    // Cet appareil seulement (par défaut Supabase déconnecte tous les appareils du compte).
+    supabase.auth.signOut({ scope: "local" });
   });
 
   const forgotPasswordLink = document.getElementById("forgot-password-link");
