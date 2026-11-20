@@ -48,3 +48,9 @@ $$;
 
 revoke all on function public.increment_page_event(text, text) from public, anon, authenticated;
 grant execute on function public.increment_page_event(text, text) to service_role;
+
+-- Indispensable sur ce projet Supabase : les nouveaux tableaux ne donnent AUCUN droit par défaut, même au serveur
+-- (sans ces lignes, l'enregistrement échoue sans message visible). Aucun droit pour le public (anon / authenticated).
+grant select, insert, update, delete on public.demandes to service_role;
+grant select, insert, update, delete on public.page_events to service_role;
+notify pgrst, 'reload schema';

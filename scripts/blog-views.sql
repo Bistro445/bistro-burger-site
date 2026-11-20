@@ -27,3 +27,7 @@ $$;
 
 revoke all on function public.increment_blog_view(text) from public, anon, authenticated;
 grant execute on function public.increment_blog_view(text) to service_role;
+
+-- Indispensable sur ce projet : un nouveau tableau n'a aucun droit par défaut, même pour le serveur.
+grant select, insert, update, delete on public.blog_views to service_role;
+notify pgrst, 'reload schema';

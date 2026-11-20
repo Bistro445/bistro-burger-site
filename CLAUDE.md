@@ -52,8 +52,11 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   autorisée (CORS) : `http://localhost:xxxx`, pour tester la maquette locale.
 - `POST /api/track` (api/track.js) : compte un clic `{ page: "noel", event }` dans `page_events` (robots ignorés).
 - Admin : rubrique « Demandes & Noël » (public/admin/demandes.js, api/admin/demandes.js).
-- Mise en service : exécuter **une seule fois** `scripts/demandes.sql` dans Supabase (SQL Editor). Avant cela, les
-  demandes partent quand même par e-mail ; seuls l'historique dans l'admin et le compteur de clics manquent.
+- `scripts/demandes.sql` a été exécuté dans Supabase le 20/11/2026 (testé : demande enregistrée, clic compté).
+- **Piège Supabase** : sur ce projet, un tableau créé par SQL n'a **aucun droit**, même pour la clé de service. Toujours
+  ajouter `grant select, insert, update, delete on public.<table> to service_role;` (jamais pour anon/authenticated).
+  Le compteur du blog (`scripts/blog-views.sql`) n'a jamais été exécuté (table `blog_views` absente au 20/11/2026) :
+  y ajouter cette ligne de droits avant de le lancer.
 - Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée**. Ses PDF vont dans
   `public/noel/` (noms fixes dans `DOCS` de noel.js) et s'activent tout seuls quand le fichier existe.
 
