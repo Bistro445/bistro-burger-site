@@ -8,7 +8,7 @@ $l = New-Object System.Net.HttpListener
 $l.Prefixes.Add("http://localhost:8099/")
 $l.Start()
 Write-Host "Site de test sur http://localhost:8099/  (Ctrl+C pour arrêter)"
-$types = @{ ".html"="text/html; charset=utf-8"; ".js"="application/javascript; charset=utf-8"; ".css"="text/css"; ".png"="image/png"; ".jpg"="image/jpeg"; ".webp"="image/webp"; ".svg"="image/svg+xml"; ".json"="application/json"; ".ico"="image/x-icon"; ".webmanifest"="application/manifest+json" }
+$types = @{ ".html"="text/html; charset=utf-8"; ".js"="application/javascript; charset=utf-8"; ".css"="text/css"; ".png"="image/png"; ".jpg"="image/jpeg"; ".webp"="image/webp"; ".svg"="image/svg+xml"; ".json"="application/json"; ".ico"="image/x-icon"; ".webmanifest"="application/manifest+json"; ".pdf"="application/pdf" }
 while ($l.IsListening) {
   $c = $l.GetContext()
   $p = [Uri]::UnescapeDataString($c.Request.Url.AbsolutePath)
