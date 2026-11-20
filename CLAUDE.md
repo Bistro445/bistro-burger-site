@@ -44,6 +44,19 @@ Chaque ouverture d'un article (`/blog/<slug>.html`, humain uniquement : robots, 
 fichier public `data.generated.js`. Mise en service : exécuter **une seule fois** `scripts/blog-views.sql` dans Supabase
 (SQL Editor). Tant que ce n'est pas fait, le compteur ne compte rien et l'admin l'indique ; le site public n'est pas affecté.
 
+## Demandes et suivi des clics (ajouté le 20/11/2026, pour la page Noël puis le devis traiteur)
+- `POST /api/demande` (api/demande.js) : formulaire public. Contrôle des champs, anti-robots (champ piège `website`,
+  délai minimum `elapsed` ≥ 3 s, 5 envois par IP et par heure), enregistrement dans la table `demandes`, alerte e-mail
+  aux comptes admin (modèle `adminNewDemande`), notification push, accusé de réception au client (`clientDemandeAck`,
+  si Resend est configuré). `{ dryRun: true }` contrôle tout sans rien envoyer (tests). Seule origine extérieure
+  autorisée (CORS) : `http://localhost:xxxx`, pour tester la maquette locale.
+- `POST /api/track` (api/track.js) : compte un clic `{ page: "noel", event }` dans `page_events` (robots ignorés).
+- Admin : rubrique « Demandes & Noël » (public/admin/demandes.js, api/admin/demandes.js).
+- Mise en service : exécuter **une seule fois** `scripts/demandes.sql` dans Supabase (SQL Editor). Avant cela, les
+  demandes partent quand même par e-mail ; seuls l'historique dans l'admin et le compteur de clics manquent.
+- Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée**. Ses PDF vont dans
+  `public/noel/` (noms fixes dans `DOCS` de noel.js) et s'activent tout seuls quand le fichier existe.
+
 ## Déploiement
 Hébergeur : Hostinger (application Node.js), déploiement depuis GitHub. **Aucun environnement de test en
 ligne** : tout `push` sur la branche déployée part en production après un redéploiement.

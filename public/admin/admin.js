@@ -129,6 +129,7 @@ window.AdminDrafts = (() => {
     { key: "blog", title: "Blog", editor: () => window.BlogEditor },
     { key: "commandes", title: "Commandes", editor: () => window.CommandesEditor },
     { key: "reservations-clients", title: "Réservations reçues", editor: () => window.ReservationsClientsEditor },
+    { key: "demandes", title: "Demandes & suivi Noël", editor: () => window.DemandesEditor },
     { key: "administrateurs", title: "Administrateurs", editor: () => window.AdministrateursEditor },
   ];
 

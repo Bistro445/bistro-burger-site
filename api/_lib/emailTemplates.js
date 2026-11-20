@@ -248,4 +248,101 @@ function adminNewOrder(row) {
   return { subject: "Nouvelle commande : " + (row.customer_name || "client") + (row.total != null ? " — " + row.total + " €" : ""), html, text };
 }
 
-module.exports = { clientReservationConfirmed, adminNewReservation, adminNewOrder, RESTAURANT };
+// ───────────── Demandes (page Noël, puis devis traiteur) ─────────────
+// d = { source, prestation, date, personnes, type, societe, nom, telephone, email, message }
+const TYPE_CLIENT = { particulier: "Particulier", entreprise: "Entreprise", association: "Association" };
+
+function resumeDemande(d) {
+  const parts = [];
+  if (d.date) parts.push(formatDateFr(d.date, true));
+  if (d.personnes) parts.push(d.personnes + " pers.");
+  return parts.join(", ");
+}
+
+// Alerte au RESTAURANT : nouvelle demande
+function adminNewDemande(d) {
+  const tel = d.telephone ? '<a href="tel:' + esc(String(d.telephone).replace(/[^\d+]/g, "")) + '" style="color:' + C.vert800 + ';text-decoration:none">' + esc(d.telephone) + "</a>" : "";
+  const mail = d.email ? '<a href="mailto:' + esc(d.email) + '" style="color:' + C.vert800 + ';text-decoration:none">' + esc(d.email) + "</a>" : "";
+  const details = lignes([
+    ["Prestation", esc(d.prestation || "")],
+    ["Date souhaitée", esc(formatDateFr(d.date))],
+    ["Personnes", esc(d.personnes || "")],
+    ["Client", esc(TYPE_CLIENT[d.type] || d.type || "")],
+    ["Structure", esc(d.societe || "")],
+    ["Nom", esc(d.nom || "")],
+    ["Téléphone", tel],
+    ["E-mail", mail],
+  ]);
+  const message = d.message
+    ? '<p style="margin:16px 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:' + C.gris + ';text-transform:uppercase;letter-spacing:.6px">Message du client</p>' +
+      '<p style="margin:0;padding:12px 14px;background:' + C.creme400 + ';border-left:4px solid ' + C.terre + ';border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:' + C.texte + '">' + esc(d.message).replace(/\n/g, "<br>") + "</p>"
+    : "";
+  const contenu =
+    details + message +
+    '<div style="margin-top:22px">' +
+    (d.telephone ? bouton("Appeler le client", "tel:" + String(d.telephone).replace(/[^\d+]/g, ""), true) : "") +
+    (d.email ? bouton("Répondre par e-mail", "mailto:" + d.email, false) : "") +
+    "</div>" +
+    '<p style="margin:14px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:' + C.gris + '">' +
+    "Le client a reçu un accusé de réception lui indiquant que vous allez le recontacter. Vous pouvez répondre directement à cet e-mail.</p>";
+  const source = d.source === "noel" ? "Noël" : "Traiteur";
+  const html = cadre({
+    preheader: (d.nom || "Un client") + " · " + (d.prestation || "") + " · " + resumeDemande(d),
+    pastille: "Nouvelle demande · " + source,
+    pastilleCouleur: C.terre,
+    titre: esc(d.prestation || "Nouvelle demande"),
+    intro: "<b>" + esc(d.nom || "") + "</b>" + (resumeDemande(d) ? " · " + esc(resumeDemande(d)) : ""),
+    contenu,
+    pied: "Alerte automatique envoyée par le site <a href=\"" + esc(SITE_URL) + '" style="color:' + C.vert800 + '">bistroburgergardanne.com</a>.',
+  });
+  const text =
+    "Nouvelle demande (" + source + ") — " + RESTAURANT.nom + "\n\n" +
+    "Prestation : " + (d.prestation || "") + "\nDate souhaitée : " + formatDateFr(d.date) + "\nPersonnes : " + (d.personnes || "") + "\n" +
+    "Client : " + (TYPE_CLIENT[d.type] || d.type || "") + (d.societe ? " — " + d.societe : "") + "\n" +
+    "Nom : " + (d.nom || "") + "\nTéléphone : " + (d.telephone || "") + "\nE-mail : " + (d.email || "") + "\n" +
+    (d.message ? "\nMessage :\n" + d.message + "\n" : "");
+  return {
+    subject: "Demande " + source + " : " + (d.prestation || "") + " — " + (d.nom || "client") + (resumeDemande(d) ? " (" + resumeDemande(d) + ")" : ""),
+    html, text,
+    replyTo: d.email || undefined,
+  };
+}
+
+// Accusé de réception au CLIENT
+function clientDemandeAck(d) {
+  const prenom = d.nom ? String(d.nom).trim().split(/\s+/)[0] : "";
+  const details = lignes([
+    ["Prestation", esc(d.prestation || "")],
+    ["Date souhaitée", esc(formatDateFr(d.date))],
+    ["Personnes", esc(d.personnes || "")],
+  ]);
+  const contenu =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="' + C.creme400 + '" style="border-radius:10px"><tr><td style="padding:8px 20px">' +
+    details + "</td></tr></table>" +
+    '<p style="margin:20px 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:' + C.texte + '">' +
+    "Le gérant vous recontacte rapidement pour en parler et vous faire une proposition. Votre demande ne vous engage à rien : <b>rien n'est réservé ni validé sans cet échange</b>.</p>" +
+    bouton("Nous appeler : " + RESTAURANT.telephoneAffiche, "tel:" + RESTAURANT.telephoneLien, true) +
+    bouton("Voir l'itinéraire", RESTAURANT.carte, false);
+  const html = cadre({
+    preheader: "Nous avons bien reçu votre demande : " + (d.prestation || "") + ".",
+    pastille: "Demande reçue",
+    pastilleCouleur: C.vert700,
+    titre: "Merci" + (prenom ? " " + esc(prenom) : "") + ", c'est bien reçu !",
+    intro: "Nous avons bien reçu votre demande. Voici ce que vous nous avez indiqué.",
+    contenu,
+    pied:
+      "Vous recevez cet e-mail car une demande a été envoyée avec cette adresse sur " +
+      '<a href="' + esc(SITE_URL) + '" style="color:' + C.vert800 + '">bistroburgergardanne.com</a>.<br>' +
+      esc(RESTAURANT.nom) + " &middot; " + esc(RESTAURANT.adresse),
+  });
+  const text =
+    (prenom ? "Bonjour " + prenom + "," : "Bonjour,") + "\n\n" +
+    "Nous avons bien reçu votre demande :\n" +
+    "Prestation : " + (d.prestation || "") + "\nDate souhaitée : " + formatDateFr(d.date) + "\nPersonnes : " + (d.personnes || "") + "\n\n" +
+    "Le gérant vous recontacte rapidement pour en parler et vous faire une proposition. Rien n'est réservé ni validé sans cet échange.\n\n" +
+    "Téléphone : " + RESTAURANT.telephoneAffiche + "\nAdresse : " + RESTAURANT.adresse + "\n\n" +
+    "À très bientôt,\nL'équipe " + RESTAURANT.nom + " — Gardanne\n";
+  return { subject: "Nous avons bien reçu votre demande — " + RESTAURANT.nom, html, text };
+}
+
+module.exports = { clientReservationConfirmed, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, RESTAURANT };
