@@ -202,7 +202,7 @@
 
   const PLAT_DU_JOUR = SITE_DATA.plat_du_jour || {
     plat: { label: "Plat du jour", meta: "Jeudi 7 août · servi de 12h à 14h", title: "Brochette de magret de canard aux abricots marinée, boulgour aux légumes croquants", price: "14,50 €" },
-    suggestions: [{ label: "Suggestion du jour", title: "Burger du boucher, sauce poivre", description: "La suggestion que le chef ajoute à la carte, selon le marché du matin. Servie avec frites maison et salade.", price: "16,90 €" }],
+    suggestions: [{ label: "Suggestion du jour", title: "Burger du boucher, sauce poivre", description: "Servie avec frites maison et salade.", price: "16,90 €" }],
   };
 
   const OFFRES = SITE_DATA.offres || [
@@ -644,7 +644,12 @@
     if (!pdjSuggestions.length) return;
     const sug = pdjSuggestions[pdjSugIndex] || {};
     pdjSetText("sug-title", sug.title || "");
-    pdjSetText("sug-desc", sug.description || "");
+    // Toujours réécrire la description (même vide) : sinon l'ancien texte reste affiché
+    const sugDescEl = document.getElementById("sug-desc");
+    if (sugDescEl) {
+      sugDescEl.textContent = sug.description || "";
+      sugDescEl.hidden = !sug.description;
+    }
     pdjSetText("sug-price", sug.price || "");
     if (counterEl) counterEl.textContent = (pdjSugIndex + 1) + " / " + pdjSuggestions.length;
   }
