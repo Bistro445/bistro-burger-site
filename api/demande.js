@@ -120,24 +120,36 @@ module.exports = async (req, res) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
+  // Historique gardé dans l'admin (« traces ») : chaque étape avec son heure.
+  const historique = [{ at: new Date().toISOString(), quoi: "Demande reçue depuis la page " + (d.source === "noel" ? "Noël" : "devis") }];
+
   // Enregistrement (best-effort : si la table n'existe pas encore, la demande part quand même par e-mail).
-  let saved = false;
+  let saved = false, id = null;
   try {
-    const { error } = await supabase.from("demandes").insert({
+    const { data, error } = await supabase.from("demandes").insert({
       source: d.source, prestation: d.prestation, date_souhaitee: d.date, personnes: d.personnes,
       type_client: d.type, societe: d.societe || null, nom: d.nom, telephone: d.telephone, email: d.email,
-      message: d.message || null, consentement: d.consentement,
-    });
-    if (!error) saved = true;
+      message: d.message || null, consentement: d.consentement, historique,
+    }).select("id").single();
+    if (!error) { saved = true; id = data && data.id; }
     else if (!isSetupError(error)) console.error("[demande] enregistrement : " + error.message);
   } catch (e) {
     console.error("[demande] enregistrement : " + (e && e.message));
   }
 
-  await notifyAdmins(supabase, ALERT_EMAIL, "Nouvelle demande — Bistro Burger", {
-    prestation: d.prestation, date: d.date, personnes: d.personnes, client: d.type, structure: d.societe,
-    nom: d.nom, téléphone: d.telephone, email: d.email, message: d.message,
-  }, adminNewDemande(d));
+  let alerte = [];
+  try {
+    alerte = (await notifyAdmins(supabase, ALERT_EMAIL, "Nouvelle demande — Bistro Burger", {
+      prestation: d.prestation, date: d.date, personnes: d.personnes, client: d.type, structure: d.societe,
+      nom: d.nom, téléphone: d.telephone, email: d.email, message: d.message,
+    }, adminNewDemande(d))) || [];
+  } catch (e) {
+    console.error("[demande] alerte : " + (e && e.message));
+  }
+  const alerteTxt = alerte.length
+    ? "Alerte envoyée au restaurant (" + alerte.map((a) => a.to + (a.via === "formsubmit" ? " · secours" : "")).join(", ") + ")"
+    : "Alerte au restaurant : aucun destinataire";
+  historique.push({ at: new Date().toISOString(), quoi: alerteTxt });
 
   try {
     await notifyPush(supabase, {
@@ -147,10 +159,25 @@ module.exports = async (req, res) => {
     });
   } catch {}
 
-  let ack = "non_configure";
   const c = clientDemandeAck(d);
   const r = await sendEmail({ to: d.email, subject: c.subject, html: c.html, text: c.text, replyTo: ALERT_EMAIL });
-  ack = r.status;
+  const ack = r.status;
+  historique.push({
+    at: new Date().toISOString(),
+    quoi: ack === "envoye" ? "Accusé de réception envoyé au client (" + d.email + ")"
+      : ack === "non_configure" ? "Accusé de réception non envoyé : envoi d'e-mails non configuré"
+      : "Accusé de réception NON envoyé : " + (r.detail || "échec de l'envoi"),
+  });
+
+  if (saved && id != null) {
+    try {
+      await supabase.from("demandes").update({
+        historique,
+        email_restaurant: alerte.length ? "envoye" : "aucun_destinataire",
+        email_client: ack,
+      }).eq("id", id);
+    } catch {}
+  }
 
   res.status(200).json({ ok: true, saved, ack });
 };

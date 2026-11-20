@@ -1575,3 +1575,18 @@ button.section-card:hover .section-card-btn{
   border:none; border-radius:999px; padding:9px 14px; cursor:pointer;
 }
 .bl-alt-save:hover{filter:brightness(1.06)}
+
+/* Rubrique « Demandes & Noël » : notes internes, historique, tableau jour par jour */
+.dm-notes{margin-top:12px; display:flex; flex-direction:column; gap:6px}
+.dm-notes label{font-size:13px; font-weight:600; color:var(--green-900)}
+.dm-notes label span{font-weight:400; color:var(--muted)}
+.dm-notes textarea{width:100%; box-sizing:border-box; font:inherit; font-size:14px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; resize:vertical}
+.dm-notes .rec-btn{align-self:flex-start}
+.dm-hist{margin-top:12px; font-size:13.5px}
+.dm-hist summary{cursor:pointer; font-weight:600; color:var(--green-900)}
+.dm-hist ol{margin:8px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px}
+.dm-hist li span{color:var(--muted); font-variant-numeric:tabular-nums}
+.dm-hist li em{color:var(--muted)}
+.dm-table{width:100%; border-collapse:collapse; font-size:14px}
+.dm-table th{text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--border)}
+.dm-table td{padding:8px; border-bottom:1px solid var(--border)}

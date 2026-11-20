@@ -23,6 +23,14 @@ create table if not exists public.demandes (
 
 alter table public.demandes enable row level security;
 
+-- Traces dans l'admin (ajouté le 20/11/2026) : historique daté de chaque demande, état des e-mails, notes internes.
+alter table public.demandes add column if not exists historique jsonb not null default '[]'::jsonb;
+alter table public.demandes add column if not exists email_restaurant text;
+alter table public.demandes add column if not exists email_client text;
+alter table public.demandes add column if not exists notes text;
+alter table public.demandes add column if not exists traite_par text;
+alter table public.demandes add column if not exists traite_le timestamptz;
+
 create table if not exists public.page_events (
   page text not null,
   event text not null,

@@ -41,11 +41,12 @@ async function sendViaFormsubmit(email, subject, fields) {
   } catch {}
 }
 
+// Renvoie un résumé (utile pour garder une trace) : [{ to, via: "resend" | "formsubmit" }].
 async function notifyAdmins(supabase, fallbackEmail, subject, fields, mail) {
   let emails = await getAdminEmails(supabase);
   if (!emails.length && fallbackEmail) emails = [fallbackEmail];
 
-  await Promise.all(
+  return Promise.all(
     emails.map(async (email) => {
       if (mail && isConfigured()) {
         const result = await sendEmail({
@@ -56,9 +57,10 @@ async function notifyAdmins(supabase, fallbackEmail, subject, fields, mail) {
           replyTo: mail.replyTo,
           fromName: "Bistro Burger (alertes)",
         });
-        if (result.status === "envoye") return;
+        if (result.status === "envoye") return { to: email, via: "resend" };
       }
       await sendViaFormsubmit(email, subject, fields);
+      return { to: email, via: "formsubmit" };
     })
   );
 }

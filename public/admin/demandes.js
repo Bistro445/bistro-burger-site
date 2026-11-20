@@ -38,10 +38,23 @@
     if (!res.ok) throw new Error(json.error || "Échec du chargement.");
     return json;
   }
-  async function apiSet(id, statut) {
+  async function apiPatch(payload) {
     const headers = await window.adminAuth.authHeader();
-    const res = await fetch(API_URL, { method: "PATCH", headers: Object.assign({ "Content-Type": "application/json" }, headers), body: JSON.stringify({ id, statut }) });
-    if (!res.ok) throw new Error("Échec de la mise à jour.");
+    const res = await fetch(API_URL, { method: "PATCH", headers: Object.assign({ "Content-Type": "application/json" }, headers), body: JSON.stringify(payload) });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || "Échec de la mise à jour.");
+    return json;
+  }
+  const MAIL_LABEL = {
+    envoye: "✓ envoyé", non_configure: "non envoyé (envoi non configuré)", echec: "⚠ échec de l'envoi",
+    aucun_destinataire: "⚠ aucun destinataire",
+  };
+  function histHtml(d) {
+    const h = Array.isArray(d.historique) ? d.historique : [];
+    if (!h.length) return "";
+    return '<details class="dm-hist"><summary>Historique (' + h.length + ")</summary><ol>" +
+      h.map((e) => "<li><span>" + esc(fmtWhen(e.at)) + "</span> " + esc(e.quoi) + (e.par ? " <em>· " + esc(e.par) + "</em>" : "") + "</li>").join("") +
+      "</ol></details>";
   }
 
   function row(label, value) { return value ? '<div class="rec-info-row"><span class="rec-info-label">' + esc(label) + '</span><span class="rec-info-value">' + value + "</span></div>" : ""; }
@@ -56,10 +69,24 @@
       '<div class="rec-info-grid">' +
       row("Nom", esc(d.nom)) + row("Client", esc((TYPES[d.type_client] || d.type_client || "") + (d.societe ? " · " + d.societe : ""))) +
       row("Téléphone", tel) + row("E-mail", mail) + row("Date souhaitée", esc(fmtDay(d.date_souhaitee))) + row("Personnes", esc(d.personnes)) +
+      row("Alerte restaurant", esc(MAIL_LABEL[d.email_restaurant] || d.email_restaurant || "")) +
+      row("Accusé au client", esc(MAIL_LABEL[d.email_client] || d.email_client || "")) +
+      row("Traitée", traite && d.traite_par ? esc(d.traite_par) + (d.traite_le ? " · " + esc(fmtWhen(d.traite_le)) : "") : "") +
       "</div>" +
       (d.message ? '<p class="rec-note">' + esc(d.message) + "</p>" : "") +
+      '<div class="dm-notes"><label for="dm-note-' + esc(d.id) + '">Notes internes <span>(visibles seulement dans l\'admin)</span></label>' +
+      '<textarea id="dm-note-' + esc(d.id) + '" rows="2" maxlength="4000" placeholder="Ex. : rappelé le 21/11, devis envoyé…">' + esc(d.notes || "") + "</textarea>" +
+      '<button type="button" class="rec-btn" data-note="' + esc(d.id) + '">Enregistrer la note</button></div>' +
+      histHtml(d) +
       '<div class="rec-actions"><button type="button" class="rec-btn' + (traite ? "" : " rec-btn-primary") + '" data-set="' + esc(d.id) + '" data-statut="' + (traite ? "nouveau" : "traite") + '">' + (traite ? "Remettre en nouvelle" : "Marquer comme traitée") + "</button></div>" +
       "</div>";
+  }
+
+  function dailyHtml(daily) {
+    if (!daily || !daily.length) return "";
+    return '<div class="rec-card" style="overflow-x:auto"><table class="dm-table"><thead><tr><th>Jour</th><th>Visites</th><th>Clics</th><th>Demandes</th></tr></thead><tbody>' +
+      daily.map((r) => "<tr><td>" + esc(fmtDay(r.day)) + "</td><td>" + r.visites + "</td><td>" + r.clics + "</td><td>" + r.demandes + "</td></tr>").join("") +
+      "</tbody></table></div>";
   }
 
   function statsHtml(stats) {
@@ -91,7 +118,9 @@
       [["all", "Toutes"], ["nouveau", "Nouvelles"], ["traite", "Traitées"]].map((f) => '<button type="button" class="rec-filter-btn' + (state.filter === f[0] ? " is-active" : "") + '" data-filter="' + f[0] + '">' + f[1] + "</button>").join("") +
       "</div></div>" +
       (items.length ? '<div class="rec-list">' + items.map(card).join("") + "</div>" : '<div class="rec-empty">Aucune demande pour l\'instant.</div>') +
-      "<h2 style=\"font-size:18px;margin:26px 0 10px\">Clics sur la page Noël</h2>" +
+      "<h2 style=\"font-size:18px;margin:26px 0 10px\">Jour par jour (page Noël)</h2>" +
+      (dailyHtml(state.daily) || '<div class="rec-empty">Rien pour l\'instant.</div>') +
+      "<h2 style=\"font-size:18px;margin:26px 0 10px\">Clics par bouton (total)</h2>" +
       statsHtml(state.stats);
 
     document.getElementById("dm-back").addEventListener("click", () => window.adminShowDashboard());
@@ -99,22 +128,33 @@
     container.querySelectorAll("[data-set]").forEach((b) => b.addEventListener("click", async () => {
       b.disabled = true;
       try {
-        await apiSet(b.dataset.set, b.dataset.statut);
+        const r = await apiPatch({ id: Number(b.dataset.set), statut: b.dataset.statut });
         const d = state.items.find((x) => String(x.id) === b.dataset.set);
-        if (d) d.statut = b.dataset.statut;
+        if (d) Object.assign(d, { statut: b.dataset.statut, historique: r.historique, traite_par: r.traite_par, traite_le: r.traite_le });
         render();
       } catch (err) { b.disabled = false; alert(err.message); }
+    }));
+    container.querySelectorAll("[data-note]").forEach((b) => b.addEventListener("click", async () => {
+      const id = b.dataset.note, ta = document.getElementById("dm-note-" + id);
+      b.disabled = true; b.textContent = "Enregistrement…";
+      try {
+        const r = await apiPatch({ id: Number(id), notes: ta.value });
+        const d = state.items.find((x) => String(x.id) === id);
+        if (d) Object.assign(d, { notes: r.notes, historique: r.historique });
+        render();
+      } catch (err) { b.disabled = false; b.textContent = "Enregistrer la note"; alert(err.message); }
     }));
   }
 
   window.DemandesEditor = {
     async open() {
-      state = { screen: "loading", items: [], stats: {}, filter: "all", setupRequired: false };
+      state = { screen: "loading", items: [], stats: {}, daily: [], filter: "all", setupRequired: false };
       render();
       try {
         const json = await apiList();
         state.items = json.items || [];
         state.stats = json.stats || {};
+        state.daily = json.daily || [];
         state.setupRequired = !!json.setupRequired;
         state.screen = "ready";
       } catch (err) { state.screen = "error"; state.error = err.message; }
