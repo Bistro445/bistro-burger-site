@@ -129,12 +129,23 @@
     btn.disabled = true;
     state.messages[user.id] = "Envoi…";
     render();
-    const { error } = await window.adminAuth.supabase.auth.resetPasswordForEmail(user.email, {
-      redirectTo: window.location.origin + "/admin/",
-    });
-    state.messages[user.id] = error
-      ? "Échec de l'envoi : " + error.message
-      : "Lien envoyé à " + user.email + ". Il n'est utilisable qu'une fois.";
+    // E-mail en français envoyé par le site (lien valable 1 h, à usage unique).
+    let errorMsg = "";
+    try {
+      const headers = await window.adminAuth.authHeader();
+      const res = await fetch("/api/admin/password-link", {
+        method: "POST",
+        headers: Object.assign({ "Content-Type": "application/json" }, headers),
+        body: JSON.stringify({ email: user.email }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) errorMsg = json.error || "Échec de l'envoi.";
+    } catch (err) {
+      errorMsg = (err && err.message) || "Échec de l'envoi.";
+    }
+    state.messages[user.id] = errorMsg
+      ? "Échec de l'envoi : " + errorMsg
+      : "Lien envoyé à " + user.email + " (valable 1 heure, utilisable une seule fois). Pensez à regarder dans les spams.";
     render();
   });
 

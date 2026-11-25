@@ -345,4 +345,40 @@ function clientDemandeAck(d) {
   return { subject: "Nous avons bien reçu votre demande — " + RESTAURANT.nom, html, text };
 }
 
-module.exports = { clientReservationConfirmed, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, RESTAURANT };
+// ───────────── Compte admin : lien pour choisir son mot de passe ─────────────
+// note : phrase facultative ajoutée par l'admin (ex. « Vous recevrez aussi un autre lien sur… »).
+function adminPasswordLink(email, link, note) {
+  const contenu =
+    '<p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.55;color:' + C.texte + '">' +
+    "Voici votre lien pour choisir le mot de passe de l'espace admin du site, pour le compte <b>" + esc(email) + "</b>.</p>" +
+    bouton("Choisir mon mot de passe", link, true) +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="' + C.creme400 + '" style="border-radius:10px;margin-top:20px"><tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:' + C.texte + '">' +
+    "<b>Comment ça marche</b><br>" +
+    "1. Cliquez sur le bouton : la page « Choisissez votre mot de passe » s'ouvre.<br>" +
+    "2. Choisissez un mot de passe (8 caractères minimum) et confirmez-le.<br>" +
+    "3. C'est tout : ce mot de passe fonctionne ensuite sur ordinateur comme sur téléphone, avec l'adresse " + esc(email) + ".</td></tr></table>" +
+    (note
+      ? '<p style="margin:18px 0 0;padding:12px 14px;border-left:4px solid ' + C.terre + ';background:#fff8f0;border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:' + C.texte + '">' + esc(note).replace(/\n/g, "<br>") + "</p>"
+      : "") +
+    '<p style="margin:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:' + C.gris + '">' +
+    "Le lien est valable 1 heure et ne sert qu'une seule fois. Sur téléphone, si le lien s'ouvre dans l'application Gmail, choisissez votre mot de passe sur cette page, puis connectez-vous normalement depuis votre navigateur.<br>" +
+    "Vous n'avez rien demandé ? Ignorez simplement cet e-mail : votre mot de passe actuel ne change pas.</p>";
+  const html = cadre({
+    preheader: "Choisissez le mot de passe de l'espace admin Bistro Burger.",
+    pastille: "Espace admin",
+    pastilleCouleur: C.vert700,
+    titre: "Votre mot de passe",
+    intro: "",
+    contenu,
+    pied: "E-mail envoyé depuis l'espace admin du site " + '<a href="' + esc(SITE_URL) + '" style="color:' + C.vert800 + '">bistroburgergardanne.com</a>.',
+  });
+  const text =
+    "Bonjour,\n\nVoici votre lien pour choisir le mot de passe de l'espace admin Bistro Burger (compte " + email + ") :\n" + link + "\n\n" +
+    "1. Cliquez sur le lien : la page « Choisissez votre mot de passe » s'ouvre.\n2. Choisissez un mot de passe (8 caractères minimum) et confirmez-le.\n" +
+    "3. Ce mot de passe fonctionne ensuite sur ordinateur comme sur téléphone.\n\n" +
+    (note ? note + "\n\n" : "") +
+    "Le lien est valable 1 heure et ne sert qu'une seule fois.\nVous n'avez rien demandé ? Ignorez cet e-mail.\n";
+  return { subject: "Espace admin Bistro Burger : choisissez votre mot de passe", html, text };
+}
+
+module.exports = { clientReservationConfirmed, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, adminPasswordLink, RESTAURANT };
