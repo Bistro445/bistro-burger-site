@@ -108,7 +108,11 @@ ligne** : tout `push` sur la branche déployée part en production après un red
    appuyer sur Échap** ; vérifier dans l'onglet "View" que le JSON est valide avant d'enregistrer ; supprimer les
    guillemets/accolades en trop ajoutés automatiquement ; traduction Chrome désactivée. Préfère l'admin.
 10. L'espace admin et l'outil SEO partagent les mêmes comptes (Supabase). Tous les comptes ont les mêmes
-    droits. Les mots de passe sont illisibles, par conception : on envoie un lien de réinitialisation.
+    droits (dont inviter et supprimer un autre admin ; pas soi-même, ni le dernier compte). Les mots de passe sont
+    illisibles, par conception : on envoie un lien (rubrique Administrateurs → e-mail français via /api/admin/password-link).
+    **Inscription libre désactivée dans Supabase le 25/11/2026** (« Allow new users to sign up » = off) : sinon n'importe
+    qui pourrait se créer un compte et aurait tous les droits admin, car les API admin vérifient seulement la connexion.
+    Ne jamais la réactiver. Les invitations depuis l'admin fonctionnent quand même.
 11. Connexion sur plusieurs appareils (corrigé le 18/11/2026) : la déconnexion utilise `signOut({ scope: "local" })`
     (admin et `/app`) ; sans ce paramètre Supabase déconnecte **tous** les appareils du compte. Arrivée par un lien
     d'invitation ou « Mot de passe oublié » : l'admin impose l'écran « Choisissez votre mot de passe » avant d'entrer
