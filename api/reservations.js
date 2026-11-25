@@ -4,6 +4,7 @@ const { createClient } = require("@supabase/supabase-js");
 const { notifyAdmins } = require("./_lib/notify");
 const { notifyPush } = require("./_lib/push");
 const { adminNewReservation } = require("./_lib/emailTemplates");
+const { sendReservationReceived } = require("./_lib/customerMail");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,9 +20,9 @@ function isValidEmail(raw) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(raw || ""));
 }
 
-// L'e-mail au client n'est plus envoyé à la demande : il part quand le restaurant
-// confirme la réservation dans l'admin (voir api/_lib/customerMail.js et
-// api/admin/reservations.js).
+// Deux e-mails au client : « demande bien reçue » tout de suite après la demande (ci-dessous,
+// table pas encore confirmée), puis « réservation confirmée » quand le restaurant clique sur
+// « Confirmer » dans l'admin (voir api/_lib/customerMail.js et api/admin/reservations.js).
 
 async function verifyRecaptcha(token) {
   if (!RECAPTCHA_SECRET_KEY) return true; // captcha non configuré : ne bloque pas les réservations
@@ -121,5 +122,13 @@ module.exports = async (req, res) => {
     url: "/app/",
   });
 
-  res.status(200).json({ ok: true });
+  // Accusé de réception au client (jamais bloquant : la réservation est déjà enregistrée).
+  let clientEmail = "pas_d_email";
+  try {
+    clientEmail = (await sendReservationReceived(row)).status;
+  } catch (e) {
+    clientEmail = "echec";
+  }
+
+  res.status(200).json({ ok: true, clientEmail });
 };

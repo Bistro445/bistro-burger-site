@@ -161,6 +161,48 @@ function clientReservationConfirmed(row) {
   return { subject: "Votre réservation est confirmée — " + RESTAURANT.nom, html, text };
 }
 
+// ───────────── E-mail au CLIENT : demande de réservation bien reçue ─────────────
+// Envoyé tout de suite après la demande. La table n'est PAS encore confirmée : le client
+// reçoit ensuite clientReservationConfirmed quand le restaurant clique sur « Confirmer ».
+function clientReservationReceived(row) {
+  const prenom = row.name ? String(row.name).trim() : "";
+  const date = formatDateFr(row.reservation_date);
+  const details = lignes([
+    ["Date", esc(date)],
+    ["Heure", esc(row.reservation_time || "")],
+    ["Personnes", esc(row.party_size || "")],
+  ]);
+  const contenu =
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="' + C.creme400 + '" style="border-radius:10px"><tr><td style="padding:8px 20px">' +
+    details + "</td></tr></table>" +
+    '<p style="margin:20px 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:' + C.texte + '">' +
+    "Votre table n'est <b>pas encore confirmée</b> : nous vérifions la disponibilité et vous recevrez un second e-mail dès que le restaurant aura validé votre réservation.</p>" +
+    bouton("Nous appeler : " + RESTAURANT.telephoneAffiche, "tel:" + RESTAURANT.telephoneLien, true) +
+    bouton("Voir l'itinéraire", RESTAURANT.carte, false) +
+    '<p style="margin:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:' + C.gris + '">Une question ou un changement ? Appelez-nous ou répondez simplement à cet e-mail.</p>';
+  const html = cadre({
+    preheader: "Demande reçue pour le " + (date || "") + (row.reservation_time ? " à " + row.reservation_time : "") + " — en attente de confirmation.",
+    pastille: "Demande reçue",
+    pastilleCouleur: C.terre,
+    titre: "Merci" + (prenom ? " " + esc(prenom) : "") + " !",
+    intro: "Nous avons bien reçu votre demande de réservation. Voici le récapitulatif.",
+    contenu,
+    pied:
+      "Vous recevez cet e-mail car une réservation a été demandée avec cette adresse sur " +
+      '<a href="' + esc(SITE_URL) + '" style="color:' + C.vert800 + '">bistroburgergardanne.com</a>.<br>' +
+      esc(RESTAURANT.nom) + " &middot; " + esc(RESTAURANT.adresse),
+  });
+  const text =
+    (prenom ? "Bonjour " + prenom + "," : "Bonjour,") + "\n\n" +
+    "Nous avons bien reçu votre demande de réservation chez " + RESTAURANT.nom + " :\n" +
+    (date ? "Date : " + date + "\n" : "") +
+    (row.reservation_time ? "Heure : " + row.reservation_time + "\n" : "") +
+    (row.party_size ? "Personnes : " + row.party_size + "\n" : "") +
+    "\nVotre table n'est pas encore confirmée : vous recevrez un second e-mail dès que le restaurant aura validé votre réservation.\n\n" +
+    "Téléphone : " + RESTAURANT.telephoneAffiche + "\nAdresse : " + RESTAURANT.adresse + "\n\nÀ très bientôt,\nL'équipe " + RESTAURANT.nom + "\n";
+  return { subject: "Demande de réservation reçue — " + RESTAURANT.nom, html, text };
+}
+
 // ───────────── Alerte au RESTAURANT : nouvelle réservation ─────────────
 function adminNewReservation(row) {
   const tel = row.phone ? '<a href="tel:' + esc(String(row.phone).replace(/[^\d+]/g, "")) + '" style="color:' + C.vert800 + ';text-decoration:none">' + esc(row.phone) + "</a>" : "";
@@ -381,4 +423,4 @@ function adminPasswordLink(email, link, note) {
   return { subject: "Espace admin Bistro Burger : choisissez votre mot de passe", html, text };
 }
 
-module.exports = { clientReservationConfirmed, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, adminPasswordLink, RESTAURANT };
+module.exports = { clientReservationConfirmed, clientReservationReceived, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, adminPasswordLink, RESTAURANT };

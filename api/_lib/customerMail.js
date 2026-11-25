@@ -3,7 +3,7 @@
 // dans emailTemplates.js. N'envoie rien tant que RESEND_API_KEY et RESEND_FROM_EMAIL
 // (adresse d'un domaine vérifié chez Resend) ne sont pas définies dans Hostinger.
 const { sendEmail, isConfigured } = require("./mailer");
-const { clientReservationConfirmed } = require("./emailTemplates");
+const { clientReservationConfirmed, clientReservationReceived } = require("./emailTemplates");
 
 // Adresse qui reçoit les réponses des clients (par défaut : celle du restaurant).
 const REPLY_TO = process.env.RESEND_REPLY_TO || process.env.ALERT_EMAIL || "brasserie.zone.avon@gmail.com";
@@ -17,4 +17,12 @@ async function sendReservationConfirmed(row) {
   return sendEmail({ to: row.email, subject, html, text, replyTo: REPLY_TO, fromName: "Bistro Burger" });
 }
 
-module.exports = { sendReservationConfirmed };
+// E-mail « demande bien reçue » envoyé au client dès sa demande (même format de retour).
+async function sendReservationReceived(row) {
+  if (!row || !row.email) return { status: "pas_d_email" };
+  if (!isConfigured()) return { status: "non_configure" };
+  const { subject, html, text } = clientReservationReceived(row);
+  return sendEmail({ to: row.email, subject, html, text, replyTo: REPLY_TO, fromName: "Bistro Burger" });
+}
+
+module.exports = { sendReservationConfirmed, sendReservationReceived };
