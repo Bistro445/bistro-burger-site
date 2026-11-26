@@ -41,11 +41,8 @@
     ] },
   ];
   const DOCS = [
-    { key: "offres", file: "noel-2026-nos-offres.pdf", label: "Nos offres de Noël (les 8 fiches)" },
-    { key: "menu-fetes", file: "menu-de-fetes.pdf", label: "Menu de fêtes" },
-    { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Carte traiteur d'hiver" },
-    { key: "emporter", file: "menu-noel-a-emporter.pdf", label: "Noël à emporter ou livré" },
-    { key: "buffet", file: "buffet-du-lendemain.pdf", label: "Buffet du lendemain" },
+    { key: "offres", file: "noel-2026-nos-offres.pdf", label: "Noël 2026 au Bistro · nos offres (présentation des offres)" },
+    { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Carte traiteur d'hiver · cocktail & bouchées" },
   ];
 
   let state = null;
