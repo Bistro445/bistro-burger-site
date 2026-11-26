@@ -110,7 +110,7 @@
     const items = state.filter === "all" ? state.items : state.items.filter((d) => (d.statut || "nouveau") === state.filter);
     container.innerHTML =
       '<button type="button" class="back-btn" id="dm-back">‹ Retour</button>' +
-      "<h1>Demandes &amp; suivi Noël</h1>" +
+      "<h1>Demandes et clics Noël</h1>" +
       '<p class="dashboard-note">Les demandes envoyées depuis la page « Noël au Bistro » (vous les recevez aussi par e-mail), et le nombre de clics sur chaque bouton de la page.</p>' +
       (state.setupRequired
         ? '<div class="login-error" style="margin-bottom:14px">L\'historique n\'est pas encore activé : il faut exécuter une fois le fichier <b>scripts/demandes.sql</b> dans Supabase (SQL Editor). En attendant, les demandes arrivent quand même par e-mail.</div>'

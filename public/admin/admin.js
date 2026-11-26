@@ -129,7 +129,7 @@ window.AdminDrafts = (() => {
     { key: "blog", title: "Blog", editor: () => window.BlogEditor },
     { key: "commandes", title: "Commandes", editor: () => window.CommandesEditor },
     { key: "reservations-clients", title: "Réservations reçues", editor: () => window.ReservationsClientsEditor },
-    { key: "demandes", title: "Demandes & suivi Noël", editor: () => window.DemandesEditor },
+    { key: "demandes", title: "Demandes et clics Noël", editor: () => window.DemandesEditor },
     { key: "devis", title: "Devis traiteur", editor: () => window.DevisEditor },
     { key: "noel", title: "Page Noël", editor: () => window.NoelEditor },
     { key: "administrateurs", title: "Administrateurs", editor: () => window.AdministrateursEditor },
