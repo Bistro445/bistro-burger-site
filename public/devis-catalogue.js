@@ -44,28 +44,38 @@
   ];
   var DRINKS_BOX = ["Eau minérale 50 cl", "Soda 33 cl", "Jus de fruits 25 cl"];
   var DESSERTS = ["Cookie maison", "Brownie maison", "Salade de fruits frais"];
-  // Carte des bouchées (source : BB_Carte_Cocktail_Bouchees.pdf). Pictos : V végétarien, VG vegan, SG sans gluten.
+  // Carte des bouchées d'hiver (source : BB-Carte-Cocktail-Traiteur-Hiver-26.pdf). Pictos : V végétarien, VG vegan, SG sans gluten.
+  // Groupes « noel: true » : les bouchées de Noël, au choix dans toutes les formules sans supplément, en DÉCEMBRE seulement
+  // (proposées si l'événement tombe en décembre ; refusées par le serveur sinon).
   var PIECES = {
     sal: [
+      { group: "Les bouchées de Noël", note: "En décembre, au choix sans supplément", noel: true, items: [
+        ["Mini burger de Noël : bœuf, comté & confit d'oignons"], ["Toast pain d'épices, chèvre & miel", "V"], ["Blini saumon fumé, crème à l'aneth"],
+        ["Feuilleté de boudin blanc & pommes"], ["Pique magret fumé & clémentine", "SG"]] },
       { group: "Signatures BB", note: "Sur notre mini bun, sauce maison", items: [
         ["Mini burger bœuf, cheddar, sauce maison"], ["Mini burger poulet croustillant"], ["Mini burger veggie, galette légumes & pois chiches", "V"],
         ["Mini burger chèvre, miel & roquette", "V"], ["Mini burger effiloché de bœuf ou pulled pork"], ["Mini croque jambon-comté (option truffe)"], ["Mini hot-dog, sauce maison"]] },
       { group: "Toasts & tartines", note: "Sur le pain de notre boulanger", items: [
-        ["Toast saumon gravlax, crème citronnée"], ["Toast rillettes de poulet ou de thon"], ["Bruschetta tomate & basilic", "VG"], ["Tartine chèvre & figue", "V"],
-        ["Toast tapenade ou anchoïade"], ["Mini pan bagnat"], ["Mini club sandwich"]] },
+        ["Toast saumon gravlax, crème citronnée"], ["Toast rillettes de poulet ou de thon"], ["Bruschetta champignons & persillade", "VG"], ["Tartine chèvre, poire & noix", "V"],
+        ["Toast tapenade ou anchoïade"], ["Tartine poireaux fondants & comté", "V"], ["Mini club sandwich"]] },
       { group: "Brochettes & piques", items: [
-        ["Tomate cerise, mozzarella & basilic", "V SG"], ["Poulet mariné", "SG"], ["Bœuf mariné, sauce BB"], ["Boulette de bœuf, sauce tomate"], ["Crevette ail & citron", "SG"], ["Légumes grillés", "VG SG"]] },
+        ["Mozzarella, tomate confite & pesto", "V SG"], ["Poulet mariné", "SG"], ["Bœuf mariné, sauce BB"], ["Boulette de bœuf, sauce tomate"], ["Crevette ail & citron", "SG"], ["Légumes d'hiver rôtis", "VG SG"]] },
       { group: "Verrines & cuillères", items: [
-        ["Gaspacho (été) ou velouté butternut (hiver)", "VG SG"], ["Houmous & bâtonnets de crudités", "VG SG"], ["Caviar d'aubergine", "VG SG"], ["Guacamole & crevette", "SG"],
-        ["Taboulé ou salade de quinoa", "VG"], ["Mousseline de thon & guacamole"], ["Crevette, sauce chimichurri"]] },
+        ["Velouté butternut & éclats de châtaigne", "VG SG"], ["Houmous & bâtonnets de crudités", "VG SG"], ["Houmous de betterave & graines", "VG SG"], ["Guacamole & crevette", "SG"],
+        ["Quinoa, butternut rôti & grenade", "VG SG"], ["Mousseline de thon & guacamole"], ["Crevette, sauce chimichurri"]] },
       { group: "Wraps & roulés", items: [
         ["Wrap poulet & crudités"], ["Wrap poulet curry"], ["Wrap veggie", "V"], ["Roulés de tortilla saumon & fromage frais"], ["Pain suédois saumon & cream cheese"]] },
     ],
     suc: [
+      { group: "Les bouchées de Noël", note: "En décembre, au choix sans supplément", noel: true, items: [
+        ["Mini bûche chocolat-praliné"], ["Verrine crème de marrons & chantilly", "SG"], ["Truffes au chocolat maison", "SG"], ["Sablés de Noël à la cannelle"], ["Mendiants, clin d'œil aux 13 desserts", "SG"]] },
       { group: "Les pièces sucrées", items: [
-        ["Brownie carré"], ["Mini cookie maison"], ["Mini pain perdu"], ["Mini panna cotta"], ["Mini tiramisu"], ["Mini mousse au chocolat"], ["Mini tropézienne"], ["Brochette de fruits frais", "VG SG"]] },
+        ["Brownie carré"], ["Mini cookie maison"], ["Mini pain perdu"], ["Mini panna cotta"], ["Mini tiramisu"], ["Mini mousse au chocolat"], ["Mini tropézienne"], ["Brochette de fruits d'hiver", "VG SG"]] },
     ],
   };
+  // Les bouchées de Noël ne se commandent que pour un événement en décembre (date au format AAAA-MM-JJ).
+  function isDecember(dateStr) { return /^\d{4}-12-\d{2}$/.test(String(dateStr || "")); }
+  function piecesFor(kind, dateStr) { return PIECES[kind].filter(function (g) { return !g.noel || isDecember(dateStr); }); }
   var TAG_LABEL = { V: "Végétarien", VG: "Vegan", SG: "Sans gluten" };
 
   var ALL_FORMULAS = [
@@ -96,15 +106,15 @@
     { id: "pl-sucre", fam: "plateaux", type: "base", name: "Sucré & Café", desc: "Pâtisseries maison et boisson chaude.", price: 8, tva: 10, unit: "plateau", min: 6, ex: true, img: "/assets/bande-2.webp",
       options: [{ id: "jus", name: "Jus de fruits", price: 2 }] },
 
-    // Formules cocktail et plateaux à partager : carte « Cocktail & bouchées » (prix réels ; HT ou TTC encore à confirmer).
+    // Formules cocktail et plateaux à partager : carte « Cocktail & bouchées » d'hiver 2026 (prix HT, cahier des charges).
     // Photos : celles de la carte (public/assets/traiteur/), extraites du PDF le 26/11/2026.
     { id: "co-aperitif", fam: "cocktail", type: "cocktail", name: "L'Apéritif", desc: "6 pièces salées par personne, 100 % salé.", price: 13, tva: 10, unit: "personne", sal: 6, suc: 0, min: 1, img: "/assets/traiteur/cocktail-verrines.jpg" },
     { id: "co-cocktail", fam: "cocktail", type: "cocktail", name: "Le Cocktail", desc: "8 pièces salées et 2 pièces sucrées par personne.", price: 20, tva: 10, unit: "personne", sal: 8, suc: 2, min: 1, badge: "Le plus demandé", img: "/assets/traiteur/cocktail-mini-burgers.jpg" },
     { id: "co-dinatoire", fam: "cocktail", type: "cocktail", name: "Le Dînatoire", desc: "10 pièces salées et 2 pièces sucrées par personne.", price: 23, tva: 10, unit: "personne", sal: 10, suc: 2, min: 1, img: "/assets/traiteur/cocktail-sandwichs.jpg" },
 
-    { id: "pa-charcuterie", fam: "partage", type: "unit", name: "Plateau de charcuterie", sub: "La planche du bistrot", desc: "Une généreuse sélection de charcuteries, servie avec le pain de notre boulanger et nos pickles maison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-charcuterie.jpg" },
-    { id: "pa-fromages", fam: "partage", type: "unit", name: "Plateau de fromages", sub: "Le plateau du fromager", desc: "Un assortiment de fromages affinés aux caractères variés, avec le pain de notre boulanger et des garnitures de saison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-fromages.jpg" },
-    { id: "pa-crudites", fam: "partage", type: "unit", name: "Plateau crudités & dips", sub: "Le jardin méditerranéen", desc: "Légumes croquants de saison à tremper dans quatre dips maison : anchoïade, tapenade, houmous et tzatziki.", price: 20, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-crudites.jpg" },
+    { id: "pa-charcuterie", fam: "partage", type: "unit", name: "Plateau de charcuterie", sub: "La planche du bistrot", desc: "Une généreuse sélection de charcuteries, servie avec le pain de notre boulanger et nos pickles maison.", price: 40, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-charcuterie.jpg" },
+    { id: "pa-fromages", fam: "partage", type: "unit", name: "Plateau de fromages", sub: "Le plateau du fromager", desc: "Un assortiment de fromages affinés aux caractères variés, avec le pain de notre boulanger et des garnitures de saison.", price: 40, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-fromages.jpg" },
+    { id: "pa-crudites", fam: "partage", type: "unit", name: "Plateau crudités & dips", sub: "Le jardin méditerranéen", desc: "Légumes croquants de saison à tremper dans quatre dips maison : anchoïade, tapenade, houmous et tzatziki.", price: 25, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-crudites.jpg" },
 
     { id: "bo-eau", fam: "boissons", type: "unit", name: "Eau minérale 1,5 L", price: 2.5, tva: 10, unit: "bouteille", ex: true },
     { id: "bo-gaz", fam: "boissons", type: "unit", name: "Eau gazeuse 1 L", price: 2.8, tva: 10, unit: "bouteille", ex: true },
@@ -221,6 +231,13 @@
     var errs = [];
     if (!(state.lines || []).length && !unitItems(state).length) errs.push("Ajoutez au moins une formule à votre devis.");
     (state.lines || []).forEach(function (l) { lineErrors(l).forEach(function (e) { errs.push(e); }); });
+    // Bouchées de Noël choisies alors que l'événement n'est pas en décembre
+    if (!isDecember((state.event || {}).date)) (state.lines || []).forEach(function (l) {
+      var f = BY_ID[l.fid], sel = l.sel || {}; if (!f || f.type !== "cocktail" || l.chef) return;
+      var noel = [];
+      ["sal", "suc"].forEach(function (k) { PIECES[k].forEach(function (g) { if (g.noel) g.items.forEach(function (it) { if ((sel[k] || []).indexOf(it[0]) > -1) noel.push(it[0]); }); }); });
+      if (noel.length) errs.push("Les bouchées de Noël ne sont proposées qu'en décembre : remplacez « " + noel.join(" », « ") + " » dans « " + f.name + " ».");
+    });
     return errs;
   }
 
@@ -273,7 +290,7 @@
     input = input || {};
     var ev = input.event || {};
     var allPieces = { sal: [], suc: [] };
-    ["sal", "suc"].forEach(function (k) { PIECES[k].forEach(function (g) { g.items.forEach(function (it) { allPieces[k].push(it[0]); }); }); });
+    ["sal", "suc"].forEach(function (k) { piecesFor(k, ev.date).forEach(function (g) { g.items.forEach(function (it) { allPieces[k].push(it[0]); }); }); });
     var out = {
       event: {
         date: /^\d{4}-\d{2}-\d{2}$/.test(String(ev.date || "")) ? ev.date : "",
@@ -323,6 +340,7 @@
 
   return {
     CONFIG: CONFIG, FAMILIES: FAMILIES, PIECES: PIECES, TAG_LABEL: TAG_LABEL, FORMULAS: FORMULAS, BY_ID: BY_ID, DIETS: DIETS,
+    isDecember: isDecember, piecesFor: piecesFor,
     eur: eur, round2: round2, int: int, plural: plural, sum: sum, pad2: pad2, parseYmd: parseYmd, fmtTime: fmtTime, unitLabel: unitLabel,
     slotsFor: slotsFor, linePrice: linePrice, lineErrors: lineErrors, communeInfo: communeInfo, deliveryLine: deliveryLine,
     unitItems: unitItems, totals: totals, orderErrors: orderErrors, lineDetail: lineDetail, contactErrors: contactErrors,

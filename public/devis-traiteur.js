@@ -75,12 +75,7 @@
     if (ev.mode === "livraison" && !ev.commune) errs.push("Choisissez la commune de livraison.");
     return errs;
   }
-  function orderErrors() {
-    var errs = [];
-    if (!state.lines.length && !unitItems().length) errs.push("Ajoutez au moins une formule à votre devis.");
-    state.lines.forEach(function (l) { lineErrors(l).forEach(function (e) { errs.push(e); }); });
-    return errs;
-  }
+  function orderErrors() { return D.orderErrors(state); }
   function showAlerts(id, list, kind) {
     var box = document.getElementById(id); if (!box) return;
     box.innerHTML = (list || []).map(function (m) { return '<div class="dv-alert' + (kind ? " is-" + kind : "") + '">' + esc(m) + "</div>"; }).join("");
@@ -268,8 +263,9 @@
         if (!g[2]) return;
         var chosen = draft.sel[g[0]] = draft.sel[g[0]] || [], full = chosen.length >= g[2];
         h += '<div class="dv-comp-section"><div class="dv-comp-section-head"><h3>' + g[1] + "</h3>" + countBadge(chosen.length, g[2]) + "</div>";
-        PIECES[g[0]].forEach(function (grp) {
-          if (PIECES[g[0]].length > 1) h += '<div class="dv-piece-group">' + esc(grp.group) + (grp.note ? " <span>" + esc(grp.note) + "</span>" : "") + "</div>";
+        var groups = D.piecesFor(g[0], state.event.date);
+        groups.forEach(function (grp) {
+          if (groups.length > 1) h += '<div class="dv-piece-group' + (grp.noel ? " is-noel" : "") + '">' + esc(grp.group) + (grp.note ? " <span>" + esc(grp.note) + "</span>" : "") + "</div>";
           h += '<div class="dv-pieces">';
           grp.items.forEach(function (it) {
             var on = chosen.indexOf(it[0]) > -1;

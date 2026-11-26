@@ -57,13 +57,18 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   ajouter `grant select, insert, update, delete on public.<table> to service_role;` (jamais pour anon/authenticated).
   Le compteur du blog (`scripts/blog-views.sql`) n'a jamais été exécuté (table `blog_views` absente au 20/11/2026) :
   y ajouter cette ligne de droits avant de le lancer.
-- Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée** (fichiers locaux, non
-  suivis par git). Contenu modifiable dans l'admin, rubrique « Page Noël » (public/admin/noel.js, clé site_content
-  `noel` = { visible, textes, docs }) : chaque case `<span class="nl-todo" data-noel="clé">` est remplacée côté
-  serveur par lib/noelPage.js (route /noel de server.js, + prix dans les données « Event »). PDF déposés depuis
-  l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql, exécuté le 26/11/2026), servis à adresse
-  fixe `/noel/<fichier>.pdf` (redirection vers le fichier actuel). « Page visible » décochée → /noel répond 404.
-  Publication : ajouter pages/noel.html + public/noel.css/.js au dépôt, retirer le bandeau maquette et le noindex.
+- Page Noël `/noel` (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **publiée le 27/11/2026** avec les
+  documents « BB-Noel-2026-Presentation-des-offres.pdf » et « BB-Carte-Cocktail-Traiteur-Hiver-26.pdf ». Textes
+  modifiables dans l'admin, rubrique « Page Noël » (public/admin/noel.js, clé site_content `noel` = { visible,
+  textes, docs }) : chaque `<span data-noel="clé">texte d'origine</span>` est remplacé côté serveur par
+  lib/noelPage.js (route /noel de server.js) si la case est remplie dans l'admin (+ prix du menu de fêtes dans les
+  données « Event »). 5 PDF déposés depuis l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql),
+  servis à adresse fixe `/noel/<fichier>.pdf` (redirection). « Page visible » décochée → /noel répond 404 (à faire
+  début janvier ; retirer alors aussi /noel du sitemap, lib/siteData.js).
+- Délais différents selon les documents (à harmoniser si le restaurant le décide) : page devis 96 h (décision du
+  20/11), carte traiteur 48 h, fiche Noël traiteur 72 h, buffet 3 jours. Zones aussi différentes : carte traiteur
+  (Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau) ≠ fiche Noël (Gardanne, Bouc-Bel-Air, Simiane,
+  Meyreuil, Calas, Cabriès, Gréasque, Fuveau). La page devis suit la carte, la page Noël suit les fiches Noël.
 
 ## Devis traiteur (OUVERT AUX CLIENTS depuis le 26/11/2026, après un aperçu privé le même jour)
 - Liens : menu principal de toutes les pages (« Devis traiteur »), page /traiteur, sitemap. Pour recacher en urgence :

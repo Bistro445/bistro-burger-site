@@ -281,3 +281,7 @@ select.dv-input { appearance: none; -webkit-appearance: none; background-image: 
   .dv-pick { flex-wrap: wrap; }
   .dv-pieces { grid-template-columns: minmax(0,1fr); }
 }
+
+/* Bouchées de Noël (décembre) */
+.dv-piece-group.is-noel { color: #B5651D; }
+

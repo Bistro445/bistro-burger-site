@@ -11,39 +11,40 @@
   const container = document.getElementById("noel-view");
   if (!container) return;
 
-  // Une entrée par case « à compléter » de la page (attribut data-noel de pages/noel.html).
+  // Les textes modifiables de la page (attribut data-noel de pages/noel.html). Case vide = texte d'origine de la page.
   const GROUPS = [
     { title: "Menu de fêtes · 16 et 17 décembre", fields: [
-      { key: "fetes_prix", label: "Prix par personne (en €)", hint: "Juste le nombre, ex. : 45", short: true },
+      { key: "fetes_prix", label: "Prix par personne (en €)", hint: "Juste le nombre, ex. : 50", short: true },
     ] },
     { title: "Repas de groupe (dès 10 personnes)", fields: [
-      { key: "groupe_quand", label: "Jours et services", hint: "Ex. : du lundi au vendredi, midi et soir" },
-      { key: "groupe_menu", label: "Composition du menu", hint: "Entrée, plat, dessert…", area: true },
-      { key: "groupe_prix", label: "Prix par personne (en €)", hint: "Juste le nombre", short: true },
+      { key: "groupe_prix", label: "Prix par personne (en €)", hint: "Juste le nombre, ex. : 35", short: true },
+      { key: "groupe_quand", label: "Quand", hint: "Ex. : Sur réservation, entre le 14 et le 31 décembre 2026" },
     ] },
     { title: "Privatisation · arbre de Noël", fields: [
-      { key: "arbre_apresmidi", label: "Horaires de l'après-midi", hint: "Ex. : de 14 h à 18 h" },
-      { key: "arbre_soiree", label: "Horaires de la soirée", hint: "Ex. : à partir de 19 h" },
-      { key: "arbre_capacite", label: "Capacité (nombre de personnes)", hint: "Juste le nombre", short: true },
+      { key: "arbre_apresmidi", label: "Horaires de l'après-midi", hint: "Ex. : du lundi au vendredi de 15 h à 18 h" },
+      { key: "arbre_soiree", label: "Horaires de la soirée", hint: "Ex. : de 19 h à 1 h" },
+      { key: "arbre_capacite", label: "Capacité (personnes)", hint: "Ex. : 30 à 40", short: true },
+    ] },
+    { title: "Traiteur en entreprise", fields: [
+      { key: "traiteur_zone", label: "Communes livrées", hint: "Ex. : Gardanne, Bouc-Bel-Air, Simiane…" },
+      { key: "traiteur_delai", label: "Délai de commande", hint: "Ex. : 72 h", short: true },
     ] },
     { title: "Noël à emporter ou livré", fields: [
-      { key: "emporter_retrait", label: "Horaires de retrait", hint: "Ex. : le 24 décembre de 10 h à 16 h" },
-      { key: "emporter_menu", label: "Composition du menu", area: true },
-      { key: "emporter_prix", label: "Prix par personne (en €)", hint: "Juste le nombre", short: true },
-      { key: "emporter_date_limite", label: "Date limite de commande", hint: "Ex. : 20 décembre" },
+      { key: "emporter_retrait", label: "Retrait au restaurant", hint: "Ex. : le 24 décembre, de l'ouverture jusqu'à 15 h" },
+      { key: "emporter_livraison", label: "Livraison", hint: "Ex. : le 24 décembre au matin" },
+      { key: "emporter_prix", label: "Prix", hint: "Texte complet, ex. : Selon la formule choisie" },
+      { key: "emporter_date_limite", label: "Commander avant le", hint: "Ex. : 19 décembre", short: true },
     ] },
     { title: "Buffet du lendemain", fields: [
-      { key: "buffet_menu", label: "Composition et formats", area: true },
-      { key: "buffet_prix", label: "Prix", hint: "Texte complet, ex. : 15 € par personne" },
-    ] },
-    { title: "Infos pratiques", fields: [
-      { key: "horaires_fetes", label: "Horaires des 16 et 17 décembre", hint: "Ex. : midi et soir, de 12 h à 14 h et de 19 h à 22 h" },
+      { key: "buffet_delai", label: "Délai de commande", hint: "Ex. : 3 jours", short: true },
+      { key: "buffet_prix", label: "Prix", hint: "Texte complet, ex. : Selon la formule choisie" },
     ] },
   ];
   const DOCS = [
+    { key: "offres", file: "noel-2026-nos-offres.pdf", label: "Nos offres de Noël (les 8 fiches)" },
     { key: "menu-fetes", file: "menu-de-fetes.pdf", label: "Menu de fêtes" },
-    { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Listing traiteur de Noël" },
-    { key: "emporter", file: "menu-noel-a-emporter.pdf", label: "Menu de Noël à emporter / livré" },
+    { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Carte traiteur d'hiver" },
+    { key: "emporter", file: "menu-noel-a-emporter.pdf", label: "Noël à emporter ou livré" },
     { key: "buffet", file: "buffet-du-lendemain.pdf", label: "Buffet du lendemain" },
   ];
 
@@ -120,7 +121,7 @@
       '<button type="button" class="back-btn" id="nl-back">‹ Retour</button>' +
       "<h1>Page Noël</h1>" +
       '<p class="dashboard-note">Les prix, horaires et menus de la page « Noël au Bistro », et les PDF que les clients téléchargent. ' +
-      "Une case laissée vide reste affichée « à compléter » sur la page. Rempli : <b>" + filled + " / " + total + "</b>.</p>" +
+      "Une case laissée vide garde le texte d'origine de la page (" + filled + " / " + total + " personnalisées).</p>" +
       '<form id="nl-form-admin">' +
       '<label class="nl-adm-check"><input type="checkbox" id="nl-visible"' + (d.visible ? " checked" : "") + "> Page visible sur le site <span>(décochez début janvier pour la masquer ; elle reste prête pour Noël 2027)</span></label>" +
       GROUPS.map((g) =>
