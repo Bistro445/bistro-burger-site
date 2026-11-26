@@ -65,7 +65,7 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   données « Event »). 2 PDF à télécharger (demande du 26/11 : la présentation des offres = noel-2026-nos-offres.pdf, et la carte traiteur d'hiver = listing-traiteur-noel.pdf ; les 3 autres fichiers déposés le 26/11 ne sont plus liés) déposés depuis l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql),
   servis à adresse fixe `/noel/<fichier>.pdf` (redirection). « Page visible » décochée → /noel répond 404 (à faire
   début janvier ; retirer alors aussi /noel du sitemap, lib/siteData.js).
-- Délai de commande : **96 h partout sur le site** (décision du 26/11/2026 : page devis, bloc traiteur et buffet de la page Noël). Les PDF du restaurant disent encore 48 h (carte) et 72 h / 3 jours (fiches Noël). Zones : carte traiteur et page devis (Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau) ≠ fiche Noël (Gardanne, Bouc-Bel-Air, Simiane, Meyreuil, Calas, Cabriès, Gréasque, Fuveau) : pas encore tranché.
+- Délais (décision du 26/11/2026) : la page devis traiteur reste à **96 h** ; la page Noël suit ses fiches Noël (traiteur en entreprise **72 h**, buffet **3 jours**, emporter avant le 19 déc.) : ce sont deux offres différentes, ne pas les aligner. La carte traiteur PDF dit 48 h. Zones : carte traiteur et page devis (Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau) ≠ fiche Noël (Gardanne, Bouc-Bel-Air, Simiane, Meyreuil, Calas, Cabriès, Gréasque, Fuveau) : pas encore tranché.
 
 ## Devis traiteur (OUVERT AUX CLIENTS depuis le 26/11/2026, après un aperçu privé le même jour)
 - Liens : menu principal de toutes les pages (« Devis traiteur »), page /traiteur, sitemap. Pour recacher en urgence :

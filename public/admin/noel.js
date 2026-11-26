@@ -27,7 +27,7 @@
     ] },
     { title: "Traiteur en entreprise", fields: [
       { key: "traiteur_zone", label: "Communes livrées", hint: "Ex. : Gardanne, Bouc-Bel-Air, Simiane…" },
-      { key: "traiteur_delai", label: "Délai de commande", hint: "Ex. : 96 h", short: true },
+      { key: "traiteur_delai", label: "Délai de commande", hint: "Ex. : 72 h", short: true },
     ] },
     { title: "Noël à emporter ou livré", fields: [
       { key: "emporter_retrait", label: "Retrait au restaurant", hint: "Ex. : le 24 décembre, de l'ouverture jusqu'à 15 h" },
@@ -36,7 +36,7 @@
       { key: "emporter_date_limite", label: "Commander avant le", hint: "Ex. : 19 décembre", short: true },
     ] },
     { title: "Buffet du lendemain", fields: [
-      { key: "buffet_delai", label: "Délai de commande", hint: "Ex. : 96 h", short: true },
+      { key: "buffet_delai", label: "Délai de commande", hint: "Ex. : 3 jours", short: true },
       { key: "buffet_prix", label: "Prix", hint: "Texte complet, ex. : Selon la formule choisie" },
     ] },
   ];
