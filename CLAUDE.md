@@ -62,7 +62,7 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   modifiables dans l'admin, rubrique « Page Noël » (public/admin/noel.js, clé site_content `noel` = { visible,
   textes, docs }) : chaque `<span data-noel="clé">texte d'origine</span>` est remplacé côté serveur par
   lib/noelPage.js (route /noel de server.js) si la case est remplie dans l'admin (+ prix du menu de fêtes dans les
-  données « Event »). 5 PDF déposés depuis l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql),
+  données « Event »). 2 PDF à télécharger (demande du 26/11 : la présentation des offres = noel-2026-nos-offres.pdf, et la carte traiteur d'hiver = listing-traiteur-noel.pdf ; les 3 autres fichiers déposés le 26/11 ne sont plus liés) déposés depuis l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql),
   servis à adresse fixe `/noel/<fichier>.pdf` (redirection). « Page visible » décochée → /noel répond 404 (à faire
   début janvier ; retirer alors aussi /noel du sitemap, lib/siteData.js).
 - Délais différents selon les documents (à harmoniser si le restaurant le décide) : page devis 96 h (décision du
