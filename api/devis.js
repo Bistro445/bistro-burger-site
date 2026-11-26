@@ -2,7 +2,7 @@
 // POST { event, lines, units, promo, contact, website, elapsed } : crée le devis.
 //   1. filtre les robots (champ piège, délai minimum, 5 devis par adresse IP et par heure) ;
 //   2. refait TOUT le calcul côté serveur avec public/devis-catalogue.js (les prix du navigateur sont ignorés) ;
-//   3. contrôle les règles : délai de 96 h, jours d'ouverture, minimums, composition, coordonnées ;
+//   3. contrôle les règles : délai minimum (CONFIG.delayHours, 48 h), jours d'ouverture, minimums, composition, coordonnées ;
 //   4. numérote (DEV-2026-0001), enregistre dans la table `devis` (scripts/devis.sql) avec un lien unique ;
 //   5. envoie le devis au client et une copie au restaurant (comptes admin), plus une notification mobile.
 // POST { action: "accept", token } : le client « souhaite valider » son devis → statut « accepte »,

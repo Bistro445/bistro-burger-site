@@ -13,7 +13,7 @@
   /* Réglages (seront modifiables dans l'admin)                          */
   /* ------------------------------------------------------------------ */
   var CONFIG = {
-    delayHours: 96,              // délai minimum de commande (décision du restaurant, 25/11/2026)
+    delayHours: 48,              // délai minimum de commande = celui de la carte traiteur (décision du 26/11/2026)
     slotStep: 30,                // créneaux toutes les 30 min
     freeDeliveryFrom: 15,        // livraison offerte dès 15 personnes
     // Frais sous 15 personnes : pas encore fixés par le restaurant → « à confirmer » (0 € dans le total).

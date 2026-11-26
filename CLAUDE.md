@@ -65,7 +65,7 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   données « Event »). 2 PDF à télécharger (demande du 26/11 : la présentation des offres = noel-2026-nos-offres.pdf, et la carte traiteur d'hiver = listing-traiteur-noel.pdf ; les 3 autres fichiers déposés le 26/11 ne sont plus liés) déposés depuis l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql),
   servis à adresse fixe `/noel/<fichier>.pdf` (redirection). « Page visible » décochée → /noel répond 404 (à faire
   début janvier ; retirer alors aussi /noel du sitemap, lib/siteData.js).
-- Délais (décision du 26/11/2026) : la page devis traiteur reste à **96 h** ; la page Noël suit ses fiches Noël (traiteur en entreprise **72 h**, buffet **3 jours**, emporter avant le 19 déc.) : ce sont deux offres différentes, ne pas les aligner. La carte traiteur PDF dit 48 h. Zones : carte traiteur et page devis (Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau) ≠ fiche Noël (Gardanne, Bouc-Bel-Air, Simiane, Meyreuil, Calas, Cabriès, Gréasque, Fuveau) : pas encore tranché.
+- Délais (décision du 26/11/2026) : la page devis traiteur est à **48 h** comme la carte traiteur (CONFIG.delayHours ; 96 h avant le 26/11) ; la page Noël suit ses fiches Noël (traiteur en entreprise **72 h**, buffet **3 jours**, emporter avant le 19 déc.) : ce sont deux offres différentes, ne pas les aligner. Zones : carte traiteur et page devis (Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau) ≠ fiche Noël (Gardanne, Bouc-Bel-Air, Simiane, Meyreuil, Calas, Cabriès, Gréasque, Fuveau) : pas encore tranché.
 
 ## Devis traiteur (OUVERT AUX CLIENTS depuis le 26/11/2026, après un aperçu privé le même jour)
 - Liens : menu principal de toutes les pages (« Devis traiteur »), page /traiteur, sitemap. Pour recacher en urgence :
@@ -74,7 +74,7 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   emporter) → le devis indique « conditions convenues avec le gérant lors de l'échange ». Ne pas inventer de conditions.
 - Page `/devis-traiteur` (pages/devis-traiteur.html, public/devis-traiteur.css/.js). Le catalogue, les règles et les
   calculs sont dans **public/devis-catalogue.js**, partagé navigateur + serveur : `api/devis.js` refait tout le calcul
-  à la validation (prix du navigateur ignorés), contrôle délai (96 h, heure de Paris), jours d'ouverture, minimums,
+  à la validation (prix du navigateur ignorés), contrôle délai (48 h, heure de Paris), jours d'ouverture, minimums,
   composition et coordonnées, numérote via la fonction SQL `next_devis_numero()` (DEV-2026-0001), enregistre dans la
   table `devis`, envoie le devis au client (`clientDevis`) et une copie aux comptes admin (`adminDevis`).
 - Chaque devis a sa page : `/devis-traiteur/d/<jeton>` (lib/devisDocument.js) : A4 imprimable / PDF par le navigateur,
