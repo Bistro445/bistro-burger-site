@@ -18,6 +18,7 @@ const { notifyAdmins } = require("./_lib/notify");
 const { notifyPush } = require("./_lib/push");
 const { sendEmail } = require("./_lib/mailer");
 const { clientDevis, adminDevis } = require("./_lib/emailTemplates");
+const { devisAttachment } = require("../lib/pdfDevis");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

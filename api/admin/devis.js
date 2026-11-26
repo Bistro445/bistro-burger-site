@@ -7,6 +7,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { sendEmail } = require("../_lib/mailer");
 const { clientDevis } = require("../_lib/emailTemplates");
+const { devisAttachment } = require("../../lib/pdfDevis");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,6 +54,7 @@ module.exports = async (req, res) => {
       const url = SITE_URL + "/devis-traiteur/d/" + d.token;
       const m = clientDevis(d, url);
       const pdf = devisAttachment(d);
+      const r = await sendEmail({ to: d.email, subject: m.subject, html: m.html, text: m.text, replyTo: ALERT_EMAIL, attachments: pdf ? [pdf] : undefined });
       emailClient = r.status;
       patch.email_client = r.status;
       if (r.status === "envoye" && d.statut === "nouveau") patch.statut = "envoye";
