@@ -278,6 +278,31 @@ app.get("/devis-traiteur/d/:token", (req, res, next) => {
   devisDocument.handle(req, res, () => notFoundPage(res)).catch(next);
 });
 
+// Page « Noël au Bistro » (pages/noel.html) : prix, textes et PDF modifiables dans l'admin, rubrique
+// « Page Noël » (clé site_content « noel », lib/noelPage.js). Tant que pages/noel.html n'est pas publié,
+// ces routes ne servent rien. Masquer la page (début janvier) : case « Page visible » dans l'admin.
+const noelPage = require("./lib/noelPage");
+const NOEL_HTML_PATH = path.join(PAGES_DIR, "noel.html");
+async function noelData() {
+  try { return ((await siteData.getFiles()).data || {}).noel || null; } catch { return null; }
+}
+app.get("/noel.html", (req, res) => res.redirect(301, "/noel"));
+app.get("/noel", async (req, res, next) => {
+  if (!fs.existsSync(NOEL_HTML_PATH)) return next();
+  const noel = await noelData();
+  if (!noelPage.isVisible(noel)) return notFoundPage(res);
+  res.setHeader("Cache-Control", "no-cache");
+  return res.type("html").send(noelPage.render(fs.readFileSync(NOEL_HTML_PATH, "utf8"), noel));
+});
+// PDF de Noël à adresse fixe (/noel/menu-de-fetes.pdf…) → fichier actuel déposé depuis l'admin.
+app.get("/noel/:file", async (req, res, next) => {
+  if (!/\.pdf$/i.test(req.params.file)) return next();
+  const target = noelPage.docTarget(req.params.file, await noelData());
+  if (!target) return notFoundPage(res);
+  res.setHeader("Cache-Control", "no-cache");
+  return res.redirect(302, target);
+});
+
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(

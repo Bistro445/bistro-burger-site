@@ -1,0 +1,183 @@
+"use strict";
+// Rubrique admin « Page Noël » : prix et textes de la page /noel, PDF à télécharger, page visible ou masquée.
+// Enregistré dans site_content (clé « noel ») ; les PDF vont dans Supabase Storage (espace « site-docs »,
+// voir scripts/noel-docs.sql) à un emplacement fixe : remplacer un PDF ne change pas son lien public.
+(() => {
+  const API_URL = "/api/admin/content";
+  const KEY = "noel";
+  const BUCKET = "site-docs";
+  const MAX_BYTES = 5 * 1024 * 1024; // refus au-delà de 5 Mo
+  const WARN_BYTES = 2 * 1024 * 1024; // le cahier des charges demande des PDF de moins de 2 Mo
+  const container = document.getElementById("noel-view");
+  if (!container) return;
+
+  // Une entrée par case « à compléter » de la page (attribut data-noel de pages/noel.html).
+  const GROUPS = [
+    { title: "Menu de fêtes · 16 et 17 décembre", fields: [
+      { key: "fetes_prix", label: "Prix par personne (en €)", hint: "Juste le nombre, ex. : 45", short: true },
+    ] },
+    { title: "Repas de groupe (dès 10 personnes)", fields: [
+      { key: "groupe_quand", label: "Jours et services", hint: "Ex. : du lundi au vendredi, midi et soir" },
+      { key: "groupe_menu", label: "Composition du menu", hint: "Entrée, plat, dessert…", area: true },
+      { key: "groupe_prix", label: "Prix par personne (en €)", hint: "Juste le nombre", short: true },
+    ] },
+    { title: "Privatisation · arbre de Noël", fields: [
+      { key: "arbre_apresmidi", label: "Horaires de l'après-midi", hint: "Ex. : de 14 h à 18 h" },
+      { key: "arbre_soiree", label: "Horaires de la soirée", hint: "Ex. : à partir de 19 h" },
+      { key: "arbre_capacite", label: "Capacité (nombre de personnes)", hint: "Juste le nombre", short: true },
+    ] },
+    { title: "Noël à emporter ou livré", fields: [
+      { key: "emporter_retrait", label: "Horaires de retrait", hint: "Ex. : le 24 décembre de 10 h à 16 h" },
+      { key: "emporter_menu", label: "Composition du menu", area: true },
+      { key: "emporter_prix", label: "Prix par personne (en €)", hint: "Juste le nombre", short: true },
+      { key: "emporter_date_limite", label: "Date limite de commande", hint: "Ex. : 20 décembre" },
+    ] },
+    { title: "Buffet du lendemain", fields: [
+      { key: "buffet_menu", label: "Composition et formats", area: true },
+      { key: "buffet_prix", label: "Prix", hint: "Texte complet, ex. : 15 € par personne" },
+    ] },
+    { title: "Infos pratiques", fields: [
+      { key: "horaires_fetes", label: "Horaires des 16 et 17 décembre", hint: "Ex. : midi et soir, de 12 h à 14 h et de 19 h à 22 h" },
+    ] },
+  ];
+  const DOCS = [
+    { key: "menu-fetes", file: "menu-de-fetes.pdf", label: "Menu de fêtes" },
+    { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Listing traiteur de Noël" },
+    { key: "emporter", file: "menu-noel-a-emporter.pdf", label: "Menu de Noël à emporter / livré" },
+    { key: "buffet", file: "buffet-du-lendemain.pdf", label: "Buffet du lendemain" },
+  ];
+
+  let state = null;
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const fmtWhen = (iso) => { try { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)); } catch { return iso; } };
+  const fmtSize = (n) => (n >= 1024 * 1024 ? (n / 1024 / 1024).toFixed(1).replace(".", ",") + " Mo" : Math.round(n / 1024) + " Ko");
+
+  async function apiGet() {
+    const headers = await window.adminAuth.authHeader();
+    const res = await fetch(API_URL + "?key=" + KEY, { headers });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || "Échec du chargement.");
+    const v = json.value || {};
+    return { visible: v.visible !== false, textes: v.textes || {}, docs: v.docs || {} };
+  }
+  async function apiSave(value) {
+    const headers = await window.adminAuth.authHeader();
+    const res = await fetch(API_URL, { method: "PUT", headers: Object.assign({ "Content-Type": "application/json" }, headers), body: JSON.stringify({ key: KEY, value }) });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || "Échec de l'enregistrement.");
+    if (json.deployTriggered === false) throw new Error("Enregistré, mais le site n'a pas pu être mis à jour tout de suite : il le sera dans les 5 minutes.");
+  }
+
+  function readForm() {
+    const textes = {};
+    GROUPS.forEach((g) => g.fields.forEach((f) => { const el = document.getElementById("nl-f-" + f.key); if (el) textes[f.key] = el.value.trim(); }));
+    state.data.textes = textes;
+    state.data.visible = document.getElementById("nl-visible").checked;
+  }
+
+  async function uploadDoc(doc, file) {
+    readForm();
+    state.docMsg = {}; state.docErr = {};
+    if (!file) return;
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) { state.docErr[doc.key] = "Ce fichier n'est pas un PDF."; render(); return; }
+    if (file.size > MAX_BYTES) { state.docErr[doc.key] = "PDF trop lourd (" + fmtSize(file.size) + ") : 5 Mo maximum. Réduisez-le avant de le déposer."; render(); return; }
+    state.uploading = doc.key; render();
+    try {
+      const path = "noel/" + doc.file;
+      const { error } = await window.adminAuth.supabase.storage.from(BUCKET).upload(path, file, { contentType: "application/pdf", upsert: true, cacheControl: "300" });
+      if (error) throw new Error(error.message);
+      const { data } = window.adminAuth.supabase.storage.from(BUCKET).getPublicUrl(path);
+      state.data.docs[doc.key] = { url: data.publicUrl, nom: file.name, taille: file.size, maj: new Date().toISOString() };
+      await apiSave(state.data);
+      state.docMsg[doc.key] = "PDF en ligne." + (file.size > WARN_BYTES ? " Attention : il pèse " + fmtSize(file.size) + ", plus de 2 Mo (lent à ouvrir sur téléphone)." : "");
+    } catch (err) {
+      state.docErr[doc.key] = "Échec du dépôt : " + err.message;
+    } finally {
+      state.uploading = null; render();
+    }
+  }
+
+  async function removeDoc(doc) {
+    readForm();
+    state.docMsg = {}; state.docErr = {};
+    delete state.data.docs[doc.key];
+    try { await apiSave(state.data); state.docMsg[doc.key] = "Retiré de la page (le lien affichera « bientôt disponible »)."; }
+    catch (err) { state.docErr[doc.key] = err.message; }
+    render();
+  }
+
+  function render() {
+    if (state.screen === "loading") { container.innerHTML = '<div class="editor-loading">Chargement…</div>'; return; }
+    if (state.screen === "error") {
+      container.innerHTML = '<button type="button" class="back-btn" id="nl-back">‹ Retour</button><div class="login-error">' + esc(state.error) + "</div>";
+      document.getElementById("nl-back").addEventListener("click", () => window.adminShowDashboard());
+      return;
+    }
+    const d = state.data;
+    const filled = GROUPS.reduce((n, g) => n + g.fields.filter((f) => String(d.textes[f.key] || "").trim()).length, 0);
+    const total = GROUPS.reduce((n, g) => n + g.fields.length, 0);
+    container.innerHTML =
+      '<button type="button" class="back-btn" id="nl-back">‹ Retour</button>' +
+      "<h1>Page Noël</h1>" +
+      '<p class="dashboard-note">Les prix, horaires et menus de la page « Noël au Bistro », et les PDF que les clients téléchargent. ' +
+      "Une case laissée vide reste affichée « à compléter » sur la page. Rempli : <b>" + filled + " / " + total + "</b>.</p>" +
+      '<form id="nl-form-admin">' +
+      '<label class="nl-adm-check"><input type="checkbox" id="nl-visible"' + (d.visible ? " checked" : "") + "> Page visible sur le site <span>(décochez début janvier pour la masquer ; elle reste prête pour Noël 2027)</span></label>" +
+      GROUPS.map((g) =>
+        '<fieldset class="nl-adm-group"><legend>' + esc(g.title) + "</legend>" +
+        g.fields.map((f) => {
+          const v = d.textes[f.key] || "";
+          return '<label class="field-label" for="nl-f-' + f.key + '">' + esc(f.label) + "</label>" +
+            (f.area
+              ? '<textarea class="field" id="nl-f-' + f.key + '" rows="4" placeholder="' + esc(f.hint || "Une ligne par élément") + '">' + esc(v) + "</textarea>"
+              : '<input class="field' + (f.short ? " nl-adm-short" : "") + '" id="nl-f-' + f.key + '" value="' + esc(v) + '" placeholder="' + esc(f.hint || "") + '">');
+        }).join("") + "</fieldset>"
+      ).join("") +
+      '<button type="submit" class="btn-primary"' + (state.saving ? " disabled" : "") + ">" + (state.saving ? "Enregistrement…" : "Enregistrer les textes") + "</button>" +
+      (state.saveSuccess ? '<div class="password-success">Enregistré : la page est à jour.</div>' : "") +
+      (state.saveError ? '<div class="login-error">' + esc(state.saveError) + "</div>" : "") +
+      "</form>" +
+      '<h2 style="font-size:18px;margin:28px 0 6px">Documents à télécharger (PDF)</h2>' +
+      '<p class="dashboard-note">Moins de 2 Mo, lisibles sur téléphone. Déposer un nouveau PDF remplace l\'ancien : le lien partagé (stories, e-mails) reste le même.</p>' +
+      '<div class="nl-adm-docs">' + DOCS.map((doc) => {
+        const cur = d.docs[doc.key];
+        const busy = state.uploading === doc.key;
+        return '<div class="rec-card nl-adm-doc"><div class="rec-card-title">' + esc(doc.label) + "</div>" +
+          '<div class="rec-card-date">Lien public : bistroburgergardanne.com/noel/' + esc(doc.file) + "</div>" +
+          (cur
+            ? '<p class="nl-adm-doc-cur">En ligne : <a href="' + esc(cur.url) + '" target="_blank" rel="noopener">' + esc(cur.nom || doc.file) + "</a> · " + esc(fmtSize(cur.taille || 0)) + " · déposé le " + esc(fmtWhen(cur.maj)) + "</p>"
+            : '<p class="nl-adm-doc-cur is-empty">Pas encore déposé : la page affiche « bientôt disponible ».</p>') +
+          '<div class="rec-actions"><label class="rec-btn rec-btn-primary nl-adm-pick">' + (busy ? "Dépôt en cours…" : cur ? "Remplacer le PDF" : "Déposer le PDF") +
+          '<input type="file" accept="application/pdf,.pdf" data-doc="' + doc.key + '" hidden' + (busy ? " disabled" : "") + "></label>" +
+          (cur ? '<button type="button" class="rec-btn" data-remove="' + doc.key + '">Retirer</button>' : "") + "</div>" +
+          (state.docMsg[doc.key] ? '<div class="password-success">' + esc(state.docMsg[doc.key]) + "</div>" : "") +
+          (state.docErr[doc.key] ? '<div class="login-error">' + esc(state.docErr[doc.key]) + "</div>" : "") +
+          "</div>";
+      }).join("") + "</div>";
+
+    document.getElementById("nl-back").addEventListener("click", () => window.adminShowDashboard());
+    document.getElementById("nl-form-admin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      readForm();
+      state.saving = true; state.saveError = null; state.saveSuccess = false; render();
+      try { await apiSave(state.data); state.saveSuccess = true; }
+      catch (err) { state.saveError = err.message; }
+      finally { state.saving = false; render(); }
+    });
+    container.querySelectorAll("input[type=file][data-doc]").forEach((inp) => inp.addEventListener("change", () => {
+      const doc = DOCS.find((x) => x.key === inp.dataset.doc);
+      uploadDoc(doc, inp.files && inp.files[0]);
+    }));
+    container.querySelectorAll("[data-remove]").forEach((b) => b.addEventListener("click", () => removeDoc(DOCS.find((x) => x.key === b.dataset.remove))));
+  }
+
+  window.NoelEditor = {
+    async open() {
+      state = { screen: "loading", data: null, saving: false, saveError: null, saveSuccess: false, uploading: null, docMsg: {}, docErr: {} };
+      render();
+      try { state.data = await apiGet(); state.screen = "ready"; }
+      catch (err) { state.screen = "error"; state.error = err.message; }
+      render();
+    },
+  };
+})();

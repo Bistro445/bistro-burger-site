@@ -131,6 +131,7 @@ window.AdminDrafts = (() => {
     { key: "reservations-clients", title: "Réservations reçues", editor: () => window.ReservationsClientsEditor },
     { key: "demandes", title: "Demandes & suivi Noël", editor: () => window.DemandesEditor },
     { key: "devis", title: "Devis traiteur", editor: () => window.DevisEditor },
+    { key: "noel", title: "Page Noël", editor: () => window.NoelEditor },
     { key: "administrateurs", title: "Administrateurs", editor: () => window.AdministrateursEditor },
   ];
 

@@ -57,8 +57,13 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   ajouter `grant select, insert, update, delete on public.<table> to service_role;` (jamais pour anon/authenticated).
   Le compteur du blog (`scripts/blog-views.sql`) n'a jamais été exécuté (table `blog_views` absente au 20/11/2026) :
   y ajouter cette ligne de droits avant de le lancer.
-- Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée**. Ses PDF vont dans
-  `public/noel/` (noms fixes dans `DOCS` de noel.js) et s'activent tout seuls quand le fichier existe.
+- Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée** (fichiers locaux, non
+  suivis par git). Contenu modifiable dans l'admin, rubrique « Page Noël » (public/admin/noel.js, clé site_content
+  `noel` = { visible, textes, docs }) : chaque case `<span class="nl-todo" data-noel="clé">` est remplacée côté
+  serveur par lib/noelPage.js (route /noel de server.js, + prix dans les données « Event »). PDF déposés depuis
+  l'admin dans Supabase Storage, espace `site-docs` (scripts/noel-docs.sql, exécuté le 26/11/2026), servis à adresse
+  fixe `/noel/<fichier>.pdf` (redirection vers le fichier actuel). « Page visible » décochée → /noel répond 404.
+  Publication : ajouter pages/noel.html + public/noel.css/.js au dépôt, retirer le bandeau maquette et le noindex.
 
 ## Devis traiteur (OUVERT AUX CLIENTS depuis le 26/11/2026, après un aperçu privé le même jour)
 - Liens : menu principal de toutes les pages (« Devis traiteur »), page /traiteur, sitemap. Pour recacher en urgence :
