@@ -268,3 +268,8 @@
 /* Deux PDF côte à côte sous chaque offre */
 .nl-dl-pair { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; }
 
+
+/* PDF réunissant les 2 cartes (en tête des téléchargements) */
+.nl-docs .nl-docs-all { grid-column: 1 / -1; }
+.nl-docs .nl-docs-all a { border: 2px solid var(--nl-ink); }
+

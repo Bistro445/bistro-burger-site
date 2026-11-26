@@ -47,6 +47,7 @@
 
   // Adresses fixes des PDF (le serveur renvoie vers le fichier actuel) : les liens partagés restent bons.
   var DOCS = {
+    "complet": "/noel/noel-2026-offres-et-carte-traiteur.pdf",
     "offres": "/noel/noel-2026-nos-offres.pdf",
     "menu-fetes": "/noel/menu-de-fetes.pdf",
     "listing-traiteur": "/noel/listing-traiteur-noel.pdf",

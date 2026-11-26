@@ -21,7 +21,7 @@
     "traiteur-devis-en-ligne": "Traiteur · Devis en ligne",
     "emporter-devis": "À emporter · Commander", "emporter-pdf": "À emporter · PDF",
     "buffet-devis": "Buffet · Commander", "buffet-pdf": "Buffet · PDF",
-    "dl-offres": "Téléchargement · Nos offres de Noël",
+    "dl-complet": "Téléchargement · Les 2 cartes (un seul PDF)", "dl-offres": "Téléchargement · Nos offres de Noël",
     "dl-menu-fetes": "Téléchargement · Menu de fêtes", "dl-listing": "Téléchargement · Carte traiteur",
     "dl-emporter": "Téléchargement · À emporter", "dl-buffet": "Téléchargement · Buffet",
     "form-envoye": "Formulaire envoyé", "form-envoi": "Clic sur « Envoyer »",

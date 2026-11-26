@@ -41,6 +41,7 @@
     ] },
   ];
   const DOCS = [
+    { key: "complet", file: "noel-2026-offres-et-carte-traiteur.pdf", label: "Les 2 cartes réunies en un seul PDF (lien du QR code)" },
     { key: "offres", file: "noel-2026-nos-offres.pdf", label: "Noël 2026 au Bistro · nos offres (présentation des offres)" },
     { key: "listing-traiteur", file: "listing-traiteur-noel.pdf", label: "Carte traiteur d'hiver · cocktail & bouchées" },
   ];
