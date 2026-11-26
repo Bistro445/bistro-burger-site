@@ -265,3 +265,6 @@
   .nl-formules, .nl-plateaux, .nl-bouchees, .nl-bouchees-cols { grid-template-columns: minmax(0, 1fr); }
   .nl-formule.is-top { transform: none; margin-top: 8px; }
 }
+/* Deux PDF côte à côte sous chaque offre */
+.nl-dl-pair { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; }
+
