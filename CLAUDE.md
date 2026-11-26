@@ -60,7 +60,11 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
 - Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée**. Ses PDF vont dans
   `public/noel/` (noms fixes dans `DOCS` de noel.js) et s'activent tout seuls quand le fichier existe.
 
-## Devis traiteur (en ligne en APERÇU PRIVÉ depuis le 26/11/2026)
+## Devis traiteur (OUVERT AUX CLIENTS depuis le 26/11/2026, après un aperçu privé le même jour)
+- Liens : menu principal de toutes les pages (« Devis traiteur »), page /traiteur, sitemap. Pour recacher en urgence :
+  `DEVIS_PUBLIC=false` dans Hostinger (l'aperçu admin /devis-traiteur/apercu reste possible).
+- Conditions d'annulation / modification / solde : NON définies dans les CGV (qui ne couvrent que la vente à
+  emporter) → le devis indique « conditions convenues avec le gérant lors de l'échange ». Ne pas inventer de conditions.
 - Page `/devis-traiteur` (pages/devis-traiteur.html, public/devis-traiteur.css/.js). Le catalogue, les règles et les
   calculs sont dans **public/devis-catalogue.js**, partagé navigateur + serveur : `api/devis.js` refait tout le calcul
   à la validation (prix du navigateur ignorés), contrôle délai (96 h, heure de Paris), jours d'ouverture, minimums,

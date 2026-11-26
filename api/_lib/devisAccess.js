@@ -1,13 +1,13 @@
-// Accès à la page « Devis traiteur » pendant la phase d'aperçu.
-// Tant que DEVIS_PUBLIC n'est pas "true" dans Hostinger, /devis-traiteur répond « page introuvable »
-// à tout le monde, sauf aux navigateurs passés par /devis-traiteur/apercu avec une session admin
-// (api/devis-apercu.js pose alors un cookie de 30 jours). L'envoi des devis (api/devis.js) applique la même règle.
+// Accès à la page « Devis traiteur ».
+// OUVERTE AUX CLIENTS depuis le 26/11/2026. Pour la recacher en urgence sans toucher au code :
+// DEVIS_PUBLIC=false dans Hostinger → /devis-traiteur répond « page introuvable » à tout le monde, sauf aux
+// navigateurs passés par /devis-traiteur/apercu avec une session admin (api/devis-apercu.js pose alors un
+// cookie de 30 jours). L'envoi des devis (api/devis.js) applique la même règle.
 // Le cookie est une signature calculée avec la clé serveur Supabase : aucune clé n'est écrite dans le code
 // (le dépôt GitHub est public).
-// Pour ouvrir la page aux clients : DEVIS_PUBLIC=true (puis retirer le bandeau « Aperçu » et le noindex).
 const crypto = require("crypto");
 
-const DEVIS_PUBLIC = process.env.DEVIS_PUBLIC === "true";
+const DEVIS_PUBLIC = process.env.DEVIS_PUBLIC !== "false";
 const COOKIE = "bb_devis_apercu";
 const MAX_AGE_MS = 30 * 24 * 3600 * 1000;
 
