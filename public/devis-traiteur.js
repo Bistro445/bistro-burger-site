@@ -171,6 +171,17 @@
   function priceTag(f) {
     return eur(f.price) + " HT <small>/ " + esc(f.unit) + "</small>";
   }
+  // Encadré « Les bouchées de Noël » sous les formules cocktail (carte d'hiver : en décembre, sans supplément).
+  function noelBoxHtml() {
+    var col = function (k, title) {
+      var g = PIECES[k].filter(function (x) { return x.noel; })[0];
+      return g ? '<div><div class="dv-noel-sub">' + title + "</div><ul>" + g.items.map(function (it) { return "<li>" + esc(it[0]) + tagsHtml(it[1]) + "</li>"; }).join("") + "</ul></div>" : "";
+    };
+    var dec = D.isDecember(state.event.date);
+    return '<aside class="dv-noel-box"><span class="dv-noel-tag">En décembre</span><h3>Les bouchées de Noël</h3>' +
+      "<p>Au choix dans toutes les formules cocktail, sans supplément" + (dec ? " : choisissez-les en composant votre formule." : ", pour un événement en décembre. Choisissez une date en décembre à l'étape 1 pour les sélectionner.") + "</p>" +
+      '<div class="dv-noel-cols">' + col("sal", "Salé") + col("suc", "Sucré") + "</div></aside>";
+  }
   function renderFormulas() {
     var list = FORMULAS.filter(function (f) { return f.fam === state.fam; });
     var box = $("#dv-formulas");
@@ -196,7 +207,7 @@
         (f.min > 1 ? '<div class="dv-formula-min">Minimum ' + plural(f.min, unitLabel(f, 1), unitLabel(f, 2)) + (f.exMin || f.ex ? " (exemple)" : "") + "</div>" : "") +
         (f.priceNote ? '<div class="dv-formula-min">' + esc(f.priceNote) + "</div>" : "") +
         "</div>" + foot + "</article>";
-    }).join("");
+    }).join("") + (state.fam === "cocktail" ? noelBoxHtml() : "");
     // Sur fond vert, les compteurs prennent la couleur crème
     $$(".dv-formula .dv-qty-input", box).forEach(function (i) { i.style.background = "rgba(14,70,61,.35)"; i.style.color = "var(--color-secondary)"; i.style.borderColor = "rgba(237,224,211,.35)"; });
     $$(".dv-formula .dv-qty-btn", box).forEach(function (b) { b.style.background = "var(--color-secondary)"; b.style.borderColor = "var(--color-secondary)"; b.style.color = "var(--color-primary)"; });
@@ -263,13 +274,15 @@
         if (!g[2]) return;
         var chosen = draft.sel[g[0]] = draft.sel[g[0]] || [], full = chosen.length >= g[2];
         h += '<div class="dv-comp-section"><div class="dv-comp-section-head"><h3>' + g[1] + "</h3>" + countBadge(chosen.length, g[2]) + "</div>";
-        var groups = D.piecesFor(g[0], state.event.date);
+        // Toutes les familles sont affichées ; les bouchées de Noël restent visibles mais grisées hors décembre.
+        var groups = PIECES[g[0]], dec = D.isDecember(state.event.date);
         groups.forEach(function (grp) {
-          if (groups.length > 1) h += '<div class="dv-piece-group' + (grp.noel ? " is-noel" : "") + '">' + esc(grp.group) + (grp.note ? " <span>" + esc(grp.note) + "</span>" : "") + "</div>";
+          var locked = grp.noel && !dec;
+          if (groups.length > 1) h += '<div class="dv-piece-group' + (grp.noel ? " is-noel" : "") + '">' + esc(grp.group) + (grp.note ? " <span>" + esc(locked ? "Pour un événement en décembre : choisissez une date en décembre à l'étape 1" : grp.note) + "</span>" : "") + "</div>";
           h += '<div class="dv-pieces">';
           grp.items.forEach(function (it) {
-            var on = chosen.indexOf(it[0]) > -1;
-            h += '<label class="dv-piece' + (on ? " is-on" : "") + (!on && full ? " is-off" : "") + '"><input type="checkbox" data-piece="' + g[0] + '" value="' + esc(it[0]) + '"' + (on ? " checked" : "") + (!on && full ? " disabled" : "") + ">" +
+            var on = chosen.indexOf(it[0]) > -1, off = locked || (!on && full);
+            h += '<label class="dv-piece' + (on ? " is-on" : "") + (off && !on ? " is-off" : "") + '"><input type="checkbox" data-piece="' + g[0] + '" value="' + esc(it[0]) + '"' + (on ? " checked" : "") + (off && !on ? " disabled" : "") + ">" +
               '<span class="dv-check-box" aria-hidden="true"></span><span class="dv-piece-name">' + esc(it[0]) + "</span>" + tagsHtml(it[1]) + "</label>";
           });
           h += "</div>";
