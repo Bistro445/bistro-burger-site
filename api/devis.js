@@ -188,7 +188,7 @@ module.exports = async (req, res) => {
   const historique = [{ at: now, quoi: "Devis créé depuis la page devis traiteur" }];
 
   const row = {
-    numero, token, statut: "nouveau", valide_jusqu: addDays(parisToday(), D.CONFIG.validityDays),
+    created_at: now, numero, token, statut: "nouveau", valide_jusqu: addDays(parisToday(), D.CONFIG.validityDays),
     type_client: contact.type, nom: contact.nom, societe: contact.societe || null, siret: contact.siret ? contact.siret.replace(/\s/g, "") : null,
     telephone: contact.tel, email: contact.email, adresse: contact.adresse || null, code_postal: contact.cp || null, ville: contact.ville || null,
     facturation: contact.facturation || null, remarques: contact.remarques || null, consentement: contact.rgpd, offres: contact.offres,
@@ -206,12 +206,13 @@ module.exports = async (req, res) => {
   const id = ins.data.id;
   const url = SITE_URL + "/devis-traiteur/d/" + token;
 
-  // E-mail au client
+  // E-mail au client, devis PDF en pièce jointe
+  const pdf = devisAttachment(row);
   const cm = clientDevis(row, url);
-  const sent = await sendEmail({ to: row.email, subject: cm.subject, html: cm.html, text: cm.text, replyTo: ALERT_EMAIL });
+  const sent = await sendEmail({ to: row.email, subject: cm.subject, html: cm.html, text: cm.text, replyTo: ALERT_EMAIL, attachments: pdf ? [pdf] : undefined });
   historique.push({
     at: new Date().toISOString(),
-    quoi: sent.status === "envoye" ? "Devis envoyé au client (" + row.email + ")"
+    quoi: sent.status === "envoye" ? "Devis envoyé au client (" + row.email + ")" + (pdf ? " avec le PDF" : " (sans PDF : création impossible)")
       : sent.status === "non_configure" ? "Devis NON envoyé au client : envoi d'e-mails non configuré"
       : "Devis NON envoyé au client : " + (sent.detail || "échec de l'envoi"),
   });
@@ -222,7 +223,7 @@ module.exports = async (req, res) => {
     alerte = (await notifyAdmins(supabase, ALERT_EMAIL, "Nouveau devis " + numero, {
       devis: numero, nom: row.nom, société: row.societe, téléphone: row.telephone, email: row.email,
       date: row.date_evenement + " " + row.heure, convives: row.convives, total: row.total_ttc + " € TTC", lien: url,
-    }, adminDevis(row, url, false))) || [];
+    }, Object.assign(adminDevis(row, url, false), { attachments: pdf ? [pdf] : undefined }))) || [];
   } catch (e) { console.error("[devis] alerte : " + (e && e.message)); }
   historique.push({ at: new Date().toISOString(), quoi: alerte.length ? "Copie envoyée au restaurant (" + alerte.map((a) => a.to + (a.via === "formsubmit" ? " · secours" : "")).join(", ") + ")" : "Copie au restaurant : aucun destinataire" });
   try { await notifyPush(supabase, { title: "Nouveau devis traiteur", body: numero + " — " + row.nom + " (" + row.convives + " pers.)", url: "/admin/" }); } catch {}

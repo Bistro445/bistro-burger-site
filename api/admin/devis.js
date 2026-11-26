@@ -52,7 +52,7 @@ module.exports = async (req, res) => {
     } else if (body.action === "renvoyer") {
       const url = SITE_URL + "/devis-traiteur/d/" + d.token;
       const m = clientDevis(d, url);
-      const r = await sendEmail({ to: d.email, subject: m.subject, html: m.html, text: m.text, replyTo: ALERT_EMAIL });
+      const pdf = devisAttachment(d);
       emailClient = r.status;
       patch.email_client = r.status;
       if (r.status === "envoye" && d.statut === "nouveau") patch.statut = "envoye";

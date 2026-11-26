@@ -271,6 +271,9 @@ app.get(["/devis-traiteur", "/devis-traiteur.html"], (req, res) => {
   if (!devisAccess.DEVIS_PUBLIC) res.setHeader("X-Robots-Tag", "noindex, nofollow");
   return res.sendFile(path.join(PAGES_DIR, "devis-traiteur.html"));
 });
+app.get("/devis-traiteur/d/:token/pdf", (req, res, next) => {
+  devisDocument.handlePdf(req, res, () => notFoundPage(res)).catch(next);
+});
 app.get("/devis-traiteur/d/:token", (req, res, next) => {
   devisDocument.handle(req, res, () => notFoundPage(res)).catch(next);
 });

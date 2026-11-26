@@ -479,7 +479,7 @@ function clientDevis(d, url) {
     pastille: "Devis traiteur",
     pastilleCouleur: C.vert700,
     titre: "Votre devis " + esc(d.numero),
-    intro: "Bonjour" + (prenom ? " " + esc(prenom) : "") + ", merci pour votre demande. Voici le récapitulatif de votre devis traiteur.",
+    intro: "Bonjour" + (prenom ? " " + esc(prenom) : "") + ", merci pour votre demande. Voici le récapitulatif de votre devis traiteur : vous le trouverez aussi en PDF, joint à cet e-mail.",
     contenu,
     pied: esc(RESTAURANT.nom) + " &middot; " + esc(RESTAURANT.adresse) + "<br>Vous pouvez répondre directement à cet e-mail.",
   });
@@ -488,7 +488,7 @@ function clientDevis(d, url) {
     "Événement : " + quandDevis(d) + "\nConvives : " + (d.convives || "") + "\nRemise : " + remiseDevis(d) + "\n\n" +
     ((d.contenu && d.contenu.lignes) || []).map((l) => "- " + l.name + " × " + l.qty + " : " + euro(l.ht) + " HT").join("\n") +
     "\n\nTotal HT : " + euro(d.total_ht) + "\nTotal TTC : " + euro(d.total_ttc) + "\nAcompte à la commande : " + euro(d.acompte) + " TTC\n\n" +
-    "Voir, télécharger ou imprimer votre devis : " + url + "\n\n" +
+    "Votre devis est joint en PDF. Vous pouvez aussi le voir en ligne : " + url + "\n\n" +
     "Aucun devis n'est validé sans un échange préalable avec le gérant : il vous contacte pour faire le point. " +
     "Votre commande est ensuite confirmée par le règlement de l'acompte au restaurant, par virement ou carte bancaire.\n\n" +
     "Téléphone : " + RESTAURANT.telephoneAffiche + "\n\nÀ très bientôt,\nL'équipe " + RESTAURANT.nom + " — Gardanne\n";

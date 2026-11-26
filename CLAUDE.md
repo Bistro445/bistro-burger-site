@@ -77,10 +77,15 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
   de clé ou de lien secret dans le code.** Pour ouvrir aux clients : `DEVIS_PUBLIC=true`, retirer le bandeau
   « Aperçu privé » et le `noindex` de la page, ajouter les liens (menu, page traiteur, QR code), et remettre le compteur
   à zéro (fin de scripts/devis.sql).
-- Formules à prix d'EXEMPLE (`ex: true`) : lunch boxes, plateaux repas, boissons, suppléments, frais de livraison
-  sous 15 pers. Prix réels : formules cocktail et plateaux à partager (HT ou TTC encore à confirmer).
-- Pas encore fait : PDF joint à l'e-mail, relance automatique à 3 jours, versions modifiées par le restaurant,
-  gestion du catalogue depuis l'admin.
+- Prix : uniquement la carte « Cocktail & bouchées » (3 formules cocktail + 3 plateaux à partager ; HT ou TTC encore à
+  confirmer). Les formules à prix d'EXEMPLE (`ex: true` : lunch boxes, plateaux repas, boissons, suppléments) restent
+  dans devis-catalogue.js mais sont masquées (`CONFIG.showExamples: false`). Livraison sous 15 pers. : « frais à
+  confirmer » (`deliveryFee.toConfirm`). Aucun code promo.
+- PDF : lib/pdfDevis.js (générateur écrit à la main, SANS dépendance npm : package-lock.json ne peut pas être mis à
+  jour sur ce PC sans Node). Joint à l'e-mail du client, à la copie au restaurant et au renvoi depuis l'admin ;
+  téléchargeable sur `/devis-traiteur/d/<jeton>/pdf`. Logo : lib/devis-logo.jpg (JPEG sur fond vert).
+- Pas encore fait : relance automatique à 3 jours, versions modifiées par le restaurant, gestion du catalogue
+  depuis l'admin.
 
 ## Déploiement
 Hébergeur : Hostinger (application Node.js), déploiement depuis GitHub. **Aucun environnement de test en

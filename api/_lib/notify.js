@@ -55,6 +55,7 @@ async function notifyAdmins(supabase, fallbackEmail, subject, fields, mail) {
           html: mail.html,
           text: mail.text,
           replyTo: mail.replyTo,
+          attachments: mail.attachments,
           fromName: "Bistro Burger (alertes)",
         });
         if (result.status === "envoye") return { to: email, via: "resend" };

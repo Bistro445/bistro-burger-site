@@ -40,9 +40,12 @@
   /* État (gardé dans le navigateur si on recharge la page)              */
   /* ------------------------------------------------------------------ */
   var KEY = "bbDevisTraiteur.v1";
-  var state = { step: 1, fam: "lunch", event: { date: "", time: null, guests: 0, mode: "", commune: "" }, lines: [], units: {}, promo: "", contact: {}, calMonth: null };
+  var state = { step: 1, fam: FAMILIES[0].id, event: { date: "", time: null, guests: 0, mode: "", commune: "" }, lines: [], units: {}, promo: "", contact: {}, calMonth: null };
   try { var saved = JSON.parse(localStorage.getItem(KEY) || "null"); if (saved && typeof saved === "object") state = Object.assign(state, saved, { event: Object.assign(state.event, saved.event || {}) }); } catch (e) { /* stockage indisponible : on repart de zéro */ }
   state.lines = (state.lines || []).filter(function (l) { return BY_ID[l.fid]; });
+  Object.keys(state.units || {}).forEach(function (id) { if (!BY_ID[id]) delete state.units[id]; });
+  if (!FAMILIES.some(function (f) { return f.id === state.fam; })) state.fam = FAMILIES[0].id;
+  if (state.promo && !CONFIG.promo[state.promo]) state.promo = "";
   if (state.step === 3) state.step = 2;
   var draft = null; // formule en cours de composition
   var startedAt = Date.now(); // anti-robots : délai minimum avant l'envoi
@@ -151,7 +154,7 @@
     $("#dv-commune").value = ev.commune || "";
     var hint = "", ci = communeInfo();
     if (ci && !ci.inZone) hint = "Cette commune est hors de notre zone habituelle : votre devis sera enregistré et nous vous recontacterons pour la livraison.";
-    else if (ci) hint = int(ev.guests) >= CONFIG.freeDeliveryFrom ? "Livraison offerte : vous êtes au moins " + CONFIG.freeDeliveryFrom + "." : "Livraison offerte dès " + CONFIG.freeDeliveryFrom + " personnes. En dessous : " + eur(CONFIG.deliveryFee.ht) + " HT" + (CONFIG.deliveryFee.ex ? " (montant d'exemple)" : "") + ".";
+    else if (ci) hint = int(ev.guests) >= CONFIG.freeDeliveryFrom ? "Livraison offerte : vous êtes au moins " + CONFIG.freeDeliveryFrom + "." : "Livraison offerte dès " + CONFIG.freeDeliveryFrom + " personnes. En dessous : " + (CONFIG.deliveryFee.toConfirm ? "frais confirmés par le restaurant lors de l'échange avec le gérant." : eur(CONFIG.deliveryFee.ht) + " HT" + (CONFIG.deliveryFee.ex ? " (montant d'exemple)" : "") + ".");
     $("#dv-delivery-hint").textContent = hint;
   }
 
@@ -207,7 +210,9 @@
       eur(f.price) + " HT / " + esc(f.unit) + (f.tva === 20 ? " · TVA 20 %" : "") + "</div></div>" + qtyHtml('data-unit="' + f.id + '"', (state.units || {})[f.id], f.name) + "</div>";
   }
   function renderExtras() {
-    $("#dv-extras").innerHTML = FORMULAS.filter(function (f) { return f.fam === "extras"; }).map(unitRow).join("");
+    var extras = FORMULAS.filter(function (f) { return f.fam === "extras"; });
+    $(".dv-extras").hidden = !extras.length;
+    $("#dv-extras").innerHTML = extras.map(unitRow).join("");
   }
 
   /* Étape 3 : composition */
@@ -362,6 +367,7 @@
     h += '<div class="dv-recap-totals">' + totalsHtml(t) + "</div>";
     box.innerHTML = h;
     $("#dv-promo").value = state.promo || "";
+    $(".dv-promo").hidden = !Object.keys(CONFIG.promo).length;
   }
 
   /* Colonne « Votre devis » et barre du bas */

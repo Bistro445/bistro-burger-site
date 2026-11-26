@@ -16,7 +16,12 @@
     delayHours: 96,              // délai minimum de commande (décision du restaurant, 25/11/2026)
     slotStep: 30,                // créneaux toutes les 30 min
     freeDeliveryFrom: 15,        // livraison offerte dès 15 personnes
-    deliveryFee: { ht: 25, tva: 10, ex: true }, // frais sous 15 personnes (exemple)
+    // Frais sous 15 personnes : pas encore fixés par le restaurant → « à confirmer » (0 € dans le total).
+    // Quand le montant est connu : { ht: <montant>, tva: 10 }.
+    deliveryFee: { ht: 0, tva: 10, toConfirm: true },
+    // false : seules les formules aux prix réels de la carte « Cocktail & bouchées » sont proposées
+    // (les formules marquées ex: true restent ici, masquées, jusqu'à ce que leurs vrais prix soient connus).
+    showExamples: false,
     validityDays: 30,
     depositPct: 40,              // acompte demandé pour valider le devis (cahier des charges)
     monthsAhead: 6,
@@ -24,18 +29,18 @@
       { name: "Gardanne", cp: "13120" }, { name: "Biver", cp: "13120" }, { name: "Mimet", cp: "13105" },
       { name: "Simiane-Collongue", cp: "13109" }, { name: "Meyreuil", cp: "13590" }, { name: "Fuveau", cp: "13710" },
     ],
-    promo: { BIENVENUE10: { pct: 10, ex: true } }, // code d'exemple : -10 % sur les produits
+    promo: {}, // codes promo : { CODE: { pct: 10 } } (aucun pour l'instant)
   };
 
   /* ------------------------------------------------------------------ */
   /* Catalogue                                                           */
   /* ------------------------------------------------------------------ */
-  var FAMILIES = [
-    { id: "lunch", label: "Lunch boxes", intro: "Une box individuelle par convive : vous répartissez les choix entre vos invités." },
-    { id: "plateaux", label: "Plateaux", intro: "Un plateau repas par convive : une base, puis des options si vous le souhaitez." },
-    { id: "cocktail", label: "Cocktail & bouchées", intro: "Des buffets à partager, généreux et faits à la brasserie. Prix par personne, pièces au choix dans la carte des bouchées : composez votre sélection, nous l'équilibrons pour vous." },
+  var ALL_FAMILIES = [
+    { id: "cocktail", label: "Cocktail & bouchées", intro: "Des buffets à partager, généreux et faits à la brasserie, pour vos réunions, séminaires et afterworks. Prix par personne, pièces au choix dans la carte des bouchées : composez votre sélection, ou laissez-nous faire." },
     { id: "partage", label: "Plateaux à partager", intro: "En supplément de toutes les formules. Prix par plateau : 1 plateau pour 8 à 10 personnes." },
-    { id: "boissons", label: "Boissons", intro: "À l'unité, en complément de vos formules." },
+    { id: "lunch", label: "Lunch boxes", ex: true, intro: "Une box individuelle par convive : vous répartissez les choix entre vos invités." },
+    { id: "plateaux", label: "Plateaux", ex: true, intro: "Un plateau repas par convive : une base, puis des options si vous le souhaitez." },
+    { id: "boissons", label: "Boissons", ex: true, intro: "À l'unité, en complément de vos formules." },
   ];
   var DRINKS_BOX = ["Eau minérale 50 cl", "Soda 33 cl", "Jus de fruits 25 cl"];
   var DESSERTS = ["Cookie maison", "Brownie maison", "Salade de fruits frais"];
@@ -63,7 +68,7 @@
   };
   var TAG_LABEL = { V: "Végétarien", VG: "Vegan", SG: "Sans gluten" };
 
-  var FORMULAS = [
+  var ALL_FORMULAS = [
     { id: "lb-bistro", fam: "lunch", type: "menu", name: "Lunch box Bistro", desc: "Entrée, plat, dessert et boisson.", price: 16.5, tva: 10, unit: "box", min: 6, ex: true, img: "/assets/bande-5.jpg",
       slots: [
         { key: "entree", label: "Entrée", choices: ["Salade César", "Taboulé maison", "Velouté du moment"] },
@@ -113,6 +118,9 @@
     { id: "ex-nappe", fam: "extras", type: "unit", name: "Nappe en tissu", price: 6, tva: 10, unit: "nappe", ex: true },
     { id: "ex-service", fam: "extras", type: "unit", name: "Service sur place (serveur)", price: 30, tva: 20, unit: "heure", ex: true },
   ];
+  // Formules proposées : sans les prix d'exemple tant que CONFIG.showExamples vaut false.
+  var FAMILIES = ALL_FAMILIES.filter(function (f) { return CONFIG.showExamples || !f.ex; });
+  var FORMULAS = ALL_FORMULAS.filter(function (f) { return CONFIG.showExamples || !f.ex; });
   var BY_ID = {};
   FORMULAS.forEach(function (f) { BY_ID[f.id] = f; });
   var DIETS = [{ key: "veg", label: "Végétarien" }, { key: "vegan", label: "Vegan" }, { key: "gf", label: "Sans gluten" }];
@@ -182,6 +190,7 @@
     var ci = communeInfo(state); if (!ci) return null;
     if (!ci.inZone) return { label: "Livraison hors zone", ht: 0, tva: CONFIG.deliveryFee.tva, note: "nous consulter" };
     if (int(state.event.guests) >= CONFIG.freeDeliveryFrom) return { label: "Livraison", ht: 0, tva: CONFIG.deliveryFee.tva, note: "offerte" };
+    if (CONFIG.deliveryFee.toConfirm) return { label: "Livraison (moins de " + CONFIG.freeDeliveryFrom + " pers.)", ht: 0, tva: CONFIG.deliveryFee.tva, note: "frais à confirmer" };
     return { label: "Livraison", ht: CONFIG.deliveryFee.ht, tva: CONFIG.deliveryFee.tva, ex: CONFIG.deliveryFee.ex };
   }
   function unitItems(state) {

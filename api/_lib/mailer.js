@@ -14,7 +14,8 @@ function isConfigured() {
   return Boolean(clean(RESEND_API_KEY) && clean(RESEND_FROM_EMAIL));
 }
 
-async function sendEmail({ to, subject, html, text, replyTo, fromName }) {
+// attachments (facultatif) : [{ filename, content }] avec content en base64 (ex. devis PDF).
+async function sendEmail({ to, subject, html, text, replyTo, fromName, attachments }) {
   if (!isConfigured()) return { status: "non_configure" };
 
   const payload = {
@@ -25,9 +26,10 @@ async function sendEmail({ to, subject, html, text, replyTo, fromName }) {
     text,
   };
   if (replyTo) payload.reply_to = replyTo;
+  if (Array.isArray(attachments) && attachments.length) payload.attachments = attachments.filter(Boolean);
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), payload.attachments ? 15000 : 8000);
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
