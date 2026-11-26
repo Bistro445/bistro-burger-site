@@ -96,14 +96,15 @@
     { id: "pl-sucre", fam: "plateaux", type: "base", name: "Sucré & Café", desc: "Pâtisseries maison et boisson chaude.", price: 8, tva: 10, unit: "plateau", min: 6, ex: true, img: "/assets/bande-2.webp",
       options: [{ id: "jus", name: "Jus de fruits", price: 2 }] },
 
-    // Formules cocktail et plateaux à partager : carte « Cocktail & bouchées » (prix réels ; HT ou TTC encore à confirmer)
-    { id: "co-aperitif", fam: "cocktail", type: "cocktail", name: "L'Apéritif", desc: "6 pièces salées par personne, 100 % salé.", price: 13, tva: 10, unit: "personne", sal: 6, suc: 0, min: 1, img: "/assets/bande-4.webp" },
-    { id: "co-cocktail", fam: "cocktail", type: "cocktail", name: "Le Cocktail", desc: "8 pièces salées et 2 pièces sucrées par personne.", price: 20, tva: 10, unit: "personne", sal: 8, suc: 2, min: 1, badge: "Le plus demandé", img: "/assets/carte-fond.jpg" },
-    { id: "co-dinatoire", fam: "cocktail", type: "cocktail", name: "Le Dînatoire", desc: "10 pièces salées et 2 pièces sucrées par personne.", price: 23, tva: 10, unit: "personne", sal: 10, suc: 2, min: 1, img: "/assets/bande-6.jpg" },
+    // Formules cocktail et plateaux à partager : carte « Cocktail & bouchées » (prix réels ; HT ou TTC encore à confirmer).
+    // Photos : celles de la carte (public/assets/traiteur/), extraites du PDF le 26/11/2026.
+    { id: "co-aperitif", fam: "cocktail", type: "cocktail", name: "L'Apéritif", desc: "6 pièces salées par personne, 100 % salé.", price: 13, tva: 10, unit: "personne", sal: 6, suc: 0, min: 1, img: "/assets/traiteur/cocktail-verrines.jpg" },
+    { id: "co-cocktail", fam: "cocktail", type: "cocktail", name: "Le Cocktail", desc: "8 pièces salées et 2 pièces sucrées par personne.", price: 20, tva: 10, unit: "personne", sal: 8, suc: 2, min: 1, badge: "Le plus demandé", img: "/assets/traiteur/cocktail-mini-burgers.jpg" },
+    { id: "co-dinatoire", fam: "cocktail", type: "cocktail", name: "Le Dînatoire", desc: "10 pièces salées et 2 pièces sucrées par personne.", price: 23, tva: 10, unit: "personne", sal: 10, suc: 2, min: 1, img: "/assets/traiteur/cocktail-sandwichs.jpg" },
 
-    { id: "pa-charcuterie", fam: "partage", type: "unit", name: "Plateau de charcuterie", sub: "La planche du bistrot", desc: "Une généreuse sélection de charcuteries, servie avec le pain de notre boulanger et nos pickles maison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/bande-4.webp" },
-    { id: "pa-fromages", fam: "partage", type: "unit", name: "Plateau de fromages", sub: "Le plateau du fromager", desc: "Un assortiment de fromages affinés aux caractères variés, avec le pain de notre boulanger et des garnitures de saison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/carte-fond.jpg" },
-    { id: "pa-crudites", fam: "partage", type: "unit", name: "Plateau crudités & dips", sub: "Le jardin méditerranéen", desc: "Légumes croquants de saison à tremper dans quatre dips maison : anchoïade, tapenade, houmous et tzatziki.", price: 20, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/bande-1.webp" },
+    { id: "pa-charcuterie", fam: "partage", type: "unit", name: "Plateau de charcuterie", sub: "La planche du bistrot", desc: "Une généreuse sélection de charcuteries, servie avec le pain de notre boulanger et nos pickles maison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-charcuterie.jpg" },
+    { id: "pa-fromages", fam: "partage", type: "unit", name: "Plateau de fromages", sub: "Le plateau du fromager", desc: "Un assortiment de fromages affinés aux caractères variés, avec le pain de notre boulanger et des garnitures de saison.", price: 30, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-fromages.jpg" },
+    { id: "pa-crudites", fam: "partage", type: "unit", name: "Plateau crudités & dips", sub: "Le jardin méditerranéen", desc: "Légumes croquants de saison à tremper dans quatre dips maison : anchoïade, tapenade, houmous et tzatziki.", price: 20, tva: 10, unit: "plateau", min: 1, serves: "8 à 10 pers.", img: "/assets/traiteur/plateau-crudites.jpg" },
 
     { id: "bo-eau", fam: "boissons", type: "unit", name: "Eau minérale 1,5 L", price: 2.5, tva: 10, unit: "bouteille", ex: true },
     { id: "bo-gaz", fam: "boissons", type: "unit", name: "Eau gazeuse 1 L", price: 2.8, tva: 10, unit: "bouteille", ex: true },

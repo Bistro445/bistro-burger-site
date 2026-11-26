@@ -91,7 +91,8 @@
   /* ------------------------------------------------------------------ */
   function goTo(n, opts) {
     opts = opts || {};
-    if (n >= 2 && n !== 3) { var ee = eventErrors(); if (ee.length) { n = 1; showAlerts("dv-alerts-1", ee); } }
+    // Les produits se consultent librement ; l'événement (date, heure, convives, remise) est exigé pour le récapitulatif.
+    if (n >= 4) { var ee = eventErrors(); if (ee.length) { n = 1; showAlerts("dv-alerts-1", ["Pour continuer, complétez d'abord votre événement :"].concat(ee)); } }
     if (n === 3 && !draft) n = 2;
     if (n === 5) { var oe = orderErrors(); if (oe.length) { n = state.lines.length || unitItems().length ? 4 : 2; showAlerts(n === 4 ? "dv-alerts-4" : "dv-alerts-2", oe); } }
     state.step = n; save();
