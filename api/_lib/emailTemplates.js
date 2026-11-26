@@ -423,4 +423,124 @@ function adminPasswordLink(email, link, note) {
   return { subject: "Espace admin Bistro Burger : choisissez votre mot de passe", html, text };
 }
 
-module.exports = { clientReservationConfirmed, clientReservationReceived, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, adminPasswordLink, RESTAURANT };
+// ───────────── Devis traiteur (api/devis.js) ─────────────
+// d = ligne de la table `devis` ; url = lien unique vers le devis (page imprimable).
+const euro = (n) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Math.round((Number(n) || 0) * 100) / 100);
+const MODE = { livraison: "Livraison", retrait: "Retrait à la brasserie" };
+
+function quandDevis(d) {
+  return formatDateFr(d.date_evenement) + (d.heure ? " à " + d.heure : "");
+}
+function remiseDevis(d) {
+  return d.mode === "livraison" ? "Livraison" + (d.ville || d.commune ? " à " + (d.ville || d.commune) : "") : MODE[d.mode] || "";
+}
+function tableauDevis(d) {
+  const rows = ((d.contenu && d.contenu.lignes) || []).map((l) =>
+    "<tr>" +
+    '<td style="padding:10px 0;border-bottom:1px solid ' + C.ligne + ';font-family:Arial,Helvetica,sans-serif;font-size:15px;color:' + C.texte + ';vertical-align:top">' +
+    "<b>" + esc(l.name) + "</b> &times; " + esc(l.qty) +
+    ((l.detail || []).length ? '<div style="font-size:13px;line-height:1.5;color:' + C.gris + ';margin-top:3px">' + l.detail.map(esc).join("<br>") + "</div>" : "") +
+    "</td>" +
+    '<td align="right" style="padding:10px 0 10px 12px;border-bottom:1px solid ' + C.ligne + ';font-family:Arial,Helvetica,sans-serif;font-size:15px;color:' + C.texte + ';white-space:nowrap;vertical-align:top">' + esc(euro(l.ht)) + " HT</td></tr>"
+  ).join("");
+  const t = (d.contenu && d.contenu.totaux) || {};
+  const tot = (label, val, fort) =>
+    '<tr><td style="padding:5px 0;font-family:Arial,Helvetica,sans-serif;font-size:' + (fort ? "17px" : "14px") + ";color:" + (fort ? C.vert900 : C.gris) + ";" + (fort ? "font-weight:700;" : "") + '">' + esc(label) + "</td>" +
+    '<td align="right" style="padding:5px 0;font-family:Arial,Helvetica,sans-serif;font-size:' + (fort ? "17px" : "14px") + ";color:" + (fort ? C.vert900 : C.texte) + ';font-weight:700;white-space:nowrap">' + esc(val) + "</td></tr>";
+  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">' + rows +
+    (t.remise ? tot("Remise (" + (t.codePromo || "") + ")", "− " + euro(t.remise) + " HT") : "") +
+    (t.livraison ? tot(t.livraison.label, t.livraison.note || euro(t.livraison.ht) + " HT") : "") +
+    tot("Total HT", euro(d.total_ht)) +
+    (t.tva || []).filter((r) => r.base).map((r) => tot("TVA " + r.rate + " %", euro(r.tva))).join("") +
+    tot("Total TTC", euro(d.total_ttc), true) +
+    tot("Acompte à la commande (" + (t.acomptePct || 40) + " %)", euro(d.acompte) + " TTC") +
+    "</table>";
+}
+
+// E-mail au CLIENT : son devis
+function clientDevis(d, url) {
+  const prenom = d.nom ? String(d.nom).trim().split(/\s+/)[0] : "";
+  const contenu =
+    lignes([
+      ["Devis n°", "<b>" + esc(d.numero) + "</b>"],
+      ["Événement", esc(quandDevis(d))],
+      ["Convives", esc(d.convives || "")],
+      ["Remise", esc(remiseDevis(d))],
+    ]) +
+    '<div style="height:14px"></div>' + tableauDevis(d) +
+    '<div style="margin-top:22px">' + bouton("Voir, télécharger ou imprimer mon devis", url, true) + bouton("Je souhaite valider ce devis", url + "#valider", false) + "</div>" +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="' + C.creme400 + '" style="border-radius:10px;margin-top:18px"><tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:' + C.texte + '">' +
+    "<b>La suite</b><br>Aucun devis n'est validé sans un échange préalable avec le gérant : il vous contacte pour faire le point sur votre événement. " +
+    "Votre commande est ensuite confirmée par le règlement d'un acompte de " + esc((d.contenu && d.contenu.totaux && d.contenu.totaux.acomptePct) || 40) + " % au restaurant, par virement ou carte bancaire.<br>" +
+    "Devis valable jusqu'au " + esc(formatDateFr(d.valide_jusqu)) + ", sous réserve de disponibilité à la date demandée.</td></tr></table>" +
+    '<div style="margin-top:16px">' + bouton("Nous appeler : " + RESTAURANT.telephoneAffiche, "tel:" + RESTAURANT.telephoneLien, false) + "</div>";
+  const html = cadre({
+    preheader: "Votre devis " + d.numero + " : " + euro(d.total_ttc) + " TTC pour " + (d.convives || "") + " personnes.",
+    pastille: "Devis traiteur",
+    pastilleCouleur: C.vert700,
+    titre: "Votre devis " + esc(d.numero),
+    intro: "Bonjour" + (prenom ? " " + esc(prenom) : "") + ", merci pour votre demande. Voici le récapitulatif de votre devis traiteur.",
+    contenu,
+    pied: esc(RESTAURANT.nom) + " &middot; " + esc(RESTAURANT.adresse) + "<br>Vous pouvez répondre directement à cet e-mail.",
+  });
+  const text =
+    "Bonjour" + (prenom ? " " + prenom : "") + ",\n\nMerci pour votre demande. Voici votre devis traiteur " + d.numero + " :\n" +
+    "Événement : " + quandDevis(d) + "\nConvives : " + (d.convives || "") + "\nRemise : " + remiseDevis(d) + "\n\n" +
+    ((d.contenu && d.contenu.lignes) || []).map((l) => "- " + l.name + " × " + l.qty + " : " + euro(l.ht) + " HT").join("\n") +
+    "\n\nTotal HT : " + euro(d.total_ht) + "\nTotal TTC : " + euro(d.total_ttc) + "\nAcompte à la commande : " + euro(d.acompte) + " TTC\n\n" +
+    "Voir, télécharger ou imprimer votre devis : " + url + "\n\n" +
+    "Aucun devis n'est validé sans un échange préalable avec le gérant : il vous contacte pour faire le point. " +
+    "Votre commande est ensuite confirmée par le règlement de l'acompte au restaurant, par virement ou carte bancaire.\n\n" +
+    "Téléphone : " + RESTAURANT.telephoneAffiche + "\n\nÀ très bientôt,\nL'équipe " + RESTAURANT.nom + " — Gardanne\n";
+  return { subject: "Votre devis traiteur " + d.numero + " — " + RESTAURANT.nom, html, text };
+}
+
+// Alerte au RESTAURANT : nouveau devis, ou client qui souhaite valider (accepte = true)
+function adminDevis(d, url, accepte) {
+  const tel = d.telephone ? '<a href="tel:' + esc(String(d.telephone).replace(/[^\d+]/g, "")) + '" style="color:' + C.vert800 + ';text-decoration:none">' + esc(d.telephone) + "</a>" : "";
+  const mail = d.email ? '<a href="mailto:' + esc(d.email) + '" style="color:' + C.vert800 + ';text-decoration:none">' + esc(d.email) + "</a>" : "";
+  const contenu =
+    (accepte
+      ? '<p style="margin:0 0 16px;padding:12px 14px;border-left:4px solid ' + C.terre + ';background:#fff8f0;border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:' + C.texte + '">' +
+        "Le client a cliqué sur « Je souhaite valider ce devis ». <b>Rien n'est encore validé</b> : appelez-le pour faire le point, puis la commande sera confirmée après le règlement de l'acompte (" + esc(euro(d.acompte)) + " TTC).</p>"
+      : "") +
+    lignes([
+      ["Client", esc((TYPE_CLIENT[d.type_client] || d.type_client || "") + (d.societe ? " · " + d.societe : ""))],
+      ["Nom", esc(d.nom || "")],
+      ["Téléphone", tel],
+      ["E-mail", mail],
+      ["Événement", esc(quandDevis(d))],
+      ["Convives", esc(d.convives || "")],
+      ["Remise", esc(remiseDevis(d)) + (d.adresse ? "<br><span style=\"font-weight:400\">" + esc(d.adresse + ", " + (d.code_postal || "") + " " + (d.ville || "")) + "</span>" : "")],
+    ]) +
+    '<div style="height:14px"></div>' + tableauDevis(d) +
+    (d.remarques
+      ? '<p style="margin:16px 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:' + C.gris + ';text-transform:uppercase;letter-spacing:.6px">Remarques du client</p>' +
+        '<p style="margin:0;padding:12px 14px;background:' + C.creme400 + ';border-left:4px solid ' + C.terre + ';border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:' + C.texte + '">' + esc(d.remarques).replace(/\n/g, "<br>") + "</p>"
+      : "") +
+    '<div style="margin-top:22px">' +
+    (d.telephone ? bouton("Appeler le client", "tel:" + String(d.telephone).replace(/[^\d+]/g, ""), true) : "") +
+    bouton("Voir le devis", url, false) + bouton("Ouvrir l'admin", SITE_URL + "/admin/", false) + "</div>";
+  const html = cadre({
+    preheader: (accepte ? "Souhaite valider : " : "Nouveau devis : ") + d.numero + " · " + (d.nom || "") + " · " + euro(d.total_ttc) + " TTC",
+    pastille: accepte ? "Devis · le client souhaite valider" : "Nouveau devis traiteur",
+    pastilleCouleur: C.terre,
+    titre: esc(d.numero) + " · " + esc(euro(d.total_ttc)) + " TTC",
+    intro: "<b>" + esc(d.nom || "") + "</b>" + (d.societe ? " (" + esc(d.societe) + ")" : "") + " · " + esc(quandDevis(d)) + " · " + esc(d.convives || "") + " pers.",
+    contenu,
+    pied: "Alerte automatique envoyée par le site <a href=\"" + esc(SITE_URL) + '" style="color:' + C.vert800 + '">bistroburgergardanne.com</a>. Le devis est aussi dans l\'admin, rubrique « Devis traiteur ».',
+  });
+  const text =
+    (accepte ? "Le client souhaite valider son devis " : "Nouveau devis ") + d.numero + " — " + RESTAURANT.nom + "\n\n" +
+    "Client : " + (TYPE_CLIENT[d.type_client] || d.type_client || "") + (d.societe ? " — " + d.societe : "") + "\nNom : " + (d.nom || "") +
+    "\nTéléphone : " + (d.telephone || "") + "\nE-mail : " + (d.email || "") + "\nÉvénement : " + quandDevis(d) + "\nConvives : " + (d.convives || "") +
+    "\nRemise : " + remiseDevis(d) + "\nTotal TTC : " + euro(d.total_ttc) + "\nAcompte : " + euro(d.acompte) + " TTC\n\nDevis : " + url + "\n" +
+    (d.remarques ? "\nRemarques :\n" + d.remarques + "\n" : "");
+  return {
+    subject: (accepte ? "Devis " + d.numero + " : le client souhaite valider — " : "Nouveau devis " + d.numero + " — ") + (d.nom || "client") + " (" + euro(d.total_ttc) + " TTC)",
+    html, text,
+    replyTo: d.email || undefined,
+  };
+}
+
+module.exports = { clientReservationConfirmed, clientReservationReceived, adminNewReservation, adminNewOrder, adminNewDemande, clientDemandeAck, adminPasswordLink, clientDevis, adminDevis, RESTAURANT };

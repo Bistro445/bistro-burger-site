@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devis traiteur en ligne | Bistro Burger Gardanne</title>
+<meta name="description" content="Composez votre commande traiteur (lunch boxes, plateaux, cocktail, plateaux à partager) et recevez votre devis Bistro Burger par e-mail.">
+<!-- Page en construction : jamais indexée tant qu'elle n'est pas validée -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Geologica:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/devis-traiteur.css">
+</head>
+<body data-home="/" data-blog-base="/blog/" data-asset-base="/" class="dv-body">
+<div style="width:100%; overflow-x:clip; color:var(--text-body); font-family:var(--font-body);">
+
+  <div id="header-spacer" style="height:69px;"></div>
+
+  <header style="position:fixed; top:0; left:0; right:0; z-index:80; background:rgba(14,70,61,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--border-on-dark);">
+    <div style="max-width:1240px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:32px;">
+      <a href="/#accueil" style="order:0; display:flex; align-items:center; flex:none;">
+        <img src="/assets/logo-cream-sm.png" alt="Bistro Burger — Brasserie &amp; Burgers" style="height:46px; width:auto; display:block;">
+      </a>
+      <button type="button" id="nav-toggle" data-nav-toggle aria-label="Menu" aria-expanded="false" style="order:1; width:42px; height:42px; border:none; background:transparent; color:var(--color-secondary); cursor:pointer; align-items:center; justify-content:center; flex-direction:column; gap:4px; padding:0;">
+        <span style="display:block; width:22px; height:2.5px; background:currentColor; border-radius:2px;"></span>
+        <span style="display:block; width:22px; height:2.5px; background:currentColor; border-radius:2px;"></span>
+        <span style="display:block; width:22px; height:2.5px; background:currentColor; border-radius:2px;"></span>
+      </button>
+      <nav id="nav-main" data-nav-main data-open="false" style="order:2; display:flex; gap:26px; margin-left:auto; align-items:center; flex-wrap:wrap;">
+        <a href="/#accueil" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Accueil</a>
+        <a href="/#plat-du-jour" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Plat du jour</a>
+        <a href="/#carte" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Notre carte</a>
+        <a href="/#a-propos" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">À propos</a>
+        <a href="/blog/index.html" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Blog</a>
+        <a href="/#avis" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Avis</a>
+        <a href="/#contact" class="nav-link" style="color:var(--color-secondary); font-size:14.5px; opacity:.85;">Contact</a>
+      </nav>
+      <div id="nav-actions" data-nav-actions data-open="false" style="order:3; display:flex; gap:10px; align-items:center;">
+        <button type="button" class="btn btn-outline-on-green btn-sm" data-shine data-call>04 65 84 89 18</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bandeau d'aperçu : à retirer avant l'ouverture aux clients -->
+  <div class="dv-maquette" role="note">Aperçu privé : les devis sont réellement enregistrés et envoyés. Seules les formules cocktail et plateaux à partager ont leurs vrais prix.</div>
+
+  <section class="dv-hero">
+    <div class="dv-hero-bg" aria-hidden="true">
+      <img src="/assets/carte-fond.jpg" alt="" decoding="async">
+      <div class="dv-hero-shade"></div>
+    </div>
+    <div class="dv-hero-inner">
+      <span class="dv-hero-label">Traiteur · Gardanne</span>
+      <h1>Votre devis traiteur<br>en quelques minutes</h1>
+      <p>Lunch boxes, plateaux, cocktail et plateaux à partager : composez votre commande, le prix s'affiche en direct et vous recevez votre devis par e-mail.</p>
+      <ul class="dv-hero-points">
+        <li>Devis immédiat, sans créer de compte</li>
+        <li>Livraison offerte dès 15 personnes</li>
+        <li>Commande au moins <span data-delay-label>96 h</span> à l'avance</li>
+      </ul>
+    </div>
+  </section>
+
+  <main class="dv-main">
+    <ol class="dv-steps" id="dv-steps" aria-label="Étapes du devis">
+      <li><button type="button" data-goto="1"><span class="dv-step-num">1</span><span class="dv-step-txt">Événement</span></button></li>
+      <li><button type="button" data-goto="2"><span class="dv-step-num">2</span><span class="dv-step-txt">Produits</span></button></li>
+      <li><button type="button" data-goto="3"><span class="dv-step-num">3</span><span class="dv-step-txt">Composition</span></button></li>
+      <li><button type="button" data-goto="4"><span class="dv-step-num">4</span><span class="dv-step-txt">Récapitulatif</span></button></li>
+      <li><button type="button" data-goto="5"><span class="dv-step-num">5</span><span class="dv-step-txt">Coordonnées</span></button></li>
+    </ol>
+
+    <div class="dv-layout">
+      <div class="dv-col" id="dv-col">
+
+        <!-- Étape 1 : l'événement -->
+        <section class="dv-card dv-panel" data-panel="1" aria-labelledby="dv-t1">
+          <div class="dv-card-head">
+            <span class="dv-kicker">Étape 1 sur 5</span>
+            <h2 id="dv-t1">Votre événement</h2>
+            <p class="dv-muted">Ces informations fixent le délai, le minimum de convives et les frais de livraison.</p>
+          </div>
+
+          <div class="dv-block">
+            <div class="dv-label" id="dv-date-label">Date souhaitée</div>
+            <div class="dv-cal" id="dv-cal" aria-labelledby="dv-date-label"></div>
+            <p class="dv-hint">Les dates grisées ne sont pas disponibles : commande au moins <span data-delay-label>96 h</span> à l'avance, les jours d'ouverture du restaurant.</p>
+          </div>
+
+          <div class="dv-block">
+            <div class="dv-label" id="dv-time-label">Heure de livraison ou de retrait</div>
+            <div class="dv-chips" id="dv-times" aria-labelledby="dv-time-label"><p class="dv-hint">Choisissez d'abord une date.</p></div>
+          </div>
+
+          <div class="dv-grid2">
+            <div class="dv-block">
+              <label class="dv-label" for="dv-guests">Nombre de convives</label>
+              <div class="dv-qty dv-qty-lg" data-qty-for="dv-guests">
+                <button type="button" class="dv-qty-btn" data-step="-1" aria-label="Retirer un convive">−</button>
+                <input id="dv-guests" class="dv-input dv-qty-input" type="number" inputmode="numeric" min="1" max="999" placeholder="0">
+                <button type="button" class="dv-qty-btn" data-step="1" aria-label="Ajouter un convive">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="dv-block">
+            <div class="dv-label" id="dv-mode-label">Mode de remise</div>
+            <div class="dv-choice2" role="radiogroup" aria-labelledby="dv-mode-label">
+              <label class="dv-choice">
+                <input type="radio" name="dv-mode" value="livraison">
+                <span class="dv-choice-box">
+                  <span class="dv-choice-title">Livraison</span>
+                  <span class="dv-choice-sub">Gardanne, Biver, Mimet, Simiane-Collongue, Meyreuil, Fuveau</span>
+                </span>
+              </label>
+              <label class="dv-choice">
+                <input type="radio" name="dv-mode" value="retrait">
+                <span class="dv-choice-box">
+                  <span class="dv-choice-title">Retrait à la brasserie</span>
+                  <span class="dv-choice-sub">ZAC Avon, Bretelle de la Plaine · parking gratuit</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="dv-block" id="dv-commune-wrap" hidden>
+            <label class="dv-label" for="dv-commune">Commune de livraison</label>
+            <select id="dv-commune" class="dv-input">
+              <option value="">Choisir la commune</option>
+            </select>
+            <p class="dv-hint" id="dv-delivery-hint"></p>
+          </div>
+
+          <div class="dv-alerts" id="dv-alerts-1" aria-live="polite"></div>
+          <div class="dv-actions">
+            <button type="button" class="btn btn-gradient" data-next="2">Choisir les produits</button>
+          </div>
+        </section>
+
+        <!-- Étape 2 : les produits -->
+        <section class="dv-card dv-panel" data-panel="2" aria-labelledby="dv-t2" hidden>
+          <div class="dv-card-head">
+            <span class="dv-kicker">Étape 2 sur 5</span>
+            <h2 id="dv-t2">Choisissez vos formules</h2>
+            <p class="dv-muted">Choisissez une formule puis composez-la. Vous pouvez en ajouter plusieurs.</p>
+          </div>
+          <div class="tabs dv-tabs" id="dv-tabs" role="tablist"></div>
+          <p class="dv-fam-intro" id="dv-fam-intro"></p>
+          <div class="dv-formulas" id="dv-formulas"></div>
+
+          <div class="dv-extras">
+            <h3>Suppléments</h3>
+            <p class="dv-muted">Pain, couverts, nappes ou service sur place, à l'unité.</p>
+            <div class="dv-extras-list" id="dv-extras"></div>
+          </div>
+
+          <div class="dv-alerts" id="dv-alerts-2" aria-live="polite"></div>
+          <div class="dv-actions">
+            <button type="button" class="btn btn-outline" data-next="1">Retour</button>
+            <button type="button" class="btn btn-gradient" data-next="4">Voir le récapitulatif</button>
+          </div>
+        </section>
+
+        <!-- Étape 3 : composition d'une formule -->
+        <section class="dv-card dv-panel" data-panel="3" aria-labelledby="dv-t3" hidden>
+          <button type="button" class="dv-back" data-next="2">← Retour aux formules</button>
+          <div id="dv-composer"></div>
+        </section>
+
+        <!-- Étape 4 : récapitulatif -->
+        <section class="dv-card dv-panel" data-panel="4" aria-labelledby="dv-t4" hidden>
+          <div class="dv-card-head">
+            <span class="dv-kicker">Étape 4 sur 5</span>
+            <h2 id="dv-t4">Récapitulatif de votre devis</h2>
+            <p class="dv-muted">Vérifiez chaque ligne : vous pouvez la modifier ou la supprimer.</p>
+          </div>
+          <div id="dv-recap"></div>
+          <div class="dv-promo">
+            <label class="dv-label" for="dv-promo">Code promo</label>
+            <div class="dv-promo-row">
+              <input id="dv-promo" class="dv-input" type="text" autocomplete="off" placeholder="Votre code">
+              <button type="button" class="btn btn-outline btn-sm" id="dv-promo-btn">Appliquer</button>
+            </div>
+            <p class="dv-hint" id="dv-promo-msg"></p>
+          </div>
+          <div class="dv-alerts" id="dv-alerts-4" aria-live="polite"></div>
+          <div class="dv-actions">
+            <button type="button" class="btn btn-outline" data-next="2">Ajouter des produits</button>
+            <button type="button" class="btn btn-gradient" data-next="5">Mes coordonnées</button>
+          </div>
+        </section>
+
+        <!-- Étape 5 : coordonnées -->
+        <section class="dv-card dv-panel" data-panel="5" aria-labelledby="dv-t5" hidden>
+          <div id="dv-contact-wrap">
+            <div class="dv-card-head">
+              <span class="dv-kicker">Étape 5 sur 5</span>
+              <h2 id="dv-t5">Vos coordonnées</h2>
+              <p class="dv-muted">Votre devis est créé dès que vous validez, puis envoyé à votre adresse e-mail. Le gérant vous contacte ensuite : aucun devis n'est validé sans cet échange.</p>
+            </div>
+            <form id="dv-contact" novalidate>
+              <!-- Champ piège pour les robots : invisible, doit rester vide -->
+              <div aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"><label for="c-website">Site web</label><input id="c-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+              <div class="dv-block">
+                <div class="dv-label" id="dv-type-label">Vous êtes</div>
+                <div class="dv-seg" role="radiogroup" aria-labelledby="dv-type-label">
+                  <label><input type="radio" name="type" value="entreprise"><span>Une entreprise</span></label>
+                  <label><input type="radio" name="type" value="particulier"><span>Un particulier</span></label>
+                  <label><input type="radio" name="type" value="association"><span>Une association</span></label>
+                </div>
+              </div>
+              <div class="dv-grid2">
+                <div class="dv-block"><label class="dv-label" for="c-nom">Nom et prénom</label><input id="c-nom" name="nom" class="dv-input" autocomplete="name" required></div>
+                <div class="dv-block" data-company><label class="dv-label" for="c-societe">Société</label><input id="c-societe" name="societe" class="dv-input" autocomplete="organization"></div>
+                <div class="dv-block" data-company><label class="dv-label" for="c-siret">SIRET <span class="dv-opt">(facultatif)</span></label><input id="c-siret" name="siret" class="dv-input" inputmode="numeric" maxlength="17" placeholder="14 chiffres"></div>
+                <div class="dv-block"><label class="dv-label" for="c-tel">Téléphone</label><input id="c-tel" name="tel" class="dv-input" type="tel" autocomplete="tel" required placeholder="06 12 34 56 78"></div>
+                <div class="dv-block"><label class="dv-label" for="c-email">E-mail</label><input id="c-email" name="email" class="dv-input" type="email" autocomplete="email" required></div>
+                <div class="dv-block"><label class="dv-label" for="c-email2">Confirmez l'e-mail</label><input id="c-email2" name="email2" class="dv-input" type="email" autocomplete="off" required></div>
+              </div>
+              <fieldset class="dv-fieldset" id="dv-delivery-fields">
+                <legend class="dv-label">Adresse de livraison</legend>
+                <div class="dv-grid2">
+                  <div class="dv-block dv-span2"><label class="dv-label dv-label-sm" for="c-adr">Adresse</label><input id="c-adr" name="adresse" class="dv-input" autocomplete="street-address"></div>
+                  <div class="dv-block"><label class="dv-label dv-label-sm" for="c-cp">Code postal</label><input id="c-cp" name="cp" class="dv-input" inputmode="numeric" maxlength="5" autocomplete="postal-code"></div>
+                  <div class="dv-block"><label class="dv-label dv-label-sm" for="c-ville">Commune</label><input id="c-ville" name="ville" class="dv-input" readonly></div>
+                </div>
+              </fieldset>
+              <div class="dv-block">
+                <label class="dv-check"><input type="checkbox" id="c-fact-same" checked><span class="dv-check-box" aria-hidden="true"></span><span>Adresse de facturation identique</span></label>
+              </div>
+              <div class="dv-block" id="dv-fact-wrap" hidden><label class="dv-label" for="c-fact">Adresse de facturation</label><textarea id="c-fact" name="facturation" class="dv-input" rows="2"></textarea></div>
+              <div class="dv-block">
+                <label class="dv-label" for="c-rem">Remarques, allergies, accès <span class="dv-opt">(facultatif)</span></label>
+                <textarea id="c-rem" name="remarques" class="dv-input" rows="3" maxlength="1000" placeholder="Code d'accès, étage, allergies à signaler…"></textarea>
+                <p class="dv-hint dv-right"><span id="c-rem-count">0</span> / 1 000</p>
+              </div>
+              <div class="dv-block dv-consents">
+                <label class="dv-check"><input type="checkbox" name="rgpd" id="c-rgpd"><span class="dv-check-box" aria-hidden="true"></span><span>J'accepte que Bistro Burger utilise ces informations pour établir et suivre mon devis.</span></label>
+                <label class="dv-check"><input type="checkbox" name="offres" id="c-offres"><span class="dv-check-box" aria-hidden="true"></span><span>Je souhaite recevoir les offres traiteur de Bistro Burger <span class="dv-opt">(facultatif)</span>.</span></label>
+              </div>
+              <p class="dv-rgpd">Bistro Burger, responsable du traitement, utilise ces informations uniquement pour établir et suivre votre devis. Elles sont conservées 3 ans après le dernier contact. Vous pouvez y accéder, les corriger ou demander leur suppression en écrivant à brasserie.zone.avon@gmail.com. Voir notre <a href="/confidentialite.html">politique de confidentialité</a>.</p>
+              <div class="dv-alerts" id="dv-alerts-5" aria-live="polite"></div>
+              <div class="dv-actions">
+                <button type="button" class="btn btn-outline" data-next="4">Retour</button>
+                <button type="submit" class="btn btn-gradient">Recevoir mon devis</button>
+              </div>
+            </form>
+          </div>
+          <div id="dv-done" hidden></div>
+        </section>
+      </div>
+
+      <!-- Récapitulatif toujours visible -->
+      <aside class="dv-summary" id="dv-summary" aria-label="Votre devis">
+        <div class="dv-sum-head">
+          <h2>Votre devis</h2>
+          <button type="button" class="dv-sum-close" id="dv-sum-close" aria-label="Fermer le détail">×</button>
+        </div>
+        <div class="dv-sum-event" id="dv-sum-event"></div>
+        <div class="dv-sum-lines" id="dv-sum-lines"></div>
+        <div class="dv-sum-totals" id="dv-sum-totals" aria-live="polite"></div>
+        <button type="button" class="btn btn-gradient dv-sum-cta" data-next="5">Recevoir mon devis</button>
+        <p class="dv-sum-note">Devis valable 30 jours, sous réserve de disponibilité à la date demandée. Validation après échange avec le gérant.</p>
+        <button type="button" class="dv-reset" id="dv-reset">Recommencer à zéro</button>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Barre du bas sur téléphone -->
+  <div class="dv-bar" id="dv-bar">
+    <button type="button" class="dv-bar-info" id="dv-bar-open" aria-controls="dv-summary" aria-expanded="false">
+      <span class="dv-bar-label">Total TTC</span>
+      <span class="dv-bar-total" id="dv-bar-total">0,00 €</span>
+      <span class="dv-bar-sub" id="dv-bar-sub">Voir le détail</span>
+    </button>
+    <button type="button" class="btn btn-cream dv-bar-cta" id="dv-bar-cta">Continuer</button>
+  </div>
+  <div class="dv-sheet-shade" id="dv-sheet-shade" hidden></div>
+
+  <footer style="background:linear-gradient(180deg,var(--green-900),var(--color-primary)); color:var(--color-secondary); padding:72px 24px 32px;">
+    <div style="max-width:1240px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:48px;">
+      <div>
+        <img src="/assets/logo-cream-sm.png" alt="Bistro Burger — Brasserie &amp; Burgers" style="height:62px; width:auto; display:block;">
+        <p style="font-size:14.5px; line-height:1.7; color:rgba(237,224,211,.7); margin:18px 0 0; max-width:300px;">Burgers faits maison et plats du jour, à Gardanne, entre Aix-en-Provence et Marseille.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Le site</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px;">
+          <a href="/#accueil" class="footer-link">Accueil</a>
+          <a href="/#plat-du-jour" class="footer-link">Plat du jour</a>
+          <a href="/#carte" class="footer-link">Notre carte</a>
+          <a href="/blog/index.html" class="footer-link">Blog</a>
+          <a href="/#reservation" class="footer-link">Réserver</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Contact</div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px; color:rgba(237,224,211,.75);">
+          <span>ZAC Avon, Bretelle de la Plaine</span>
+          <span>13120 Gardanne</span>
+          <a href="tel:+33465848918" class="footer-link">+33 4 65 84 89 18</a>
+          <a href="mailto:brasserie.zone.avon@gmail.com" class="footer-link" style="word-break:break-all;">brasserie.zone.avon@gmail.com</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Horaires</div>
+        <div data-hours-short style="display:flex; flex-direction:column; gap:10px; font-size:14.5px; color:rgba(237,224,211,.75);">
+          <span>Lun · 9h–14h</span>
+          <span>Mar–Ven · 9h–14h et 17h30–21h30</span>
+          <span>Fermé sam. et dim.</span>
+        </div>
+      </div>
+    </div>
+    <div style="max-width:1240px; margin:44px auto 0; padding-top:22px; border-top:1px solid var(--border-on-dark); display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-size:13px; color:rgba(237,224,211,.6);">
+      <span>© 2026 Bistro Burger — Gardanne. Tous droits réservés.</span>
+      <span style="display:flex; gap:20px;"><a href="/mentions-legales.html" class="footer-link" style="color:rgba(237,224,211,.6);">Mentions légales</a><a href="/confidentialite.html" class="footer-link" style="color:rgba(237,224,211,.6);">Confidentialité</a><a href="/cgv.html" class="footer-link" style="color:rgba(237,224,211,.6);">CGV</a></span>
+    </div>
+  </footer>
+
+</div>
+<script src="/hours.js"></script>
+<script src="/data.generated.js"></script>
+<script src="/script.js?v=20261120"></script>
+<script src="/devis-catalogue.js?v=20261125"></script>
+<script src="/devis-traiteur.js?v=20261125"></script>
+</body>
+</html>

@@ -60,6 +60,28 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
 - Page Noël (`pages/noel.html`, `public/noel.css`, `public/noel.js`) : **pas encore publiée**. Ses PDF vont dans
   `public/noel/` (noms fixes dans `DOCS` de noel.js) et s'activent tout seuls quand le fichier existe.
 
+## Devis traiteur (en ligne en APERÇU PRIVÉ depuis le 26/11/2026)
+- Page `/devis-traiteur` (pages/devis-traiteur.html, public/devis-traiteur.css/.js). Le catalogue, les règles et les
+  calculs sont dans **public/devis-catalogue.js**, partagé navigateur + serveur : `api/devis.js` refait tout le calcul
+  à la validation (prix du navigateur ignorés), contrôle délai (96 h, heure de Paris), jours d'ouverture, minimums,
+  composition et coordonnées, numérote via la fonction SQL `next_devis_numero()` (DEV-2026-0001), enregistre dans la
+  table `devis`, envoie le devis au client (`clientDevis`) et une copie aux comptes admin (`adminDevis`).
+- Chaque devis a sa page : `/devis-traiteur/d/<jeton>` (lib/devisDocument.js) : A4 imprimable / PDF par le navigateur,
+  bouton « Je souhaite valider ce devis » → `POST /api/devis {action:"accept"}` → statut `accepte` + alerte au restaurant
+  (rien n'est validé avant l'échange avec le gérant et l'acompte de 40 %).
+- Admin : rubrique « Devis traiteur » (public/admin/devis.js, api/admin/devis.js) : statuts, notes, historique,
+  renvoi au client, export CSV.
+- **Aperçu privé** : tant que `DEVIS_PUBLIC` n'est pas `true` dans Hostinger, `/devis-traiteur` et la création de devis
+  répondent 404, sauf dans un navigateur passé par `/devis-traiteur/apercu` avec une session admin (cookie signé avec la
+  clé serveur Supabase, api/devis-apercu.js et api/_lib/devisAccess.js). **Le dépôt GitHub est public : ne jamais écrire
+  de clé ou de lien secret dans le code.** Pour ouvrir aux clients : `DEVIS_PUBLIC=true`, retirer le bandeau
+  « Aperçu privé » et le `noindex` de la page, ajouter les liens (menu, page traiteur, QR code), et remettre le compteur
+  à zéro (fin de scripts/devis.sql).
+- Formules à prix d'EXEMPLE (`ex: true`) : lunch boxes, plateaux repas, boissons, suppléments, frais de livraison
+  sous 15 pers. Prix réels : formules cocktail et plateaux à partager (HT ou TTC encore à confirmer).
+- Pas encore fait : PDF joint à l'e-mail, relance automatique à 3 jours, versions modifiées par le restaurant,
+  gestion du catalogue depuis l'admin.
+
 ## Déploiement
 Hébergeur : Hostinger (application Node.js), déploiement depuis GitHub. **Aucun environnement de test en
 ligne** : tout `push` sur la branche déployée part en production après un redéploiement.

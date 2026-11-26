@@ -130,6 +130,7 @@ window.AdminDrafts = (() => {
     { key: "commandes", title: "Commandes", editor: () => window.CommandesEditor },
     { key: "reservations-clients", title: "Réservations reçues", editor: () => window.ReservationsClientsEditor },
     { key: "demandes", title: "Demandes & suivi Noël", editor: () => window.DemandesEditor },
+    { key: "devis", title: "Devis traiteur", editor: () => window.DevisEditor },
     { key: "administrateurs", title: "Administrateurs", editor: () => window.AdministrateursEditor },
   ];
 

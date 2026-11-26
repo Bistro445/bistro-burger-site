@@ -227,6 +227,54 @@ app.get("/venir-chez-nous", (req, res) => {
   res.sendFile(path.join(PAGES_DIR, "venir-chez-nous.html"));
 });
 
+// Page « Devis traiteur » : en APERÇU PRIVÉ tant que DEVIS_PUBLIC n'est pas "true" dans Hostinger.
+// Seuls les navigateurs passés par /devis-traiteur/apercu avec une session admin la voient ; pour les autres,
+// elle répond « page introuvable » (voir api/_lib/devisAccess.js et api/devis-apercu.js).
+// Chaque devis a sa page : /devis-traiteur/d/<jeton> (lib/devisDocument.js).
+const devisAccess = require("./api/_lib/devisAccess");
+const devisDocument = require("./lib/devisDocument");
+const notFoundPage = (res) => res.status(404).sendFile(path.join(PAGES_DIR, "404.html"));
+const DEVIS_APERCU_HTML = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow"><title>Aperçu du devis traiteur | Bistro Burger</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0E463D;color:#EDE0D3;font-family:Arial,sans-serif;padding:16px}
+main{max-width:460px;text-align:center}h1{font-size:22px}p{line-height:1.6;opacity:.9}a{color:#EDE0D3;font-weight:700}</style></head>
+<body><main><h1>Aperçu privé du devis traiteur</h1><p id="msg">Vérification de votre session admin…</p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/admin/config.generated.js"></script>
+<script>
+(function () {
+  var msg = document.getElementById("msg");
+  function fail(t) { msg.innerHTML = t + '<br><br><a href="/admin/">Ouvrir l\\'espace admin</a>, connectez-vous, puis revenez sur cette page.'; }
+  try {
+    var cfg = window.SUPABASE_CONFIG;
+    var sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+    sb.auth.getSession().then(function (r) {
+      var t = r.data && r.data.session && r.data.session.access_token;
+      if (!t) return fail("Vous n'êtes pas connecté à l'espace admin dans ce navigateur.");
+      return fetch("/api/devis-apercu", { method: "POST", headers: { Authorization: "Bearer " + t }, credentials: "same-origin" })
+        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (j) { return { ok: res.ok, j: j }; }); })
+        .then(function (x) { if (x.ok && x.j.ok) location.replace("/devis-traiteur"); else fail(x.j.error || "Accès refusé."); });
+    }).catch(function () { fail("Impossible de vérifier votre session."); });
+  } catch (e) { fail("Impossible de vérifier votre session."); }
+})();
+</script></body></html>`;
+app.get("/devis-traiteur/apercu", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  if (devisAccess.hasPreview(req)) return res.redirect("/devis-traiteur");
+  return res.type("html").send(DEVIS_APERCU_HTML);
+});
+app.get(["/devis-traiteur", "/devis-traiteur.html"], (req, res) => {
+  if (!devisAccess.hasPreview(req)) return notFoundPage(res);
+  if (req.path.endsWith(".html")) return res.redirect(301, "/devis-traiteur");
+  res.setHeader("Cache-Control", "no-cache");
+  if (!devisAccess.DEVIS_PUBLIC) res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  return res.sendFile(path.join(PAGES_DIR, "devis-traiteur.html"));
+});
+app.get("/devis-traiteur/d/:token", (req, res, next) => {
+  devisDocument.handle(req, res, () => notFoundPage(res)).catch(next);
+});
+
 app.use("/assets", express.static(path.join(PUBLIC_DIR, "assets"), { maxAge: "1d", dotfiles: "ignore" }));
 app.use(express.static(PAGES_DIR, { dotfiles: "ignore" }));
 app.use(

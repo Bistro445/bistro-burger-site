@@ -1590,3 +1590,12 @@ button.section-card:hover .section-card-btn{
 .dm-table{width:100%; border-collapse:collapse; font-size:14px}
 .dm-table th{text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--border)}
 .dm-table td{padding:8px; border-bottom:1px solid var(--border)}
+
+/* Rubrique « Devis traiteur » */
+.rec-status.is-annulee{background:#8a8f93; box-shadow:none}
+.dv-admin-lines{margin:12px 0 0; padding:0 0 0 18px; font-size:13.5px; line-height:1.5; color:var(--ink)}
+.dv-admin-lines li{margin:0 0 6px}
+.dv-admin-lines span{color:var(--muted); font-size:12.5px}
+.dv-admin-search{flex:1 1 200px; min-width:0; padding:9px 12px; border:1px solid rgba(18,87,76,.25); border-radius:10px; font:inherit; font-size:14px}
+.dv-admin-status{display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--muted)}
+.dv-admin-status select{padding:7px 10px; border:1px solid rgba(18,87,76,.3); border-radius:9px; font:inherit; font-size:13.5px; color:var(--ink); background:#fff}
