@@ -221,3 +221,47 @@
   .nl-bar.is-visible { transform: none; }
   .nl-bar .btn { flex: 1 1 0; min-width: 0; justify-content: center; padding: 13px 8px; font-size: 15px; }
 }
+
+/* ---------- 4 bis. Carte traiteur d'hiver ---------- */
+.nl-sub { font-family: var(--font-heading); font-weight: 800; font-size: 21px !important; color: var(--nl-ink); text-transform: uppercase; margin: 40px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.nl-sub span { font-family: var(--font-body); font-weight: 400; font-size: 14px; text-transform: none; color: var(--text-muted); }
+.nl-formules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.nl-formule { position: relative; text-align: center; background: linear-gradient(165deg, var(--nl-ink), var(--nl-dark)); color: var(--nl-cream); padding: 26px 18px 22px; border-radius: 16px; }
+.nl-formule.is-top { box-shadow: 0 14px 34px rgba(14,70,61,.28); transform: translateY(-6px); }
+.nl-formule-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--nl-cream); color: var(--nl-ink); font-family: var(--font-heading); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+.nl-formule p { margin: 0; }
+.nl-formule-n { font-family: var(--font-heading); font-weight: 700; font-size: 20px; }
+.nl-formule-p { font-family: var(--font-heading); font-weight: 900; font-size: 46px; line-height: 1.1; margin-top: 6px !important; }
+.nl-formule-u { font-size: 13.5px; opacity: .85; }
+.nl-formule-c { margin-top: 12px !important; padding-top: 12px; border-top: 1px solid rgba(237,224,211,.25); font-size: 15px; line-height: 1.5; }
+.nl-plateaux { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.nl-plateau { background: #fff; border: 1px solid #E6D8C8; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.nl-plateau img { display: block; width: 100%; height: 120px; object-fit: cover; }
+.nl-plateau > div { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.nl-plateau p { margin: 0; font-size: 14px; line-height: 1.5; }
+.nl-plateau-n { font-family: var(--font-heading); font-weight: 700; font-size: 17px !important; color: var(--nl-ink); }
+.nl-plateau-s { color: var(--nl-ink); opacity: .8; font-size: 13.5px !important; }
+.nl-plateau-p { margin-top: auto !important; padding-top: 8px; color: var(--nl-ink); }
+.nl-plateau-p strong { display: inline-block; background: var(--nl-ink); color: var(--nl-cream); padding: 3px 12px; border-radius: 999px; margin-right: 4px; }
+.nl-noel-bouchees { position: relative; margin-top: 40px; background: #fff8f0; border: 2px solid var(--color-accent); border-radius: 18px; padding: 26px 24px 18px; }
+.nl-noel-tag { position: absolute; top: -13px; left: 22px; background: var(--color-accent); color: #fff; font-family: var(--font-heading); font-weight: 700; font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; padding: 4px 14px; border-radius: 999px; }
+.nl-noel-bouchees h3 { font-family: var(--font-heading); font-weight: 800; font-size: 22px !important; color: var(--nl-ink); margin: 2px 0 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.nl-noel-bouchees h3 span { font-family: var(--font-body); font-weight: 400; font-size: 14px; color: var(--text-muted); }
+.nl-bouchees-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 28px; }
+.nl-bouchees { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 32px; margin-top: 18px; }
+.nl-bouchees > div.is-sucre { background: linear-gradient(165deg, var(--nl-ink), var(--nl-dark)); color: var(--nl-cream); border-radius: 16px; padding: 16px 20px; }
+.nl-bouchees > div.is-sucre .nl-bouchees-g { color: var(--nl-cream); border-color: rgba(237,224,211,.3); }
+.nl-bouchees-g { font-family: var(--font-heading); font-weight: 800; font-size: 17px; color: var(--nl-ink); margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid rgba(18,87,76,.2); }
+.nl-bouchees-g span { font-family: var(--font-body); font-weight: 400; font-size: 13px; color: var(--text-muted); }
+.nl-noel-bouchees .nl-bouchees-g { color: var(--color-accent); border-color: rgba(181,101,29,.3); font-size: 14px; letter-spacing: .1em; text-transform: uppercase; }
+.nl-bouchees ul, .nl-noel-bouchees ul { margin: 0; padding-left: 18px; font-size: 15px; line-height: 1.75; }
+.nl-bouchees abbr, .nl-noel-bouchees abbr { text-decoration: none; display: inline-block; font-size: 10.5px; font-weight: 700; border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; line-height: 1.5; margin-left: 2px; opacity: .8; }
+.nl-carte-note { margin: 24px 0 0; font-size: 14px; color: var(--text-muted); }
+/* Aperçu réel des PDF dans les téléchargements */
+.nl-docs a { grid-template-columns: 84px minmax(0, 1fr); }
+.nl-doc-thumb { width: 84px; }
+.nl-doc-thumb img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+@media (max-width: 700px) {
+  .nl-formules, .nl-plateaux, .nl-bouchees, .nl-bouchees-cols { grid-template-columns: minmax(0, 1fr); }
+  .nl-formule.is-top { transform: none; margin-top: 8px; }
+}
