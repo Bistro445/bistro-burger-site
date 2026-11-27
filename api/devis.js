@@ -19,6 +19,7 @@ const { notifyPush } = require("./_lib/push");
 const { sendEmail } = require("./_lib/mailer");
 const { clientDevis, adminDevis } = require("./_lib/emailTemplates");
 const { devisAttachment } = require("../lib/pdfDevis");
+const { testerEmail, alertTester } = require("./_lib/testMode");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -124,14 +125,16 @@ async function accept(req, res, body) {
   const now = new Date().toISOString();
   const historique = (Array.isArray(d.historique) ? d.historique : []).concat([{ at: now, quoi: "Le client a cliqué sur « Je souhaite valider ce devis »" }]);
   const url = SITE_URL + "/devis-traiteur/d/" + d.token;
+  const tester = d.saisie && d.saisie.testAlertTo; // devis de test : alerte au seul admin qui teste
   let alerte = [];
   try {
-    alerte = (await notifyAdmins(supabase, ALERT_EMAIL, "Devis " + d.numero + " : le client souhaite valider", {
-      devis: d.numero, nom: d.nom, téléphone: d.telephone, email: d.email, total: d.total_ttc + " € TTC", lien: url,
-    }, adminDevis(d, url, true))) || [];
+    alerte = tester ? await alertTester(tester, adminDevis(d, url, true))
+      : (await notifyAdmins(supabase, ALERT_EMAIL, "Devis " + d.numero + " : le client souhaite valider", {
+        devis: d.numero, nom: d.nom, téléphone: d.telephone, email: d.email, total: d.total_ttc + " € TTC", lien: url,
+      }, adminDevis(d, url, true))) || [];
   } catch (e) { console.error("[devis] alerte acceptation : " + (e && e.message)); }
   historique.push({ at: new Date().toISOString(), quoi: alerte.length ? "Restaurant prévenu (" + alerte.map((a) => a.to).join(", ") + ")" : "Restaurant : aucun destinataire pour l'alerte" });
-  try { await notifyPush(supabase, { title: "Devis à valider", body: d.numero + " — " + d.nom, url: "/admin/" }); } catch {}
+  if (!tester) { try { await notifyPush(supabase, { title: "Devis à valider", body: d.numero + " — " + d.nom, url: "/admin/" }); } catch {} }
 
   const up = await supabase.from("devis").update({ statut: "accepte", accepte_le: now, historique }).eq("id", d.id);
   if (up.error) { res.status(500).json({ error: "L'envoi n'a pas abouti. Appelez-nous au " + TEL + "." }); return; }
@@ -151,6 +154,10 @@ module.exports = async (req, res) => {
   // Pendant l'aperçu : seules les personnes passées par le lien secret peuvent créer un devis.
   if (!hasPreview(req)) { res.status(404).json({ error: "Route introuvable." }); return; }
 
+  // Mode test (admin connecté seulement) : voir api/_lib/testMode.js.
+  const tester = await testerEmail(req, body);
+  if (tester === false) { res.status(403).json({ error: "Mode test réservé aux comptes admin connectés." }); return; }
+
   // Robots : champ piège rempli ou envoi trop rapide → réponse vide, rien n'est fait.
   if (str(body.website) || (Number(body.elapsed) > 0 && Number(body.elapsed) < 5000)) { res.status(200).json({ ok: false, error: "Envoi refusé. Réessayez dans un instant." }); return; }
 
@@ -163,7 +170,7 @@ module.exports = async (req, res) => {
     .concat(D.contactErrors(Object.assign({}, contact, { tel: contact.tel, email2: contact.email2 }), ev).errs);
   if (errors.length) { res.status(400).json({ error: errors[0], errors }); return; }
 
-  if (rateLimited(req.ip || "?")) { res.status(429).json({ error: "Vous avez déjà envoyé plusieurs devis. Appelez-nous au " + TEL + "." }); return; }
+  if (!tester && rateLimited(req.ip || "?")) { res.status(429).json({ error: "Vous avez déjà envoyé plusieurs devis. Appelez-nous au " + TEL + "." }); return; }
 
   // Calcul officiel (serveur).
   const t = D.totals(state);
@@ -177,16 +184,20 @@ module.exports = async (req, res) => {
   };
 
   const supabase = supa();
-  const num = await supabase.rpc("next_devis_numero");
-  if (num.error || !num.data) {
-    console.error("[devis] numérotation : " + (num.error && num.error.message));
-    res.status(503).json({ error: isSetupError(num.error) ? "Le service de devis n'est pas encore activé. Appelez-nous au " + TEL + "." : "Enregistrement impossible pour le moment. Réessayez ou appelez-nous au " + TEL + "." });
-    return;
+  let numero;
+  if (tester) numero = "TEST-" + Date.now().toString(36).toUpperCase(); // le compteur des vrais devis n'avance pas
+  else {
+    const num = await supabase.rpc("next_devis_numero");
+    if (num.error || !num.data) {
+      console.error("[devis] numérotation : " + (num.error && num.error.message));
+      res.status(503).json({ error: isSetupError(num.error) ? "Le service de devis n'est pas encore activé. Appelez-nous au " + TEL + "." : "Enregistrement impossible pour le moment. Réessayez ou appelez-nous au " + TEL + "." });
+      return;
+    }
+    numero = String(num.data);
   }
-  const numero = String(num.data);
   const token = crypto.randomBytes(24).toString("base64url");
   const now = new Date().toISOString();
-  const historique = [{ at: now, quoi: "Devis créé depuis la page devis traiteur" }];
+  const historique = [{ at: now, quoi: tester ? "Devis de TEST créé par " + tester + " (alertes envoyées à cette seule adresse)" : "Devis créé depuis la page devis traiteur" }];
 
   const row = {
     created_at: now, numero, token, statut: "nouveau", valide_jusqu: addDays(parisToday(), D.CONFIG.validityDays),
@@ -194,7 +205,7 @@ module.exports = async (req, res) => {
     telephone: contact.tel, email: contact.email, adresse: contact.adresse || null, code_postal: contact.cp || null, ville: contact.ville || null,
     facturation: contact.facturation || null, remarques: contact.remarques || null, consentement: contact.rgpd, offres: contact.offres,
     date_evenement: ev.date, heure: D.fmtTime(ev.time), convives: ev.guests, mode: ev.mode, commune: ev.commune || null,
-    contenu: { lignes, totaux }, saisie: { event: ev, lines: state.lines, units: state.units, promo: state.promo },
+    contenu: { lignes, totaux }, saisie: { event: ev, lines: state.lines, units: state.units, promo: state.promo, testAlertTo: tester || undefined },
     total_ht: r2(t.ht), total_tva: r2(t.tva), total_ttc: r2(t.ttc), acompte: r2(t.deposit),
     historique,
   };
@@ -220,14 +231,16 @@ module.exports = async (req, res) => {
 
   // Copie au restaurant
   let alerte = [];
+  const adminMail = Object.assign(adminDevis(row, url, false), { attachments: pdf ? [pdf] : undefined });
   try {
-    alerte = (await notifyAdmins(supabase, ALERT_EMAIL, "Nouveau devis " + numero, {
-      devis: numero, nom: row.nom, société: row.societe, téléphone: row.telephone, email: row.email,
-      date: row.date_evenement + " " + row.heure, convives: row.convives, total: row.total_ttc + " € TTC", lien: url,
-    }, Object.assign(adminDevis(row, url, false), { attachments: pdf ? [pdf] : undefined }))) || [];
+    alerte = tester ? await alertTester(tester, adminMail)
+      : (await notifyAdmins(supabase, ALERT_EMAIL, "Nouveau devis " + numero, {
+        devis: numero, nom: row.nom, société: row.societe, téléphone: row.telephone, email: row.email,
+        date: row.date_evenement + " " + row.heure, convives: row.convives, total: row.total_ttc + " € TTC", lien: url,
+      }, adminMail)) || [];
   } catch (e) { console.error("[devis] alerte : " + (e && e.message)); }
   historique.push({ at: new Date().toISOString(), quoi: alerte.length ? "Copie envoyée au restaurant (" + alerte.map((a) => a.to + (a.via === "formsubmit" ? " · secours" : "")).join(", ") + ")" : "Copie au restaurant : aucun destinataire" });
-  try { await notifyPush(supabase, { title: "Nouveau devis traiteur", body: numero + " — " + row.nom + " (" + row.convives + " pers.)", url: "/admin/" }); } catch {}
+  if (!tester) { try { await notifyPush(supabase, { title: "Nouveau devis traiteur", body: numero + " — " + row.nom + " (" + row.convives + " pers.)", url: "/admin/" }); } catch {} }
 
   try {
     await supabase.from("devis").update({

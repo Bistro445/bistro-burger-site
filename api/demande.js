@@ -9,6 +9,7 @@ const { notifyAdmins } = require("./_lib/notify");
 const { notifyPush } = require("./_lib/push");
 const { sendEmail, isConfigured } = require("./_lib/mailer");
 const { adminNewDemande, clientDemandeAck } = require("./_lib/emailTemplates");
+const { testerEmail, alertTester } = require("./_lib/testMode");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -73,6 +74,9 @@ module.exports = async (req, res) => {
   }
   body = body || {};
   const dryRun = body.dryRun === true;
+  // Mode test (admin connecté seulement) : alertes au seul admin qui teste (api/_lib/testMode.js).
+  const tester = await testerEmail(req, body);
+  if (tester === false) { res.status(403).json({ error: "Mode test réservé aux comptes admin connectés." }); return; }
 
   // Robots : champ piège rempli, ou formulaire envoyé moins de 3 secondes après l'ouverture de la page.
   // On répond « ok » sans rien faire, pour ne pas les aider.
@@ -112,7 +116,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (rateLimited(req.ip || "?")) {
+  if (!tester && rateLimited(req.ip || "?")) {
     res.status(429).json({ error: "Vous avez déjà envoyé plusieurs demandes. Appelez-nous au 04 65 84 89 18." });
     return;
   }
@@ -121,7 +125,7 @@ module.exports = async (req, res) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
   // Historique gardé dans l'admin (« traces ») : chaque étape avec son heure.
-  const historique = [{ at: new Date().toISOString(), quoi: "Demande reçue depuis la page " + (d.source === "noel" ? "Noël" : "devis") }];
+  const historique = [{ at: new Date().toISOString(), quoi: (tester ? "Demande de TEST (" + tester + ") " : "Demande reçue ") + "depuis la page " + (d.source === "noel" ? "Noël" : "devis") }];
 
   // Enregistrement (best-effort : si la table n'existe pas encore, la demande part quand même par e-mail).
   let saved = false, id = null;
@@ -139,10 +143,11 @@ module.exports = async (req, res) => {
 
   let alerte = [];
   try {
-    alerte = (await notifyAdmins(supabase, ALERT_EMAIL, "Nouvelle demande — Bistro Burger", {
-      prestation: d.prestation, date: d.date, personnes: d.personnes, client: d.type, structure: d.societe,
-      nom: d.nom, téléphone: d.telephone, email: d.email, message: d.message,
-    }, adminNewDemande(d))) || [];
+    alerte = tester ? await alertTester(tester, adminNewDemande(d))
+      : (await notifyAdmins(supabase, ALERT_EMAIL, "Nouvelle demande — Bistro Burger", {
+        prestation: d.prestation, date: d.date, personnes: d.personnes, client: d.type, structure: d.societe,
+        nom: d.nom, téléphone: d.telephone, email: d.email, message: d.message,
+      }, adminNewDemande(d))) || [];
   } catch (e) {
     console.error("[demande] alerte : " + (e && e.message));
   }
@@ -151,7 +156,7 @@ module.exports = async (req, res) => {
     : "Alerte au restaurant : aucun destinataire";
   historique.push({ at: new Date().toISOString(), quoi: alerteTxt });
 
-  try {
+  if (!tester) try {
     await notifyPush(supabase, {
       title: "Nouvelle demande" + (d.source === "noel" ? " de Noël" : ""),
       body: d.nom + " — " + d.prestation + " (" + d.personnes + " pers.)",
