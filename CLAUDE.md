@@ -98,6 +98,9 @@ fichier public `data.generated.js`. Mise en service : exécuter **une seule fois
 - Pas encore fait : relance automatique à 3 jours, versions modifiées par le restaurant, gestion du catalogue
   depuis l'admin.
 
+## Tester les formulaires sans prévenir toute l'équipe (ajouté le 27/11/2026)
+- `{ test: true }` + en-tête `Authorization: Bearer <session admin>` sur `POST /api/devis` et `POST /api/demande` (api/_lib/testMode.js) : la copie « restaurant » part seulement à l'admin qui teste, pas de push, devis numéroté `TEST-…` (le compteur DEV n'avance pas). Sans session admin : refusé (403). Supprimer ensuite les lignes TEST dans Supabase.
+
 ## Déploiement
 Hébergeur : Hostinger (application Node.js), déploiement depuis GitHub. **Aucun environnement de test en
 ligne** : tout `push` sur la branche déployée part en production après un redéploiement.
